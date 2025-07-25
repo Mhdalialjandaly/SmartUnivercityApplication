@@ -1,0 +1,128 @@
+﻿@rendermode InteractiveServer
+<div class="@(isSidebarCollapsed ? "collapsed" : "")">
+    <nav class="flex-column">
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                <i class="fas fa-home"></i>
+                <span class="nav-text">الرئيسية</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/students">
+                <i class="fas fa-users"></i>
+                <span class="nav-text">شؤون الطلاب</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/faculty">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span class="nav-text">إدارة الكادر التعليمي</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/courses">
+                <i class="fas fa-book"></i>
+                <span class="nav-text">المواد الدراسية والمحاضرات</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/departments">
+                <i class="fas fa-building"></i>
+                <span class="nav-text">إدارة الأقسام</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/library">
+                <i class="fas fa-book-reader"></i>
+                <span class="nav-text">المكتبة</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/calendar">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="nav-text">التقويم الدراسي</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/settings">
+                <i class="fas fa-cog"></i>
+                <span class="nav-text">الإعدادات</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/notifications">
+                <i class="fas fa-bell"></i>
+                <span class="nav-text">التنبيهات والإشعارات</span>
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<style>
+    .nav-link {
+        display: flex !important;
+        align-items: center !important;
+        padding: 12px 15px !important;
+        border-radius: 5px !important;
+        margin: 5px 10px !important;
+        text-decoration: none !important;
+        color: #495057 !important;
+        transition: all 0.2s !important;
+    }
+
+        .nav-link:hover {
+            background-color: #e9ecef !important;
+            color: #0d6efd !important;
+        }
+
+        .nav-link.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+    .nav-item i {
+        width: 25px;
+        text-align: center;
+        margin-left: 10px;
+    }
+
+    .collapsed .nav-text {
+        display: none !important;
+    }
+
+    .collapsed .nav-link {
+        justify-content: center !important;
+        padding: 15px 10px !important;
+        margin: 5px 5px !important;
+    }
+
+    .collapsed .nav-item i {
+        margin-left: 0 !important;
+        font-size: 1.2rem;
+    }
+</style>
+
+@code {
+    private bool isSidebarCollapsed = false;
+
+    [CascadingParameter]
+    public bool IsSidebarCollapsedFromParent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        isSidebarCollapsed = IsSidebarCollapsedFromParent;
+    }
+
+    protected override void OnParametersSet()
+    {
+        isSidebarCollapsed = IsSidebarCollapsedFromParent;
+    }
+}

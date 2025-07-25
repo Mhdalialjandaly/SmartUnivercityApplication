@@ -1,0 +1,189 @@
+﻿@page "/student/setup"
+@inject UniversityDbContext _context
+@inject NavigationManager Navigation
+
+<PageTitle>إعداد الحساب - الجامعة الذكية</PageTitle>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3 class="mb-0"><i class="fas fa-user-cog me-2"></i>إعداد حساب الطالب</h3>
+                </div>
+                <div class="card-body">
+                    @if (setupCompleted)
+                    {
+                        <div class="alert alert-success text-center">
+                            <i class="fas fa-check-circle fa-2x mb-3"></i>
+                            <h4>تم إعداد الحساب بنجاح!</h4>
+                            <p>مرحباً بك في الجامعة الذكية، @studentName</p>
+                            <a href="/student/registration" class="btn btn-primary">الانتقال لتسجيل المواد</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle me-2"></i>معلومات الدخول المؤقتة</h5>
+                            @if (application != null)
+                            {
+                                <p>رقم الطلب: <strong>@application.Id</strong></p>
+                                <p>كلمة المرور المؤقتة: <strong>@application.TemporaryPassword</strong></p>
+                            }
+                        </div>
+
+                        <form @onsubmit="CompleteSetup">
+                            <div class="mb-3">
+                                <label class="form-label">رقم الطلب *</label>
+                                <input type="text" class="form-control" @bind="applicationId" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">كلمة المرور المؤقتة *</label>
+                                <input type="password" class="form-control" @bind="temporaryPassword" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">كلمة المرور الجديدة *</label>
+                                <input type="password" class="form-control" @bind="newPassword" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">تأكيد كلمة المرور الجديدة *</label>
+                                <input type="password" class="form-control" @bind="confirmPassword" required />
+                                @if (!string.IsNullOrEmpty(passwordError))
+                                {
+                                    <div class="text-danger small mt-1">@passwordError</div>
+                                }
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">رقم الهاتف *</label>
+                                <input type="tel" class="form-control" @bind="phoneNumber" required />
+                            </div>
+
+                            @if (application != null)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">الاسم الكامل</label>
+                                    <input type="text" class="form-control" value="@($"{application.FirstName} {application.LastName}")" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" value="@application.Email" readonly />
+                                </div>
+                            }
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg" disabled="@isProcessing">
+                                    @if (isProcessing)
+                                    {
+                                        <span><i class="fas fa-spinner fa-spin me-2"></i>جاري الإعداد...</span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fas fa-check-circle me-2"></i>إكمال الإعداد</span>
+                                    }
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string applicationId = "";
+    private string temporaryPassword = "";
+    private string newPassword = "";
+    private string confirmPassword = "";
+    private string phoneNumber = "";
+    private string passwordError = "";
+    private bool isProcessing = false;
+    private bool setupCompleted = false;
+    private string studentName = "";
+    private StudentApplication? application;
+
+    private async Task CompleteSetup()
+    {
+        if (newPassword != confirmPassword)
+        {
+            passwordError = "كلمات المرور غير متطابقة";
+            return;
+        }
+
+        if (newPassword.Length < 6)
+        {
+            passwordError = "كلمة المرور يجب أن تكون 6 أحرف على الأقل";
+            return;
+        }
+
+        // التحقق من كلمة المرور المؤقتة
+        if (application?.TemporaryPassword != temporaryPassword)
+        {
+            passwordError = "كلمة المرور المؤقتة غير صحيحة";
+            return;
+        }
+
+        passwordError = "";
+        isProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            // إنشاء حساب الطالب
+            var student = new Student
+                {
+                    StudentId = $"STU-{DateTime.Now:yyyy}-{application.Id:D3}",
+                    FirstName = application.FirstName,
+                    LastName = application.LastName,
+                    Email = application.Email,
+                    Phone = phoneNumber,
+                    PasswordHash = HashPassword(newPassword), // يجب تنفيذ دالة التشفير
+                    DepartmentId = application.DepartmentId,
+                    Status = StudentStatus.Active,
+                    RegistrationDate = DateTime.Now,
+                    AccountBalance = 0
+                };
+
+            // حفظ الطالب في قاعدة البيانات
+            _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
+            // تحديث طلب التقديم
+            application.StudentId = student.StudentId;
+            application.Status = "مكتمل";
+            _context.StudentApplications.Update(application);
+            await _context.SaveChangesAsync();
+
+            studentName = $"{application.FirstName} {application.LastName}";
+            setupCompleted = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating student account: {ex.Message}");
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private void LoadApplication()
+    {
+        if (int.TryParse(applicationId, out int id))
+        {
+            application = _context.StudentApplications
+                .FirstOrDefault(a => a.Id == id && a.Status == "مقبول");
+        }
+    }
+
+    private string HashPassword(string password)
+    {
+        // تنفيذ تشفير كلمة المرور هنا
+        // مثلاً باستخدام BCrypt أو أي مكتبة تشفير أخرى
+        return password; // مؤقتاً
+    } 
+}

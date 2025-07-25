@@ -1,0 +1,161 @@
+﻿@page "/students/{studentId}/invoices"
+@attribute [Authorize]
+@inject IStudentServices _studentService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>فواتير الطالب - الجامعة الذكية</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 fw-bold text-primary">فواتير الطالب: <span id="studentName">@studentName</span></h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                            <li class="breadcrumb-item"><a href="/students">شؤون الطلاب</a></li>
+                            <li class="breadcrumb-item"><a href="/students/@studentId">تفاصيل الطالب</a></li>
+                            <li class="breadcrumb-item active">الفواتير</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <!-- Add buttons for actions like "إضافة فاتورة" if applicable -->
+                    <button class="btn btn-primary" disabled><i class="fas fa-plus me-2"></i>إضافة فاتورة جديدة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+        </div>
+    }
+    else if (invoices == null || !invoices.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> لا توجد فواتير لهذا الطالب.
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">قائمة الفواتير</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>رقم الفاتورة</th>
+                                <th>التاريخ</th>
+                                <th>الوصف</th>
+                                <th>المبلغ</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < invoices.Count; i++)
+                            {
+                                var invoice = invoices[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@invoice.InvoiceNumber</td> <!-- Assuming InvoiceDto has these properties -->
+                                    <td>@invoice.Date.ToString("yyyy-MM-dd")</td>
+                                    <td>@invoice.Description</td>
+                                    <td>@invoice.Amount.ToString("C")</td> <!-- Format currency -->
+                                    <td>
+                                        <span class="badge @(invoice.Status == "مدفوعة" ? "bg-success" : invoice.Status == "متأخرة" ? "bg-warning" : "bg-danger")">@invoice.Status</span>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>عرض التفاصيل</a></li>
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i>طباعة</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>حذف</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string studentId { get; set; } = string.Empty;
+
+    private List<InvoiceDto> invoices = new();
+    private string studentName = "جارٍ التحميل...";
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudentInvoices();
+    }
+
+    private async Task LoadStudentInvoices()
+    {
+        isLoading = true;
+        try
+        {
+            // 1. Load student name first (optional, could be passed via parameter or fetched together)
+            var studentDetails = await _studentService.GetStudentByIdAsync(studentId);
+            if (studentDetails != null)
+            {
+                studentName = $"{studentDetails.FirstName} {studentDetails.LastName}";
+            }
+            else
+            {
+                studentName = "غير محدد";
+            }
+
+            // 2. Load invoices
+            // invoices = await _studentService.GetStudentInvoicesAsync(studentId); // Implement this method
+
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            Console.WriteLine($"Error loading student invoices: {ex.Message}");
+            // Maybe show an error message on the page
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+
+<style>
+    /* Add any specific styles for this page if needed */
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .table th {
+        font-weight: 600;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+</style>

@@ -1,0 +1,428 @@
+﻿@page "/students/{studentId}/edit"
+@attribute [Authorize]
+@inject IStudentServices _studentService
+@inject IDepartmentService _departmentService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@inject UniversityDbContext _context
+<PageTitle>تعديل طالب - الجامعة الذكية</PageTitle>
+
+@if (editStudent == null)
+{
+    <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0 fw-bold text-primary">تعديل الطالب: @($"{editStudent.FirstName} {editStudent.LastName}")</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                                <li class="breadcrumb-item"><a href="/students">شؤون الطلاب</a></li>
+                                <li class="breadcrumb-item"><a href="/students/@studentId">تفاصيل الطالب</a></li>
+                                <li class="breadcrumb-item active">تعديل</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-success" @onclick="SaveStudent">
+                            <i class="fas fa-save me-2"></i>حفظ التغييرات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <EditForm Model="@editStudent" OnValidSubmit="@SaveStudent">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="row g-4">
+                <!-- معلومات أساسية -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>المعلومات الأساسية</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">رقم الطالب *</label>
+                                <InputText class="form-control" @bind-Value="editStudent.StudentId" disabled />
+                                <ValidationMessage For="@(() => editStudent.StudentId)" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">القسم *</label>
+                                <InputSelect class="form-select" @bind-Value="editStudent.DepartmentId">
+                                    <option value="">اختر القسم</option>
+                                    @foreach (var dept in departments)
+                                    {
+                                        <option value="@dept.Id">@dept.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => editStudent.DepartmentId)" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">الاسم الأول *</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.FirstName" />
+                                    <ValidationMessage For="@(() => editStudent.FirstName)" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">اسم العائلة *</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.LastName" />
+                                    <ValidationMessage For="@(() => editStudent.LastName)" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">السنة الدراسية</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.AcademicYear" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">تاريخ الولادة</label>
+                                    <InputDate class="form-control" @bind-Value="editStudent.BirthOfDate" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">الجنس</label>
+                                    <InputSelect class="form-select" @bind-Value="editStudent.Sexual">
+                                        <option value="true">ذكر</option>
+                                        <option value="false">أنثى</option>
+                                    </InputSelect>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">الديانة</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.Religion" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">المعدل التراكمي (GPA)</label>
+                                <InputNumber class="form-control" @bind-Value="editStudent.GPA" step="0.01" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات الاتصال -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-address-book me-2"></i>معلومات الاتصال</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">الهاتف الأول *</label>
+                                <InputText class="form-control" @bind-Value="editStudent.Phone" />
+                                <ValidationMessage For="@(() => editStudent.Phone)" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">الهاتف الثاني</label>
+                                <InputText class="form-control" @bind-Value="editStudent.SecoundPhone" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">البريد الإلكتروني</label>
+                                <InputText class="form-control" @bind-Value="editStudent.Email" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">محل السكن (م-ز-د) *</label>
+                                <InputText class="form-control" @bind-Value="editStudent.HomeAddress" />
+                                <ValidationMessage For="@(() => editStudent.HomeAddress)" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">رقم الدار</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.HomeNumber" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">العنوان الدائم *</label>
+                                    <InputTextArea class="form-control" Rows="2" @bind-Value="editStudent.FullAddress" />
+                                    <ValidationMessage For="@(() => editStudent.FullAddress)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات وظيفية -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>المعلومات الوظيفية</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">هل أنت موظف؟</label>
+                                <InputSelect class="form-select" @bind-Value="editStudent.TrueIsEmployee">
+                                    <option value="false">لا</option>
+                                    <option value="true">نعم</option>
+                                </InputSelect>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">مكان العمل</label>
+                                <InputText class="form-control" @bind-Value="editStudent.WorkAddress" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">قناة القبول الخاص</label>
+                                <InputSelect class="form-select" @bind-Value="editStudent.TunnelId">
+                                    <option value="">اختر قناة القبول</option>
+                                    @foreach (var tunnel in tunnels)
+                                    {
+                                        <option value="@tunnel.Id">@tunnel.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">قسم المسجل عليه</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.SubmissionDepartment" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">قناة التسجيل</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.TunnelDepartment" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات وطنية -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-passport me-2"></i>المعلومات الوطنية</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">رقم هوية الأحوال المدنية</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.CivilstatusIDNumberAndNationalCard" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">صادرة من</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.CivilstatusIDNumberAndNationalCardFrom" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">تاريخ الإصدار</label>
+                                    <InputDate class="form-control" @bind-Value="editStudent.CivilstatusIDNumberAndNationalCardDate" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">الجنسية</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.Nationality" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">القومية</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.PoliticalNationalism" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">رقم شهادة الجنسية</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.NationalityCertificateNumber" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات أكاديمية -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>المعلومات الأكاديمية</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">اسم المدرسة</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.SchoolName" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">الفرع</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.Branch" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">تاريخ التخرج</label>
+                                    <InputDate class="form-control" @bind-Value="editStudent.DateOfSchoolGraduate" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">المجموع بدون إضافات</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.StudentTotalWithoutAdditions" />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">المجموع مع إضافات</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.StudentTotalWithAdditions" />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">المعدل بدون إضافات</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.StudentGPAWithoutAdditions" />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">المعدل مع إضافات</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.StudentGPAWithAdditions" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات النظام -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>معلومات الحساب والنظام</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">اسم المستخدم على النظام</label>
+                                    <InputText class="form-control" @bind-Value="editStudent.UserNameOnSite" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">كلمة المرور (اترك فارغًا إذا لم ترد التغيير)</label>
+                                    <InputText type="password" class="form-control" @bind-Value="editStudent.PasswordOnSite" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">حالة الحساب</label>
+                                    <InputSelect class="form-select" @bind-Value="editStudent.StatusOnSite">
+                                        <option value="نشط">نشط</option>
+                                        <option value="موقوف">موقوف</option>
+                                        <option value="متخرج">متخرج</option>
+                                    </InputSelect>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">حالة الطالب</label>
+                                    <InputSelect class="form-select" @bind-Value="editStudent.Status">
+                                        <option value="نشط">نشط</option>
+                                        <option value="موقوف">موقوف</option>
+                                    </InputSelect>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">رصيد الحساب</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.AccountBalance" step="0.01" />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">رقم الامتحاني</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.ExamNumber" />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">رقم السري</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.SecretNumber" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">تاريخ التسجيل</label>
+                                    <InputDate class="form-control" @bind-Value="editStudent.RegistrationDate" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">رقم وصل الحسابات</label>
+                                    <InputNumber class="form-control" @bind-Value="editStudent.AccountsReceiptNumber" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter] public string studentId { get; set; } = string.Empty;
+
+    private StudentDto? editStudent;
+    private List<DepartmentDto> departments = new();
+    private List<Tunnel> tunnels = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadTunnels();
+        await LoadStudentForEdit();
+    }
+
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await _departmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+
+    private async Task LoadTunnels()
+    {
+        try
+        {
+            // Assuming you have a context or service for Tunnels
+            // If using service, replace _context.Tunnels with _tunnelService.GetTunnelsAsync()
+            tunnels = await _context.Tunnels.ToListAsync(); // Adjust if using a service instead of direct context
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            Console.WriteLine($"Error loading tunnels: {ex.Message}");
+        }
+    }
+
+    private async Task LoadStudentForEdit()
+    {
+        try
+        {
+            // Fetch the student DTO for editing
+            editStudent = await _studentService.GetStudentByIdAsync(studentId); // This should return StudentDto
+            if (editStudent == null)
+            {
+                // Handle case where student is not found, maybe redirect
+                Console.WriteLine($"Student with ID {studentId} not found for editing.");
+                Navigation.NavigateTo("/students"); // Redirect back to list
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            Console.WriteLine($"Error loading student for edit: {ex.Message}");
+        }
+    }
+
+    private async Task SaveStudent()
+    {
+        if (editStudent == null) return; // Safety check
+
+        try
+        {
+            await _studentService.UpdateStudentAsync(editStudent.StudentId,editStudent); // Implement this method in your service
+            Navigation.NavigateTo($"/students/{studentId}"); // Navigate back to details page
+        }
+        catch (Exception ex)
+        {
+            // Log error or show message
+            Console.WriteLine($"Error saving student: {ex.Message}");
+            // Maybe show an error toast or message
+        }
+    }
+}
+
+<style>
+    /* Add any specific styles for this page if needed */
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
