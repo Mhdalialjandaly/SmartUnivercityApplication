@@ -1,12 +1,10 @@
 using AutoMapper;
 using BlazorAuthApp.Components;
 using BlazorAuthApp.Components.Account;
-using BlazorAuthApp.Components.Account.Pages;
 using BlazorAuthApp.Mapper;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Application.Services;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -57,6 +55,7 @@ namespace BlazorAuthApp
 
             // Register services
             builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+            builder.Services.AddScoped<IDocumentService, DocumentService>();
             builder.Services.AddScoped<IStudentServices, StudentServices>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             //builder.Services.AddIdentity<User, IdentityRole>() 
@@ -72,6 +71,7 @@ namespace BlazorAuthApp
             builder.Services.AddSingleton(mapper);
 
             builder.Services.AddLogging();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

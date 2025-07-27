@@ -17,16 +17,16 @@ namespace UniversityManagementSystem.Application.DTOs
         public string LastName { get; set; }
         [Required]
         [StringLength(20)]
-        public string StudentId { get; set; } = "";
+        public string StudentId { get; set; } 
 
         [Required]
         [Display(Name = "رقم الهاتف الاول")]
         [StringLength(20)]
-        public string Phone { get; set; } = "";
+        public string Phone { get; set; } 
         public int DepartmentId { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal AccountBalance { get; set; } = 0;
+        public decimal AccountBalance { get; set; } 
         [Required]
         [Display(Name = "محل السكن  م-ز-د")]
         public string HomeAddress { get; set; }
@@ -69,7 +69,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public string PasswordOnSite { get; set; }
         [Display(Name = "حالة الحساب على نظام الاجامعة")]
         [StringLength(20)]
-        public string StatusOnSite { get; set; } = "نشط"; // نشط, موقوف, متخرج
+        public string StatusOnSite { get; set; } // نشط, موقوف, متخرج
         public StudentStatus Status { get; set; }  // نشط, موقوف
         [Display(Name = "رقم الامتحاني")]
         public int ExamNumber { get; set; }

@@ -5,6 +5,7 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 @inject UniversityDbContext _context
+@inject IMapper _mapper
 <PageTitle>تعديل طالب - الجامعة الذكية</PageTitle>
 
 @if (editStudent == null)
@@ -342,7 +343,7 @@ else
 @code {
     [Parameter] public string studentId { get; set; } = string.Empty;
 
-    private StudentDto? editStudent;
+    private Student? editStudent;
     private List<DepartmentDto> departments = new();
     private List<Tunnel> tunnels = new();
 
@@ -386,7 +387,9 @@ else
         try
         {
             // Fetch the student DTO for editing
-            editStudent = await _studentService.GetStudentByIdAsync(studentId); // This should return StudentDto
+            // editStudent = await _studentService.GetStudentByIdAsync(studentId); // This should return StudentDto
+            editStudent = await _context.Students.FirstAsync(e => e.StudentId == studentId);
+
             if (editStudent == null)
             {
                 // Handle case where student is not found, maybe redirect
@@ -407,7 +410,8 @@ else
 
         try
         {
-            await _studentService.UpdateStudentAsync(editStudent.StudentId,editStudent); // Implement this method in your service
+            _context.Students.Update(editStudent);
+            await _context.SaveChangesAsync();
             Navigation.NavigateTo($"/students/{studentId}"); // Navigate back to details page
         }
         catch (Exception ex)

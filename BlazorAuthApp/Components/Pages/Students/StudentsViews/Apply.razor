@@ -266,7 +266,6 @@
         // تحميل الأقسام من قاعدة البيانات
         departments = await _context.Departments.ToListAsync();
     }
-
     private async Task SubmitApplication()
     {
         if (!acceptTerms) return;
@@ -298,11 +297,12 @@
                     Status = application.Status,
                     RejectionReason = application.RejectionReason,
                     StudentId = application.StudentId,
-                    TemporaryPassword = application.TemporaryPassword
+                    TemporaryPassword = application.TemporaryPassword   
                 });
 
-            await _context.SaveChangesAsync();
+            var saved = await _context.SaveChangesAsync();
 
+            application.Id = saved;
             submittedApplication = application;
             applicationSubmitted = true;
         }
@@ -333,4 +333,8 @@
         var department = departments.FirstOrDefault(d => d.Id == departmentId);
         return department?.Name ?? "غير محدد";
     }  
+    private string GenerateStudentId()
+    {
+        return $"STU-{DateTime.Now:yyyy}-{new Random().Next(1000, 9999)}";
+    }
 }

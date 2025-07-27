@@ -3,10 +3,10 @@
 @inject IStudentServices _studentService
 @inject IDepartmentService _departmentService
 @inject NavigationManager Navigation
-@rendermode InteractiveServer
-
+@* @rendermode InteractiveServer *@
+@inject UniversityDbContext _context
 <PageTitle>تفاصيل الطالب - الجامعة الذكية</PageTitle>
-
+@inject IMapper _mapper
 @if (studentDetails == null)
 {
     <div class="d-flex justify-content-center my-5">
@@ -296,7 +296,8 @@ else
     {
         try
         {
-            studentDetails = await _studentService.GetStudentByIdAsync(studentId); // Implement this method in your service
+            // studentDetails = await _studentService.GetStudentByIdAsync(studentId); // Implement this method in your service
+            studentDetails =_mapper.Map<StudentDto>(await _context.Students.FirstAsync(e=>e.StudentId == studentId));
             if (studentDetails == null)
             {
                 // Handle case where student is not found, maybe redirect

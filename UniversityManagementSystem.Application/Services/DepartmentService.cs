@@ -35,8 +35,7 @@ namespace UniversityManagementSystem.Application.Services
 
         public async Task<List<DepartmentDto>> GetAllDepartmentsAsync()
         {
-            var departments = await _departmentRepository.GetAllAsync(
-                 d => d.Students);
+            var departments = await _departmentRepository.GetAllAsync();
 
             return _mapper.Map<List<DepartmentDto>>(departments);
         }

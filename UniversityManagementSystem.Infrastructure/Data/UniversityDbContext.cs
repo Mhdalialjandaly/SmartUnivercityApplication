@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UniversityManagementSystem.Domain.Entities;
+using UniversityManagementSystem.Domain.Entities.UniversityManagementSystem.Core.Entities;
 
 namespace UniversityManagementSystem.Infrastructure.Data
 {
@@ -17,6 +18,11 @@ namespace UniversityManagementSystem.Infrastructure.Data
         public DbSet<Tunnel> Tunnels { get; set; }
         public DbSet<StudentDocument> StudentDocuments { get; set; }
         public DbSet<University> Universities { get; set; }
+        public DbSet<OfficialDocument> OfficialDocuments { get; set; }
+        public DbSet<DocumentTemplate> DocumentTemplates { get; set; }
+        public DbSet<DocumentField> DocumentFields { get; set; }
+        public DbSet<DocumentSignature> DocumentSignatures { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
