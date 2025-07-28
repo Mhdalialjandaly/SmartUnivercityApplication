@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using UniversityManagementSystem.Domain.Entities;
 using UniversityManagementSystem.Domain.Entities.UniversityManagementSystem.Core.Entities;
 
@@ -22,13 +23,24 @@ namespace UniversityManagementSystem.Infrastructure.Data
         public DbSet<DocumentTemplate> DocumentTemplates { get; set; }
         public DbSet<DocumentField> DocumentFields { get; set; }
         public DbSet<DocumentSignature> DocumentSignatures { get; set; }
-
+        public DbSet<StudentPayment> StudentPayments { get; set; }
+        public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Leave> Leaves { get; set; }
+        public DbSet<LeaveType> LeaveTypes { get; set; }
+        public DbSet<Lecture> Lectures { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Student>().ToTable("Students");
             builder.Entity<Department>().ToTable("Departments");
+                
+            builder.Entity<Course>()
+                .HasOne(c => c.Department)
+                .WithMany(d => d.Courses)
+                .HasForeignKey(c => c.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             OnModelCreatingPartial(builder);
         }

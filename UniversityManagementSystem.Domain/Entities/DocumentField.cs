@@ -9,13 +9,13 @@ namespace UniversityManagementSystem.Domain.Entities
 
         [Required]
         [StringLength(100)]
-        public string FieldName { get; set; } = "";
+        public string FieldName { get; set; } 
 
         [StringLength(500)]
-        public string FieldValue { get; set; } = "";
+        public string FieldValue { get; set; } 
 
         [StringLength(50)]
-        public string FieldType { get; set; } = "نص"; // نص, تاريخ, رقم, قائمة
+        public string FieldType { get; set; }  // نص, تاريخ, رقم, قائمة
 
         public int DocumentId { get; set; }
 

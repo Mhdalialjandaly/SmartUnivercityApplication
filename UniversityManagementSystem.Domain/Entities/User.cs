@@ -2,10 +2,16 @@
 
 namespace UniversityManagementSystem.Domain.Entities
 {
-    public class User : IdentityUser
+    public class User : IdentityUser, IEntity
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string Role { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime DeletedAt { get ; set ; }
+        public DateTime ModifiedAt { get ; set ; }
+        public string ModifiedBy { get ; set ; }
+        public string DeletedBy { get ; set ; }
     }
 }

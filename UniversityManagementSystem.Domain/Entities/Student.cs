@@ -8,11 +8,13 @@ namespace UniversityManagementSystem.Domain.Entities
             CourseRegistrations = new HashSet<CourseRegistration>();
             Universities = new HashSet<University>();
             StudentDocuments = new HashSet<StudentDocument>();
+            Attendances = new HashSet<Attendance>();
         }
-        public string StudentId { get; set; } = "";    
-        public string Phone { get; set; } = "";  
+        public string StudentId { get; set; }
+        public string FullName { get; set; }
+        public string Phone { get; set; }   
         public int DepartmentId { get; set; }
-        public decimal AccountBalance { get; set; } = 0;
+        public decimal AccountBalance { get; set; }
         public string HomeAddress { get; set; }
         public string Religion { get; set; }
         public string SecoundPhone { get; set; }
@@ -31,7 +33,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public DateTime NationalityCertificateNumberDate { get; set; }
         public string UserNameOnSite { get; set; }
         public string PasswordOnSite { get; set; }
-        public string StatusOnSite { get; set; } = "نشط"; // نشط, موقوف, متخرج
+        public string StatusOnSite { get; set; } 
         public StudentStatus Status { get; set; } 
         public int ExamNumber { get; set; }
         public int SecretNumber { get; set; }
@@ -56,11 +58,12 @@ namespace UniversityManagementSystem.Domain.Entities
         public string AcademicYear { get; set; }
 
         // العلاقات
-        public virtual Department Department { get; set; }
-        public virtual Tunnel Tunnel { get; set; }
+        public  Department Department { get; set; }
+        public  Tunnel Tunnel { get; set; }
         public virtual ICollection<University> Universities { get; set; }
         public virtual ICollection<CourseRegistration> CourseRegistrations { get; set; }
         public virtual ICollection<StudentDocument> StudentDocuments { get; set; }
+        public virtual ICollection<Attendance> Attendances { get; set; }
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }
         public string ModifiedBy { get ; set ; }

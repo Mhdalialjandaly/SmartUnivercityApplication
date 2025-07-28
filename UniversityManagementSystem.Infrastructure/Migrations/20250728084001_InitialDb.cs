@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace UniversityManagementSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialWithSeeds : Migration
+    public partial class InitialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,7 +32,13 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -56,7 +60,82 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tunnel",
+                name: "DocumentTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HtmlContent = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DocumentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentTemplates", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LeaveTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    MaxDaysPerYear = table.Column<int>(type: "int", nullable: false),
+                    IsPaid = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeaveTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OfficialDocuments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DocumentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TemplateName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IssuedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IssuedTo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    SignatureData = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OfficialDocuments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tunnels",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -68,7 +147,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tunnel", x => x.Id);
+                    table.PrimaryKey("PK_Tunnels", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -178,6 +257,163 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Attendances",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CheckOutTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    HoursWorked = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    EmployeeId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attendances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attendances_AspNetUsers_EmployeeId1",
+                        column: x => x.EmployeeId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeSalaries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    SalaryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BaseSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Allowances = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Deductions = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Bonus = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NetSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    EmployeeId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeSalaries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployeeSalaries_AspNetUsers_EmployeeId1",
+                        column: x => x.EmployeeId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Leaves",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    LeaveTypeId = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalDays = table.Column<int>(type: "int", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    ApprovedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ApprovedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Leaves", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Leaves_AspNetUsers_EmployeeId1",
+                        column: x => x.EmployeeId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Leaves_LeaveTypes_LeaveTypeId",
+                        column: x => x.LeaveTypeId,
+                        principalTable: "LeaveTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DocumentFields",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FieldName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    FieldValue = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    FieldType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    DocumentId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentFields", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentFields_OfficialDocuments_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "OfficialDocuments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DocumentSignatures",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SignerName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SignerPosition = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    SignatureData = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SignatureDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SignatureType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    DocumentId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentSignatures", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentSignatures_OfficialDocuments_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "OfficialDocuments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CourseRegistrations",
                 columns: table => new
                 {
@@ -207,9 +443,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     Fee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     Instructor = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MaxStudents = table.Column<int>(type: "int", nullable: false),
                     CurrentStudents = table.Column<int>(type: "int", nullable: false),
                     GPA = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -247,6 +485,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     StudentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     AccountBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -290,11 +529,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     StudentGPAWithAdditions = table.Column<int>(type: "int", nullable: false),
                     GPA = table.Column<double>(type: "float", nullable: false),
                     FullAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -312,9 +547,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Students_Tunnel_TunnelId",
+                        name: "FK_Students_Tunnels_TunnelId",
                         column: x => x.TunnelId,
-                        principalTable: "Tunnel",
+                        principalTable: "Tunnels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -359,7 +594,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "StudentDocument",
+                name: "StudentDocuments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -373,16 +608,53 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudentDocument", x => x.Id);
+                    table.PrimaryKey("PK_StudentDocuments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudentDocument_Students_StudentId",
+                        name: "FK_StudentDocuments_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "University",
+                name: "StudentPayments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentPayments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentPayments_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentPayments_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Universities",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -399,53 +671,12 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_University", x => x.Id);
+                    table.PrimaryKey("PK_Universities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_University_Students_StudentId",
+                        name: "FK_Universities_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[,]
-                {
-                    { "0df462c8-fb0a-486b-b977-df3e7e9a5a81", "331339d3-2c04-441b-8217-81005cd25c5e", "Employee", "EMPLOYEE" },
-                    { "149b2f7f-8358-4f68-be8e-e17eddb9f025", "149b2f7f-8358-4f68-be8e-e17eddb9f025", "Admin", "ADMIN" },
-                    { "204d7c9c-fd80-46a9-88e9-82cfd39b89b1", "3a969597-6c40-4fa4-85e9-adeba6487377", "User", "USER" },
-                    { "d88234a2-6ccd-4e64-8f1c-b0668c0628a8", "8353f785-fc77-4354-b194-ab8372b63794", "Student", "STUDENT" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, "12527e86-ffd3-48c2-9dc8-20f54383e59a", new DateTime(2025, 7, 25, 6, 38, 22, 529, DateTimeKind.Utc).AddTicks(3029), "Admin@mail.com", false, "Admin", null, false, null, "ADMIN@MAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEOs4gqzdqpDmHMaRtS28wlG2QcWrYt3XYpd4C81YHTkEzI3N/57SuLwq03aai4dT6w==", null, false, "636afd09-ffbf-4e2f-8d2c-5d5b7119b076", false, "Admin" });
-
-            migrationBuilder.InsertData(
-                table: "University",
-                columns: new[] { "Id", "CreatedAt", "DeletedAt", "DeletedBy", "Description", "ModifiedAt", "ModifiedBy", "Name", "StudentId", "Type" },
-                values: new object[] { 1, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Premier university in UAE", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "UAE University", null, null });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUserRoles",
-                columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "149b2f7f-8358-4f68-be8e-e17eddb9f025", "51586e47-b125-4534-bba4-9bc6fd3dfbc8" });
-
-            migrationBuilder.InsertData(
-                table: "Departments",
-                columns: new[] { "Id", "Code", "CreatedAt", "DeletedAt", "DeletedBy", "ModifiedAt", "ModifiedBy", "Name", "UniversityId" },
-                values: new object[] { 1, "CS", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Computer Science", 1 });
-
-            migrationBuilder.InsertData(
-                table: "Courses",
-                columns: new[] { "Id", "Code", "CreatedAt", "Credits", "CurrentStudents", "DeletedAt", "DeletedBy", "DepartmentId", "Fee", "GPA", "Instructor", "MaxStudents", "ModifiedAt", "ModifiedBy", "Name" },
-                values: new object[,]
-                {
-                    { 1, "CS101", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, 0m, 0, "", 30, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Introduction to Programming" },
-                    { 2, "CS201", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, 0m, 0, "", 30, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Data Structures" },
-                    { 3, "CS301", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, 0m, 0, "", 30, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Algorithms" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -488,6 +719,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attendances_EmployeeId1",
+                table: "Attendances",
+                column: "EmployeeId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CourseRegistrations_CourseId",
                 table: "CourseRegistrations",
                 column: "CourseId");
@@ -508,6 +744,31 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "UniversityId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DocumentFields_DocumentId",
+                table: "DocumentFields",
+                column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DocumentSignatures_DocumentId",
+                table: "DocumentSignatures",
+                column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeSalaries_EmployeeId1",
+                table: "EmployeeSalaries",
+                column: "EmployeeId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Leaves_EmployeeId1",
+                table: "Leaves",
+                column: "EmployeeId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Leaves_LeaveTypeId",
+                table: "Leaves",
+                column: "LeaveTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentApplications_DepartmentId",
                 table: "StudentApplications",
                 column: "DepartmentId");
@@ -518,8 +779,18 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentDocument_StudentId",
-                table: "StudentDocument",
+                name: "IX_StudentDocuments_StudentId",
+                table: "StudentDocuments",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentPayments_CourseId",
+                table: "StudentPayments",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentPayments_StudentId",
+                table: "StudentPayments",
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
@@ -533,8 +804,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "TunnelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_University_StudentId",
-                table: "University",
+                name: "IX_Universities_StudentId",
+                table: "Universities",
                 column: "StudentId");
 
             migrationBuilder.AddForeignKey(
@@ -558,13 +829,13 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "DepartmentId",
                 principalTable: "Departments",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Departments_University_UniversityId",
+                name: "FK_Departments_Universities_UniversityId",
                 table: "Departments",
                 column: "UniversityId",
-                principalTable: "University",
+                principalTable: "Universities",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -577,8 +848,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 table: "Students");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_University_Students_StudentId",
-                table: "University");
+                name: "FK_Universities_Students_StudentId",
+                table: "Universities");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -596,16 +867,43 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Attendances");
+
+            migrationBuilder.DropTable(
                 name: "CourseRegistrations");
+
+            migrationBuilder.DropTable(
+                name: "DocumentFields");
+
+            migrationBuilder.DropTable(
+                name: "DocumentSignatures");
+
+            migrationBuilder.DropTable(
+                name: "DocumentTemplates");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeSalaries");
+
+            migrationBuilder.DropTable(
+                name: "Leaves");
 
             migrationBuilder.DropTable(
                 name: "StudentApplications");
 
             migrationBuilder.DropTable(
-                name: "StudentDocument");
+                name: "StudentDocuments");
+
+            migrationBuilder.DropTable(
+                name: "StudentPayments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "OfficialDocuments");
+
+            migrationBuilder.DropTable(
+                name: "LeaveTypes");
 
             migrationBuilder.DropTable(
                 name: "Courses");
@@ -620,10 +918,10 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 name: "Departments");
 
             migrationBuilder.DropTable(
-                name: "Tunnel");
+                name: "Tunnels");
 
             migrationBuilder.DropTable(
-                name: "University");
+                name: "Universities");
         }
     }
 }

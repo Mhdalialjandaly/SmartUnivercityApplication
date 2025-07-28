@@ -22,6 +22,9 @@ namespace BlazorAuthApp.Mapper
             CreateMap<CourseDto, Course>().PreserveReferences();
             CreateMap<Course, CourseDto>();
 
+            CreateMap<LectureDto, Lecture>().PreserveReferences();
+            CreateMap<Lecture, LectureDto>();
+
             CreateMap<CourseRegistrationDto, CourseRegistration>().PreserveReferences();
             CreateMap<CourseRegistration, CourseRegistrationDto>();
 

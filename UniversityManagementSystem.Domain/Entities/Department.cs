@@ -6,6 +6,7 @@ namespace UniversityManagementSystem.Domain.Entities
     {
         public Department() { 
             Students = new HashSet<Student>();
+            Courses = new HashSet<Course>();
         }
         public int Id { get; set; }
         public string Name { get; set; }

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Application.Models;
@@ -13,9 +13,9 @@ namespace UniversityManagementSystem.Application.Services
     public class StudentServices : IStudentServices
     {
         private readonly IRepository<Student> _studentRepository;
+        private readonly IRepository<User> _user;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-
         public StudentServices(
             IRepository<Student> studentRepository,
             IMapper mapper,
@@ -189,5 +189,6 @@ namespace UniversityManagementSystem.Application.Services
                 throw new Exception($"An error occurred while fetching invoices for student {studentId}.", ex);
             }
         }
+      
     }
 }

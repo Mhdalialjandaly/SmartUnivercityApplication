@@ -9,17 +9,17 @@ namespace UniversityManagementSystem.Domain.Entities
 
         [Required]
         [StringLength(100)]
-        public string SignerName { get; set; } = "";
+        public string SignerName { get; set; }
 
         [StringLength(100)]
-        public string SignerPosition { get; set; } = "";
+        public string SignerPosition { get; set; }
 
-        public string SignatureData { get; set; } = "";
+        public string SignatureData { get; set; }
 
-        public DateTime SignatureDate { get; set; } = DateTime.Now;
+        public DateTime SignatureDate { get; set; }
 
         [StringLength(50)]
-        public string SignatureType { get; set; } = "رقمي"; // رقمي, يدوي
+        public string SignatureType { get; set; }  // رقمي, يدوي
 
         public int DocumentId { get; set; }
 

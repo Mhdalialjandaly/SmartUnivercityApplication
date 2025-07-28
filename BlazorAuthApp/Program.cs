@@ -58,6 +58,19 @@ namespace BlazorAuthApp
             builder.Services.AddScoped<IDocumentService, DocumentService>();
             builder.Services.AddScoped<IStudentServices, StudentServices>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // تسجيل الخدمات المالية
+            builder.Services.AddScoped<IStudentPaymentService, StudentPaymentService>();
+            builder.Services.AddScoped<IEmployeeSalaryService, EmployeeSalaryService>();
+
+            // تسجيل خدمات الموارد البشرية
+            builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+            builder.Services.AddScoped<ILeaveService, LeaveService>();
+            builder.Services.AddScoped<ILeaveTypeService, LeaveTypeService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<ILectureService, LectureService>();
+            builder.Services.AddScoped<ICourseRegistrationService, CourseRegistrationService>();
             //builder.Services.AddIdentity<User, IdentityRole>() 
             //    .AddEntityFrameworkStores<UniversityDbContext>()
             //    .AddDefaultTokenProviders();
