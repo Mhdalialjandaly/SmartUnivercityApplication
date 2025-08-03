@@ -28,7 +28,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public string StudentId { get; set; }
         public int LectureId { get; set; }
         // العلاقات
-        public virtual User Employee { get; set; }
+        public  User Employee { get; set; }
         public Student Student { get; set; }
         public Lecture Lecture { get; set; }
         public DateTime CreatedAt { get; set; }

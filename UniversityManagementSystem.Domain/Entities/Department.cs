@@ -1,12 +1,11 @@
-﻿
-
-namespace UniversityManagementSystem.Domain.Entities
+﻿namespace UniversityManagementSystem.Domain.Entities
 {
     public class Department : IEntity
     {
         public Department() { 
             Students = new HashSet<Student>();
             Courses = new HashSet<Course>();
+            FinanceRecords = new HashSet<FinanceRecord>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -15,6 +14,8 @@ namespace UniversityManagementSystem.Domain.Entities
         public University University { get; set; }
         public virtual ICollection<Student> Students { get; set; }
         public virtual ICollection<Course> Courses { get; set; }
+        public virtual ICollection<FinanceRecord> FinanceRecords { get; set; }
+        public virtual ICollection<AcademicCalendar> AcademicCalendars { get; set; }
         public DateTime CreatedAt { get ; set ; }
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }

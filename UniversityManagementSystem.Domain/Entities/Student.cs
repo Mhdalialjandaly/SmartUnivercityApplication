@@ -10,6 +10,7 @@ namespace UniversityManagementSystem.Domain.Entities
             StudentDocuments = new HashSet<StudentDocument>();
             Attendances = new HashSet<Attendance>();
         }
+
         public string StudentId { get; set; }
         public string FullName { get; set; }
         public string Phone { get; set; }   

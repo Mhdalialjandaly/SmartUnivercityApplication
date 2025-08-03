@@ -1,15 +1,13 @@
-﻿using UniversityManagementSystem.Domain.Enums;
+﻿using UniversityManagementSystem.Domain.Entities;
+using UniversityManagementSystem.Domain.Enums;
 
 namespace UniversityManagementSystem.Application.DTOs
 {
     public class StudentDto
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string StudentId { get; set; }
         public string FullName { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
         public string Phone { get; set; }
         public int DepartmentId { get; set; }
         public decimal AccountBalance { get; set; }
@@ -56,14 +54,11 @@ namespace UniversityManagementSystem.Application.DTOs
         public string AcademicYear { get; set; }
 
         // العلاقات
-        public  DepartmentDto Department { get; set; }
-        public  TunnelDto Tunnel { get; set; }
-        public IList<UniversityDto> Universities { get; set; }
-        public IList<CourseRegistrationDto> CourseRegistrations { get; set; }
-        public IList<StudentDocumentDto> StudentDocuments { get; set; }
-        public DateTime DeletedAt { get; set; }
-        public DateTime ModifiedAt { get; set; }
-        public string ModifiedBy { get; set; }
-        public string DeletedBy { get; set; }
+        public DepartmentDto Department { get; set; }
+        public Tunnel Tunnel { get; set; }
+        public List<University> Universities { get; set; }
+        public List<CourseRegistration> CourseRegistrations { get; set; }
+        public List<StudentDocument> StudentDocuments { get; set; }
+        public List<Attendance> Attendances { get; set; }
     }
 }

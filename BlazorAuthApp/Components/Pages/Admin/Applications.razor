@@ -4,6 +4,9 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject IStudentServices _studentService
+@inject IDepartmentService _departmentService
+@inject IStudentApplicationsServices _applicationService
+
 @rendermode InteractiveServer
 
 <PageTitle>إدارة طلبات التقديم - الجامعة الذكية</PageTitle>
@@ -333,9 +336,9 @@
 </div>
 
 @code {
-    private List<StudentApplication> applications = new();
-    private StudentApplication? selectedApplication;
-    private StudentApplication? applicationToReject;
+    private List<StudentApplicationDto> applications = new();
+    private StudentApplicationDto? selectedApplication;
+    private StudentApplicationDto? applicationToReject;
     private string searchTerm = "";
     private string rejectionReason = "";
 
@@ -354,7 +357,7 @@
     private ApplicationStatus currentStatus = ApplicationStatus.All;
 
     // الأقسام
-    private List<Department> departments = new();
+    private List<DepartmentDto> departments = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -367,7 +370,7 @@
     {
         try
         {
-            departments = await _context.Departments.ToListAsync();
+            departments = await _departmentService.GetAllDepartmentsAsync();
         }
         catch (Exception ex)
         {
@@ -379,10 +382,10 @@
     {
         try
         {
-            totalApplications = await _context.StudentApplications.CountAsync();
-            pendingApplications = await _context.StudentApplications.CountAsync(a => a.Status == "قيد المراجعة");
-            acceptedApplications = await _context.StudentApplications.CountAsync(a => a.Status == "مقبول");
-            rejectedApplications = await _context.StudentApplications.CountAsync(a => a.Status == "مرفوض");
+            totalApplications = await _applicationService.GetApplicationsCountAsync();
+            pendingApplications = await _applicationService.GetPendingCountAsync();
+            acceptedApplications = await _applicationService.GetApprovedCountAsync();
+            rejectedApplications = await _applicationService.GetRejectedCountAsync();
         }
         catch (Exception ex)
         {
@@ -394,37 +397,27 @@
     {
         try
         {
-            var query = _context.StudentApplications.AsQueryable();
-
-            // تطبيق الفلاتر
-            if (!string.IsNullOrEmpty(searchTerm))
+            List<StudentApplicationDto> allApps = currentStatus switch
             {
-                query = query.Where(a =>
-                    a.FirstName.Contains(searchTerm) ||
-                    a.LastName.Contains(searchTerm) ||
-                    a.Email.Contains(searchTerm));
-            }
+                ApplicationStatus.Pending => await _applicationService.GetPendingApplicationsAsync(),
+                ApplicationStatus.Accepted => (await _applicationService.GetAllApplicationsAsync()).Where(a => a.Status == "مقبول").ToList(),
+                ApplicationStatus.Rejected => (await _applicationService.GetAllApplicationsAsync()).Where(a => a.Status == "مرفوض").ToList(),
+                _ => await _applicationService.GetAllApplicationsAsync()
+            };
 
-            if (currentStatus != ApplicationStatus.All)
+            // بحث
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                var status = currentStatus switch
-                {
-                    ApplicationStatus.Pending => "قيد المراجعة",
-                    ApplicationStatus.Accepted => "مقبول",
-                    ApplicationStatus.Rejected => "مرفوض",
-                    _ => ""
-                };
-                query = query.Where(a => a.Status == status);
+                allApps = allApps.Where(a =>
+                    a.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    a.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    a.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             // ترقيم الصفحات
-            totalApplications = await query.CountAsync();
+            totalApplications = allApps.Count;
             totalPages = (int)Math.Ceiling((double)totalApplications / pageSize);
-
-            applications = await query
-                .Skip((currentPage - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            applications = allApps.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
         }
         catch (Exception ex)
         {
@@ -462,36 +455,29 @@
         }
     }
 
-    private async void ViewApplicationDetails(StudentApplication application)
+    private async void ViewApplicationDetails(StudentApplicationDto application)
     {
         selectedApplication = application;
         // فتح الـ Modal
         await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#viewApplicationModal");
     }
 
-    private async Task AcceptApplication(StudentApplication application)
+    private async Task AcceptApplication(StudentApplicationDto application)
     {
         try
-        {  // إنشاء حساب طالب جديد
+        {
             var savedUser = await CreateStudentAccount(application);
-
-            // تحديث حالة الطلب
-            application.Status = "مقبول";
-            application.StudentId = savedUser.StudentId;  //  GenerateStudentId();
+            application.StudentId = savedUser.StudentId;
             application.TemporaryPassword = GenerateTemporaryPassword();
 
+            var success = await _applicationService.ApproveApplicationAsync(application.Id, application.StudentId);
 
-
-            _context.StudentApplications.Update(application);
-            await _context.SaveChangesAsync();
-
-
-
-            // تحديث الإحصائيات والقائمة
-            await LoadStatistics();
-            await LoadApplications();
-
-            StateHasChanged();
+            if (success)
+            {
+                await LoadStatistics();
+                await LoadApplications();
+                StateHasChanged();
+            }
         }
         catch (Exception ex)
         {
@@ -499,7 +485,7 @@
         }
     }
 
-    private async void ShowRejectModal(StudentApplication application)
+    private async void ShowRejectModal(StudentApplicationDto application)
     {
         applicationToReject = application;
         rejectionReason = "";
@@ -513,19 +499,12 @@
         {
             try
             {
-                applicationToReject.Status = "مرفوض";
-                applicationToReject.RejectionReason = rejectionReason;
-
-                _context.StudentApplications.Update(applicationToReject);
-                await _context.SaveChangesAsync();
-
-                // إغلاق الـ Modal
-                await JS.InvokeVoidAsync("bootstrap.Modal.getInstance", "#rejectApplicationModal");
-
-                // تحديث الإحصائيات والقائمة
-                await RefreshApplications();
-
-                StateHasChanged();
+                var success = await _applicationService.RejectApplicationAsync(applicationToReject.Id, rejectionReason);
+                if (success)
+                {
+                    await JS.InvokeVoidAsync("bootstrap.Modal.getInstance", "#rejectApplicationModal");
+                    await RefreshApplications();
+                }
             }
             catch (Exception ex)
             {
@@ -533,23 +512,20 @@
             }
         }
     }
-
-    private async Task<StudentDto> CreateStudentAccount(StudentApplication application)
+    private async Task<StudentDto> CreateStudentAccount(StudentApplicationDto application)
     {
         try
         {
             var student = new StudentDto
                 {
                     StudentId = GenerateStudentId(),
-                    FirstName = application.FirstName,
-                    LastName = application.LastName,
-                    Email = application.Email,
+                    FullName = application.FirstName + "-" + application.LastName,
                     Phone = application.Phone,
                     BirthOfDate = application.BirthDate,
                     Sexual = application.Gender == "ذكر",
                     HomeAddress = application.Address,
                     DepartmentId = application.DepartmentId,
-                    Status = StudentStatus.Active,
+                    Status = StudentStatus.New,
                     StatusOnSite = "نشط",
                     RegistrationDate = DateTime.Now,
                     UserNameOnSite = application.Email,
@@ -610,18 +586,9 @@
     {
         try
         {
-            var application = await _context.StudentApplications.FindAsync(applicationId);
-            if (application != null)
-            {
-                _context.StudentApplications.Remove(application);
-                await _context.SaveChangesAsync();
-
-                // تحديث الإحصائيات والقائمة
-                await LoadStatistics();
-                await LoadApplications();
-
-                StateHasChanged();
-            }
+            await _applicationService.DeleteApplicationAsync(applicationId);
+            await LoadStatistics();
+            await LoadApplications();
         }
         catch (Exception ex)
         {

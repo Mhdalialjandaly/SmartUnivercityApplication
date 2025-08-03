@@ -1,0 +1,340 @@
+﻿@page "/apply"
+@inject NavigationManager Navigation
+@inject UniversityDbContext _context
+@rendermode InteractiveServer
+<PageTitle>طلب التقديم - الجامعة الذكية</PageTitle>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0"><i class="fas fa-file-alt me-2"></i>طلب التقديم للجامعة</h3>
+                </div>
+                <div class="card-body">
+                    @if (applicationSubmitted)
+                    {
+                        <div class="alert alert-success text-center">
+                            <i class="fas fa-check-circle fa-2x mb-3"></i>
+                            <h4>تم تقديم طلب التقديم بنجاح!</h4>
+                            <p>رقم الطلب: <strong>@submittedApplication.Id</strong></p>
+                            <p>سيتم مراجعة طلبك من قبل الإدارة خلال 7 أيام عمل.</p>
+                            <a href="/apply/status" class="btn btn-primary">متابعة حالة الطلب</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- شريط التبويبات -->
+                        <ul class="nav nav-tabs mb-4" id="applicationTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">
+                                    <i class="fas fa-user me-2"></i>المعلومات الشخصية
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">
+                                    <i class="fas fa-phone me-2"></i>معلومات الاتصال
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button" role="tab">
+                                    <i class="fas fa-graduation-cap me-2"></i>المعلومات الأكاديمية
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="confirmation-tab" data-bs-toggle="tab" data-bs-target="#confirmation" type="button" role="tab">
+                                    <i class="fas fa-check-circle me-2"></i>التأكيد
+                                </button>
+                            </li>
+                        </ul>
+
+                        <form @onsubmit="SubmitApplication">
+                            <!-- محتوى التبويبات -->
+                            <div class="tab-content" id="applicationTabsContent">
+                                <!-- التبويب الأول: المعلومات الشخصية -->
+                                <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                                    <h5 class="mb-4">المعلومات الشخصية</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">الاسم الأول *</label>
+                                            <input type="text" class="form-control" @bind="application.FirstName" required />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">اسم العائلة *</label>
+                                            <input type="text" class="form-control" @bind="application.LastName" required />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">تاريخ الميلاد *</label>
+                                            <input type="date" class="form-control" @bind="application.BirthDate" required />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">الجنس *</label>
+                                            <select class="form-select" @bind="application.Gender" required>
+                                                <option value="">اختر الجنس</option>
+                                                <option value="ذكر">ذكر</option>
+                                                <option value="أنثى">أنثى</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <div></div> <!-- مساحة فارغة للمحاذاة -->
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="tab" data-bs-target="#contact">
+                                            التالي <i class="fas fa-arrow-left ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- التبويب الثاني: معلومات الاتصال -->
+                                <div class="tab-pane fade" id="contact" role="tabpanel">
+                                    <h5 class="mb-4">معلومات الاتصال</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">رقم الهاتف *</label>
+                                            <input type="tel" class="form-control" @bind="application.Phone" required />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">البريد الإلكتروني *</label>
+                                            <input type="email" class="form-control" @bind="application.Email" required />
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان الكامل *</label>
+                                        <textarea class="form-control" rows="3" @bind="application.Address" required></textarea>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tab" data-bs-target="#personal">
+                                            <i class="fas fa-arrow-right me-2"></i> السابق
+                                        </button>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="tab" data-bs-target="#academic">
+                                            التالي <i class="fas fa-arrow-left ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- التبويب الثالث: المعلومات الأكاديمية -->
+                                <div class="tab-pane fade" id="academic" role="tabpanel">
+                                    <h5 class="mb-4">المعلومات الأكاديمية</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">القسم المطلوب *</label>
+                                            <select class="form-select" @bind="application.DepartmentId" required>
+                                                <option value="">اختر القسم</option>
+                                                @foreach (var dept in departments)
+                                                {
+                                                    <option value="@dept.Id">@dept.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">المؤهل الدراسي *</label>
+                                            <select class="form-select" @bind="application.EducationLevel" required>
+                                                <option value="">اختر المؤهل</option>
+                                                <option value="ثانوية عامة">ثانوية عامة</option>
+                                                <option value="دبلوم">دبلوم</option>
+                                                <option value="بكالوريوس">بكالوريوس</option>
+                                                <option value="ماجستير">ماجستير</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">المعدل *</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="application.GPA" required />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">شهادة المؤهل الدراسي (PDF, JPG, PNG)</label>
+                                        <input type="file" class="form-control" @onchange="HandleFileUpload" accept=".pdf,.jpg,.jpeg,.png" />
+                                        @if (!string.IsNullOrEmpty(fileUploadMessage))
+                                        {
+                                            <div class="form-text text-success">@fileUploadMessage</div>
+                                        }
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tab" data-bs-target="#contact">
+                                            <i class="fas fa-arrow-right me-2"></i> السابق
+                                        </button>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="tab" data-bs-target="#confirmation">
+                                            التالي <i class="fas fa-arrow-left ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- التبويب الرابع: التأكيد -->
+                                <div class="tab-pane fade" id="confirmation" role="tabpanel">
+                                    <h5 class="mb-4">مراجعة وتأكيد المعلومات</h5>
+
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">المعلومات الشخصية</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>الاسم:</strong> @($"{application.FirstName} {application.LastName}")</p>
+                                                    <p><strong>تاريخ الميلاد:</strong> @application.BirthDate.ToString("yyyy-MM-dd")</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>الجنس:</strong> @application.Gender</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">معلومات الاتصال</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>رقم الهاتف:</strong> @application.Phone</p>
+                                                    <p><strong>البريد الإلكتروني:</strong> @application.Email</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>العنوان:</strong> @application.Address</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">المعلومات الأكاديمية</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>القسم المطلوب:</strong> @GetDepartmentName(application.DepartmentId)</p>
+                                                    <p><strong>المؤهل الدراسي:</strong> @application.EducationLevel</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>المعدل:</strong> @application.GPA</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" @bind="acceptTerms" required />
+                                        <label class="form-check-label">أوافق على الشروط والأحكام وأن المعلومات المقدمة صحيحة</label>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tab" data-bs-target="#academic">
+                                            <i class="fas fa-arrow-right me-2"></i> السابق
+                                        </button>
+                                        <button type="submit" @onclick="SubmitApplication" class="btn btn-success btn-lg" disabled="@isSubmitting">
+                                            @if (isSubmitting)
+                                            {
+                                                <span><i class="fas fa-spinner fa-spin me-2"></i>جاري التقديم...</span>
+                                            }
+                                            else
+                                            {
+                                                <span><i class="fas fa-paper-plane me-2"></i>تقديم الطلب</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private StudentApplicationDto application = new();
+    private List<Department> departments = new();
+    private StudentApplicationDto submittedApplication = new();
+    private bool applicationSubmitted = false;
+    private bool isSubmitting = false;
+    private bool acceptTerms = false;
+    private string fileUploadMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // تحميل الأقسام من قاعدة البيانات
+        departments = await _context.Departments.ToListAsync();
+    }
+    private async Task SubmitApplication()
+    {
+        if (!acceptTerms) return;
+
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            // إعداد طلب التقديم
+            application.SubmitDate = DateTime.Now;
+            application.Status = "قيد المراجعة";
+
+            // حفظ الطلب في قاعدة البيانات
+            _context.StudentApplications.Add(new StudentApplication
+                {
+                    FirstName = application.FirstName,
+                    LastName = application.LastName,
+                    BirthDate = application.BirthDate,
+                    Gender = application.Gender,
+                    Phone = application.Phone,
+                    Email = application.Email,
+                    Address = application.Address,
+                    DepartmentId = application.DepartmentId,
+                    EducationLevel = application.EducationLevel,
+                    GPA = application.GPA,
+                    CertificatePath = application.CertificatePath,
+                    SubmitDate = application.SubmitDate,
+                    Status = application.Status,
+                    RejectionReason = application.RejectionReason,
+                    StudentId = application.StudentId,
+                    TemporaryPassword = application.TemporaryPassword   
+                });
+
+            var saved = await _context.SaveChangesAsync();
+
+            application.Id = saved;
+            submittedApplication = application;
+            applicationSubmitted = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving application: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void HandleFileUpload(ChangeEventArgs e)
+    {
+        var file = e.Value as IBrowserFile;
+        if (file != null)
+        {
+            // هنا يمكنك تنفيذ منطق رفع الملف الفعلي
+            // مثلاً: رفع إلى سيرفر وحفظ المسار
+            fileUploadMessage = $"تم اختيار الملف: {file.Name}";
+            application.CertificatePath = file.Name; // مؤقتاً، يجب تحديثه بالمسار الفعلي
+        }
+    }
+
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }  
+    private string GenerateStudentId()
+    {
+        return $"STU-{DateTime.Now:yyyy}-{new Random().Next(1000, 9999)}";
+    }
+}

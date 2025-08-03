@@ -8,9 +8,10 @@ using UniversityManagementSystem.Domain.Interfaces;
 using QuestPDF.Infrastructure;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
+using UniversityManagementSystem.Application.Abstractions;
 namespace UniversityManagementSystem.Application.Services
 {
-    public class DocumentService : IDocumentService
+    public class DocumentService : Injectable, IDocumentService
     {
         private readonly IRepository<OfficialDocument> _documentRepository;
         private readonly IRepository<DocumentTemplate> _templateRepository;

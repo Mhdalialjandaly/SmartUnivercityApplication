@@ -1,5 +1,5 @@
 ﻿@rendermode InteractiveServer
-<div class="@(isSidebarCollapsed ? "collapsed" : "")">
+<div class="smart-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
     <nav class="flex-column">
         <div class="nav-item">
             <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
@@ -9,119 +9,68 @@
         </div>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="/students">
-                <i class="fas fa-users"></i>
-                <span class="nav-text">شؤون الطلاب</span>
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/documents">
-                <i class="fas fa-file-contract"></i>
-                <span class="nav-text">الوثائق الرسمية</span>
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/finance/student-payments">
-                <i class="fas fa-receipt"></i>
-                <span class="nav-text">مدفوعات الطلاب</span>
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/finance/employee-salaries">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <span class="nav-text">رواتب الموظفين</span>
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/hr/attendance">
-                <i class="fas fa-clock"></i>
-                <span class="nav-text">الحضور والانصراف</span>
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/hr/leaves">
-                <i class="fas fa-calendar-alt"></i>
-                <span class="nav-text">الإجازات</span>
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/faculty">
-                <i class="fas fa-chalkboard-teacher"></i>
-                <span class="nav-text">إدارة الكادر التعليمي</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/academic/courses">
-                <i class="fas fa-book"></i>
-                <span class="nav-text">المواد الدراسية والمحاضرات</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/departments">
-                <i class="fas fa-building"></i>
-                <span class="nav-text">إدارة الأقسام</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/library">
-                <i class="fas fa-book-reader"></i>
-                <span class="nav-text">المكتبة</span>
+            <NavLink class="nav-link" href="/chat">
+                <i class="fas fa-comments"></i>
+                <span class="nav-text">المحادثة</span>
             </NavLink>
         </div>
 
         <div class="nav-item">
             <NavLink class="nav-link" href="/calendar">
                 <i class="fas fa-calendar-alt"></i>
-                <span class="nav-text">التقويم الدراسي</span>
+                <span class="nav-text">تقويم الجامعة</span>
             </NavLink>
         </div>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="/settings">
-                <i class="fas fa-cog"></i>
-                <span class="nav-text">الإعدادات</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item">
-            <NavLink class="nav-link" href="/notifications">
-                <i class="fas fa-bell"></i>
-                <span class="nav-text">التنبيهات والإشعارات</span>
+            <NavLink class="nav-link" href="/backup">
+                <i class="fas fa-database"></i>
+                <span class="nav-text">النسخ الاحتياطي</span>
             </NavLink>
         </div>
     </nav>
 </div>
 
 <style>
+    .smart-sidebar {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        border-left: 1px solid #dee2e6;
+        transition: width 0.3s;
+    }
+
     .nav-link {
         display: flex !important;
         align-items: center !important;
-        padding: 12px 15px !important;
-        border-radius: 5px !important;
-        margin: 5px 10px !important;
+        padding: 12px 20px !important;
+        border-radius: 8px !important;
+        margin: 8px 12px !important;
+        color: #344767 !important;
+        font-weight: 500;
         text-decoration: none !important;
-        color: #495057 !important;
-        transition: all 0.2s !important;
+        transition: all 0.2s ease-in-out;
     }
 
+        .nav-link i {
+            margin-left: 12px;
+            width: 24px;
+            text-align: center;
+            color: #5e72e4;
+        }
+
         .nav-link:hover {
-            background-color: #e9ecef !important;
-            color: #0d6efd !important;
+            background-color: #e2e6f3 !important;
+            color: #324cdd !important;
         }
 
         .nav-link.active {
-            background-color: #0d6efd !important;
+            background-color: #5e72e4 !important;
             color: white !important;
         }
 
-    .nav-item i {
-        width: 25px;
-        text-align: center;
-        margin-left: 10px;
-    }
+            .nav-link.active i {
+                color: white;
+            }
 
     .collapsed .nav-text {
         display: none !important;
@@ -129,13 +78,13 @@
 
     .collapsed .nav-link {
         justify-content: center !important;
-        padding: 15px 10px !important;
-        margin: 5px 5px !important;
+        padding: 16px 10px !important;
+        margin: 6px 5px !important;
     }
 
     .collapsed .nav-item i {
         margin-left: 0 !important;
-        font-size: 1.2rem;
+        font-size: 1.4rem;
     }
 </style>
 

@@ -1,4 +1,4 @@
-﻿@page "/students"
+﻿@page "/students-managment"
 @attribute [Authorize]
 @inject UniversityDbContext _context
 @rendermode InteractiveServer
@@ -176,8 +176,8 @@
                                                     <td>@(i + 1)</td>
                                                     <td>
                                                         <div class="d-flex align-items-center">
-                                                            <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(student.FirstName + " " + student.LastName))&background=0D6EFD&color=fff" class="rounded-circle me-2" width="32" height="32">
-                                                            <span>@($"{student.FirstName} {student.LastName}")</span>
+                                                            <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(student.FullName + " " + student.FullName))&background=0D6EFD&color=fff" class="rounded-circle me-2" width="32" height="32">
+                                                            <span>@($"{student.FullName}")</span>
                                                         </div>
                                                     </td>
                                                     <td>@student.StudentId</td>
@@ -202,9 +202,9 @@
                                                                 <i class="fas fa-ellipsis-v"></i>
                                                             </button>
                                                             <ul class="dropdown-menu">
-                                                                <li><a class="dropdown-item" href="/students/@student.StudentId"><i class="fas fa-eye me-2"></i>عرض التفاصيل</a></li>
-                                                                <li><a class="dropdown-item" href="/students/@student.StudentId/edit"><i class="fas fa-edit me-2"></i>تعديل</a></li>
-                                                                <li><a class="dropdown-item" href="/students/@student.StudentId/invoices"><i class="fas fa-file-invoice me-2"></i>الفواتير</a></li>
+                                                                <li><a class="dropdown-item" href="/students/@student.Id"><i class="fas fa-eye me-2"></i>عرض التفاصيل</a></li>
+                                                                <li><a class="dropdown-item" href="/students/@student.Id/edit"><i class="fas fa-edit me-2"></i>اكمال عملية التسجيل</a></li>
+                                                                <li><a class="dropdown-item" href="/students/@student.Id/invoices"><i class="fas fa-file-invoice me-2"></i>الفواتير</a></li>
                                                                 <li><hr class="dropdown-divider"></li>
                                                                 <li><a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteStudent(student.StudentId)"><i class="fas fa-trash me-2"></i>حذف</a></li>
                                                             </ul>
@@ -310,11 +310,11 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">الاسم الأول *</label>
-                                    <input type="text" class="form-control" placeholder="أدخل الاسم الأول" @bind="newStudent.FirstName" required>
+                                    <input type="text" class="form-control" placeholder="أدخل الاسم الأول" @bind="FirstName" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">اسم العائلة *</label>
-                                    <input type="text" class="form-control" placeholder="أدخل اسم العائلة" @bind="newStudent.LastName" required>
+                                    <input type="text" class="form-control" placeholder="أدخل اسم العائلة" @bind="LastName" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">السنة الدراسية</label>
@@ -361,7 +361,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">البريد الإلكتروني</label>
-                                    <input type="email" class="form-control" placeholder="أدخل البريد الإلكتروني" @bind="newStudent.Email">
+                                    <input type="email" class="form-control" placeholder="أدخل البريد الإلكتروني" @bind="Email">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">محل السكن (م-ز-د) *</label>
@@ -630,11 +630,13 @@
 
 @code {
     private string searchTerm = "";
-    private List<StudentDto> students = new();
-    private List<Student> StudentsList = new();
+    private List<StudentDto> StudentsList = new();
     private List<DepartmentDto> departments = new();
     private List<Tunnel> tunnels = new();
     private StudentDto newStudent = new();
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
 
     // إحصائيات
     private int totalStudents = 0;
@@ -714,10 +716,9 @@
                 selectedDepartmentId,
                 status);
             var studentsList = result.Data.ToList();
-            StudentsList = studentsList;
-            students = _mapper.Map<List<StudentDto>>(studentsList);
             totalPages = result.TotalPages;
             totalStudents = result.TotalRecords;
+            StudentsList = studentsList;
         }
         catch (Exception ex)
         {
@@ -772,6 +773,8 @@
     {
         try
         {
+            newStudent.FullName = FirstName + "-" + LastName;
+            
             await _studentService.CreateStudentAsync(newStudent);
             // إعادة تحميل القائمة
             await LoadStudents(currentStatus);

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -7,7 +8,8 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class DepartmentService : IDepartmentService
+    
+    public class DepartmentService : Injectable, IDepartmentService
     {
         private readonly IRepository<Department> _departmentRepository;
         private readonly IMapper _mapper;
@@ -105,6 +107,12 @@ namespace UniversityManagementSystem.Application.Services
                  d => d.Students);
 
             return department?.Students?.Sum(s => s.AccountBalance) ?? 0;
+        }
+
+        public async Task<int?> GetDepartmentsCountAsync()
+        {
+            var departmentsCount = await _departmentRepository.CountAsync();
+            return departmentsCount == 0 ? 0 : departmentsCount;
         }
     }
 }

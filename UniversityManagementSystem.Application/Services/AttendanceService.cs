@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -12,7 +13,7 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class AttendanceService : IAttendanceService
+    public class AttendanceService : Injectable, IAttendanceService
     {
         private readonly IRepository<Attendance> _attendanceRepository;
         private readonly IMapper _mapper;

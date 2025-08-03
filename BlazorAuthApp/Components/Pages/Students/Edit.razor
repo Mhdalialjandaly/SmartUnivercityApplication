@@ -388,7 +388,7 @@ else
         {
             // Fetch the student DTO for editing
             // editStudent = await _studentService.GetStudentByIdAsync(studentId); // This should return StudentDto
-            editStudent = await _context.Students.FirstAsync(e => e.StudentId == studentId);
+            editStudent = await _context.Students.FirstAsync(e => e.Id == studentId);
 
             if (editStudent == null)
             {

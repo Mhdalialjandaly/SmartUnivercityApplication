@@ -40,6 +40,19 @@ namespace BlazorAuthApp.Mapper
             CreateMap<OfficialDocumentDto, OfficialDocument>().PreserveReferences();
             CreateMap<OfficialDocument, OfficialDocumentDto>();
 
+            CreateMap<StudentApplicationDto,StudentApplication>().PreserveReferences();
+            CreateMap<StudentApplication, StudentApplicationDto>();
+
+            CreateMap<StudentPaymentDto, StudentPayment>().PreserveReferences();
+            CreateMap<StudentPayment, StudentPaymentDto>();
+
+            CreateMap<UserDto, User>().PreserveReferences();
+            CreateMap<User, UserDto>();
+
+            CreateMap<EmployeeDto, Employee>().PreserveReferences();
+            CreateMap<Employee, EmployeeDto>();
+            CreateMap<FinanceRecordDto, FinanceRecord>().PreserveReferences();
+            CreateMap<FinanceRecord, FinanceRecordDto>();
         }
     }
 }

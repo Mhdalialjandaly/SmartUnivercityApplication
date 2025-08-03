@@ -2,7 +2,7 @@
 
 namespace UniversityManagementSystem.Domain.Entities
 {
-    public class StudentApplication
+    public class StudentApplication :IEntity
     {
         public int Id { get; set; }
 
@@ -58,5 +58,10 @@ namespace UniversityManagementSystem.Domain.Entities
         // العلاقات
         public Department Department { get; set; }
         public Student Student { get; set; }
+        public DateTime CreatedAt { get ; set ; }
+        public DateTime DeletedAt { get ; set ; }
+        public DateTime ModifiedAt { get ; set ; }
+        public string ModifiedBy { get ; set ; }
+        public string DeletedBy { get ; set ; }
     }
 }

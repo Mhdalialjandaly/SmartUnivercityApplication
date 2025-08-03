@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Application.Models;
@@ -10,7 +10,7 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class StudentServices : IStudentServices
+    public class StudentServices : Injectable, IStudentServices 
     {
         private readonly IRepository<Student> _studentRepository;
         private readonly IRepository<User> _user;
@@ -105,16 +105,16 @@ namespace UniversityManagementSystem.Application.Services
             return true;
         }
 
-        public async Task<List<CourseRegistration>> GetStudentCoursesAsync(string studentId)
+        public async Task<List<CourseRegistrationDto>> GetStudentCoursesAsync(string studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId, s => s.CourseRegistrations);
-            return student?.CourseRegistrations?.ToList() ?? new List<CourseRegistration>();
+            return _mapper.Map<List<CourseRegistrationDto>>(student.CourseRegistrations).ToList() ?? new List<CourseRegistrationDto>();
         }
 
-        public async Task<List<StudentDocument>> GetStudentDocumentsAsync(string studentId)
+        public async Task<List<StudentDocumentDto>> GetStudentDocumentsAsync(string studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId, s => s.StudentDocuments);
-            return student?.StudentDocuments?.ToList() ?? new List<StudentDocument>();
+            return _mapper.Map<List<StudentDocumentDto>>(student.CourseRegistrations).ToList() ?? new List<StudentDocumentDto>();
         }
 
         public async Task<bool> CompleteRegistrationAsync(string studentId)
@@ -155,13 +155,13 @@ namespace UniversityManagementSystem.Application.Services
             return courses.Average(e => e.Select(d => d.GPA).Count());
         }
 
-        public async Task<PaginatedResult<Student>> GetStudentsPagedAsync(int pageNumber, int pageSize, string term, int? departmentId, StudentStatus status)
+        public async Task<PaginatedResult<StudentDto>> GetStudentsPagedAsync(int pageNumber, int pageSize, string term, int? departmentId, StudentStatus status)
         {
             var students = await _studentRepository.GetPagedAsync(pageNumber, pageSize);
             
-            return new PaginatedResult<Student>
+            return new PaginatedResult<StudentDto>
             {
-                Data = students,
+                Data = _mapper.Map<List<StudentDto>>(students),
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalRecords = students.Count(),
@@ -172,16 +172,13 @@ namespace UniversityManagementSystem.Application.Services
         {
             try
             {
-
-                //var invoiceEntities = await _context.Invoices // Replace 'Invoices' with your actual DbSet name for invoices
-                //    .Where(i => i.StudentId == studentId) // Replace 'StudentId' with the actual FK property name in your Invoice entity
-                //    .ToListAsync();
-
-                //var invoiceDtos = _mapper.Map<List<InvoiceDto>>(invoiceEntities);
-
-
-
-                return new List<InvoiceDto>();
+                var invoices = new List<InvoiceDto>();
+                var Students = await _studentRepository.GetByIdAsync(studentId,e => e.CourseRegistrations);
+                foreach (var item in Students.CourseRegistrations)
+                {
+                    invoices.Add(new InvoiceDto {Amount = item.CourseFee , Date = DateTime.Now,InvoiceNumber = GenerateInvoiceNumber() });
+                }
+                return invoices;
             }
             catch (Exception ex)
             {
@@ -189,6 +186,9 @@ namespace UniversityManagementSystem.Application.Services
                 throw new Exception($"An error occurred while fetching invoices for student {studentId}.", ex);
             }
         }
-      
+        private string GenerateInvoiceNumber()
+        {
+            return $"INV-{DateTime.Now:yyyy}-{new Random().Next(10000, 99999)}";
+        }
     }
 }

@@ -3,10 +3,9 @@
 @inject IStudentServices _studentService
 @inject IDepartmentService _departmentService
 @inject NavigationManager Navigation
-@* @rendermode InteractiveServer *@
+@rendermode InteractiveServer
 @inject UniversityDbContext _context
 <PageTitle>تفاصيل الطالب - الجامعة الذكية</PageTitle>
-@inject IMapper _mapper
 @if (studentDetails == null)
 {
     <div class="d-flex justify-content-center my-5">
@@ -27,7 +26,7 @@ else
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
                                 <li class="breadcrumb-item"><a href="/students">شؤون الطلاب</a></li>
-                                <li class="breadcrumb-item active">@($"{studentDetails.FirstName} {studentDetails.LastName}")</li>
+                                <li class="breadcrumb-item active">@($"{studentDetails.FullName}")</li>
                             </ol>
                         </nav>
                     </div>
@@ -56,7 +55,7 @@ else
                             <dd class="col-sm-8">@studentDetails.StudentId</dd>
 
                             <dt class="col-sm-4">الاسم الكامل:</dt>
-                            <dd class="col-sm-8">@($"{studentDetails.FirstName} {studentDetails.LastName}")</dd>
+                            <dd class="col-sm-8">@($"{studentDetails.FullName}")</dd>
 
                             <dt class="col-sm-4">القسم:</dt>
                             <dd class="col-sm-8">@GetDepartmentName(studentDetails.DepartmentId)</dd>
@@ -103,8 +102,8 @@ else
                             <dt class="col-sm-4">الهاتف الثاني:</dt>
                             <dd class="col-sm-8">@studentDetails.SecoundPhone</dd>
 
-                            <dt class="col-sm-4">البريد الإلكتروني:</dt>
-                            <dd class="col-sm-8">@studentDetails.Email</dd>
+    @*                         <dt class="col-sm-4">البريد الإلكتروني:</dt>
+                            <dd class="col-sm-8">@studentDetails.Email</dd> *@
 
                             <dt class="col-sm-4">محل السكن:</dt>
                             <dd class="col-sm-8">@studentDetails.HomeAddress</dd>
@@ -257,7 +256,7 @@ else
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                هل أنت متأكد أنك تريد حذف الطالب <strong>@($"{studentDetails?.FirstName} {studentDetails?.LastName}")</strong> (رقم الطالب: <strong>@studentDetails?.StudentId</strong>)؟
+                هل أنت متأكد أنك تريد حذف الطالب <strong>@($"{studentDetails?.FullName}")</strong> (رقم الطالب: <strong>@studentDetails?.StudentId</strong>)؟
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
@@ -297,7 +296,7 @@ else
         try
         {
             // studentDetails = await _studentService.GetStudentByIdAsync(studentId); // Implement this method in your service
-            studentDetails =_mapper.Map<StudentDto>(await _context.Students.FirstAsync(e=>e.StudentId == studentId));
+            studentDetails =await _studentService.GetStudentByIdAsync(studentId);
             if (studentDetails == null)
             {
                 // Handle case where student is not found, maybe redirect

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Entities;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class IdentityService : IIdentityService
+    public class IdentityService : Injectable, IIdentityService
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;

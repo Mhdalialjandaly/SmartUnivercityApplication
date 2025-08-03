@@ -8,6 +8,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public string LastName { get; set; }
         public string Role { get; set; }
         public bool IsActive { get; set; }
+        public string PhotoUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }

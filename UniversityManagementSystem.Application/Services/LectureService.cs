@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -7,7 +8,7 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class LectureService : ILectureService
+    public class LectureService : Injectable, ILectureService
     {
         private readonly IRepository<Lecture> _lectureRepository;
         private readonly IRepository<Course> _courseRepository;

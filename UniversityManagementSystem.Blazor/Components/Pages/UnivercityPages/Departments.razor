@@ -1,0 +1,165 @@
+﻿@page "/departments"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجامعة الكرتونية الذكية</title>
+
+</head>
+<body>
+    <header class="bg-primary text-white py-4 shadow-sm">
+        <div class="container">
+            <div class="logo d-flex align-items-center gap-3">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h1 class="h3 mb-0 fw-bold">الجامعة الكرتونية الذكية</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-primary">أقسام الجامعة</h2>
+            <p class="text-muted lead">اكتشف التخصصات المتقدمة في عالم التقنية والذكاء الاصطناعي</p>
+        </div>
+
+        <!-- كروت الأقسام -->
+        <div class="row g-4">
+            <!-- قسم 1 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-laptop-code fa-2x text-primary"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">هندسة البرمجيات</h3>
+                        <p class="text-muted">تعلم بناء أنظمة ذكية وتطبيقات متطورة باستخدام أحدث التقنيات البرمجية</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 2 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-robot fa-2x text-success"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">الذكاء الاصطناعي</h3>
+                        <p class="text-muted">استكشاف عالم التعلم الآلي ومعالجة اللغات الطبيعية ورؤية الحاسوب</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 3 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-database fa-2x text-info"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">علم البيانات</h3>
+                        <p class="text-muted">تحليل البيانات الضخمة واستخراج المعرفة لاتخاذ القرارات الذكية</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 4 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-shield-alt fa-2x text-danger"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">الأمن السيبراني</h3>
+                        <p class="text-muted">حماية الأنظمة والشبكات من الهجمات الإلكترونية والتهديدات الرقمية</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 5 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-gamepad fa-2x text-warning"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">تطوير الألعاب</h3>
+                        <p class="text-muted">تصميم وتطوير ألعاب تفاعلية باستخدام محركات الألعاب الحديثة</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 6 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-secondary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-mobile-alt fa-2x text-secondary"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">تطبيقات الجوال</h3>
+                        <p class="text-muted">بناء تطبيقات ذكية لأنظمة iOS و Android باستخدام أحدث الأطر</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 7 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-cloud fa-2x text-primary"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">الحوسبة السحابية</h3>
+                        <p class="text-muted">استخدام خدمات الحوسبة السحابية لتطوير حلول قابلة للتوسع</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 8 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-vr-cardboard fa-2x text-success"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">الواقع الافتراضي</h3>
+                        <p class="text-muted">تصميم تجارب غامرة باستخدام تقنيات VR و AR المتطورة</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم 9 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-chart-line fa-2x text-info"></i>
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">التسويق الرقمي</h3>
+                        <p class="text-muted">استراتيجيات التسويق الذكي وتحليل البيانات لتحسين الحملات</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // تأثيرات تفاعلية بسيطة
+        document.querySelectorAll('.hover-lift').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px)';
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    </script>
+</body>
+</html>

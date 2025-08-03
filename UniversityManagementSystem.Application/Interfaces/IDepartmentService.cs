@@ -16,5 +16,6 @@ namespace UniversityManagementSystem.Application.Interfaces
         Task<List<CourseDto>> GetDepartmentCoursesAsync(int departmentId);
         Task<int> GetDepartmentStudentCountAsync(int departmentId);
         Task<decimal> GetDepartmentTotalAccountBalanceAsync(int departmentId);
+        Task<int?> GetDepartmentsCountAsync();
     }
 }

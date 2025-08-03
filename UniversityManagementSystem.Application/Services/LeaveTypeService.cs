@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -7,7 +8,7 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class LeaveTypeService : ILeaveTypeService
+    public class LeaveTypeService : Injectable, ILeaveTypeService
     {
         private readonly IRepository<LeaveType> _leaveTypeRepository;
         private readonly IMapper _mapper;

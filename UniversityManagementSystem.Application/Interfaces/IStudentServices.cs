@@ -1,13 +1,12 @@
 ﻿using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Models;
-using UniversityManagementSystem.Domain.Entities;
 using UniversityManagementSystem.Domain.Enums;
 
 namespace UniversityManagementSystem.Application.Interfaces
 {
     public interface IStudentServices
     {
-        Task<PaginatedResult<Student>> GetStudentsPagedAsync(int pageNumber, int pageSize,string term,int? departmentId,StudentStatus status);
+        Task<PaginatedResult<StudentDto>> GetStudentsPagedAsync(int pageNumber, int pageSize,string term,int? departmentId,StudentStatus status);
         Task<StudentDto> GetStudentByIdAsync(string studentId);
         Task<List<StudentDto>> GetAllStudentsAsync();
         Task<StudentDto> CreateStudentAsync(StudentDto studentDto);
@@ -19,8 +18,8 @@ namespace UniversityManagementSystem.Application.Interfaces
         Task<decimal> GetStudentAccountBalanceAsync(string studentId);
         Task<bool> UpdateStudentAccountBalanceAsync(string studentId, decimal amount);
         Task<bool> ChangeStudentStatusAsync(string studentId, StudentStatus status);
-        Task<List<CourseRegistration>> GetStudentCoursesAsync(string studentId);
-        Task<List<StudentDocument>> GetStudentDocumentsAsync(string studentId);
+        Task<List<CourseRegistrationDto>> GetStudentCoursesAsync(string studentId);
+        Task<List<StudentDocumentDto>> GetStudentDocumentsAsync(string studentId);
         Task<bool> CompleteRegistrationAsync(string studentId);
         Task<int> GetTotalStudentsCountAsync();
         Task<int> GetActiveStudentsCountAsync();

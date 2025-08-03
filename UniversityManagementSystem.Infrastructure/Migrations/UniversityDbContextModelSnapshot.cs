@@ -58,22 +58,22 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = "d1346b74-9166-40e2-969d-f4238971c4c0",
-                            ConcurrencyStamp = "360f0ea7-ba0a-4776-82e7-f561ddb03a57",
+                            Id = "249b2f7f-8358-4f68-be8e-e17eddb9f026",
+                            ConcurrencyStamp = "249b2f7f-8358-4f68-be8e-e17eddb9f026",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "4cbf2421-de7b-4f8d-9109-63c46d748a02",
-                            ConcurrencyStamp = "e0280f2f-d041-4f85-a861-fa1c92aa741a",
+                            Id = "349b2f7f-8358-4f68-be8e-e17eddb9f027",
+                            ConcurrencyStamp = "349b2f7f-8358-4f68-be8e-e17eddb9f027",
                             Name = "Employee",
                             NormalizedName = "EMPLOYEE"
                         },
                         new
                         {
-                            Id = "7aec5499-fec2-4abf-9c59-ec436f07dbb9",
-                            ConcurrencyStamp = "699e2256-fa27-4f31-aec0-b8c3385f1a18",
+                            Id = "449b2f7f-8358-4f68-be8e-e17eddb9f028",
+                            ConcurrencyStamp = "449b2f7f-8358-4f68-be8e-e17eddb9f028",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         });
@@ -190,6 +190,66 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.AcademicCalendar", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AcademicYear")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsHoliday")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUniversityWide")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Semester")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("AcademicCalendar");
                 });
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Attendance", b =>
@@ -350,7 +410,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             Code = "CS101",
                             CourseType = "نظري",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedDate = new DateTime(2025, 7, 28, 17, 37, 57, 704, DateTimeKind.Local).AddTicks(260),
+                            CreatedDate = new DateTime(2025, 8, 2, 17, 47, 29, 900, DateTimeKind.Local).AddTicks(6443),
                             Credits = 0,
                             CurrentStudents = 0,
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -371,7 +431,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             Code = "CS201",
                             CourseType = "نظري",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedDate = new DateTime(2025, 7, 28, 17, 37, 57, 704, DateTimeKind.Local).AddTicks(311),
+                            CreatedDate = new DateTime(2025, 8, 2, 17, 47, 29, 900, DateTimeKind.Local).AddTicks(6483),
                             Credits = 0,
                             CurrentStudents = 0,
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -392,7 +452,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             Code = "CS301",
                             CourseType = "نظري",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedDate = new DateTime(2025, 7, 28, 17, 37, 57, 704, DateTimeKind.Local).AddTicks(315),
+                            CreatedDate = new DateTime(2025, 8, 2, 17, 47, 29, 900, DateTimeKind.Local).AddTicks(6485),
                             Credits = 0,
                             CurrentStudents = 0,
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -683,6 +743,54 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.ToTable("EmployeeSalaries");
                 });
 
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.FinanceRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("FinanceRecord");
+                });
+
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Leave", b =>
                 {
                     b.Property<int>("Id")
@@ -884,6 +992,15 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<string>("CertificatePath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
@@ -913,6 +1030,12 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -1333,6 +1456,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
 
@@ -1365,22 +1491,23 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         {
                             Id = "51586e47-b125-4534-bba4-9bc6fd3dfbc8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "040a3224-6453-4152-b258-99c51a90117c",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ConcurrencyStamp = "5e80abc0-e13c-4e23-839c-4eeec7421a3f",
+                            CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "Admin@mail.com",
-                            EmailConfirmed = false,
+                            Email = "admin@university.com",
+                            EmailConfirmed = true,
                             FirstName = "Admin",
                             IsActive = false,
-                            LockoutEnabled = false,
+                            LastName = "Administrator",
+                            LockoutEnabled = true,
                             ModifiedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            NormalizedEmail = "ADMIN@MAIL.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJPppJXyEwYnHdNB3ONp+87sGQIYiYlf6nulv9HWGMuE4spCKK2Byu6NlrSRUWWfGw==",
+                            NormalizedEmail = "ADMIN@UNIVERSITY.COM",
+                            NormalizedUserName = "ADMIN@12345.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGFSgd4yLWNV84CLN4qdpqLvaOUcqXobHjnwx32VAf5xaE1UayECiY0AaPPIBkx7/w==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "ec1fd606-8293-4d00-b913-3d6acb509500",
+                            SecurityStamp = "f192075b-bacb-4ef0-a150-f7aae1c9d515",
                             TwoFactorEnabled = false,
-                            UserName = "Admin"
+                            UserName = "admin@12345.com"
                         });
                 });
 
@@ -1584,6 +1711,15 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.AcademicCalendar", b =>
+                {
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Department", "Department")
+                        .WithMany("AcademicCalendars")
+                        .HasForeignKey("DepartmentId");
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Attendance", b =>
                 {
                     b.HasOne("UniversityManagementSystem.Domain.Entities.User", "Employee")
@@ -1675,6 +1811,17 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .HasForeignKey("EmployeeId1");
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.FinanceRecord", b =>
+                {
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Department", "Department")
+                        .WithMany("FinanceRecords")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Leave", b =>
@@ -1791,7 +1938,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Department", b =>
                 {
+                    b.Navigation("AcademicCalendars");
+
                     b.Navigation("Courses");
+
+                    b.Navigation("FinanceRecords");
 
                     b.Navigation("Students");
                 });

@@ -1,0 +1,324 @@
+﻿@page "/academic/courses/{id:int}"
+@attribute [Authorize]
+@inject ICourseService CourseService
+@inject ILectureService LectureService
+@inject IStudentServices StudentService
+@inject NavigationManager Navigation
+
+<PageTitle>تفاصيل المادة - الجامعة الذكية</PageTitle>
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 fw-bold text-primary">تفاصيل المادة</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                            <li class="breadcrumb-item"><a href="/academic">الشؤون الأكاديمية</a></li>
+                            <li class="breadcrumb-item"><a href="/academic/courses">المواد الدراسية</a></li>
+                            <li class="breadcrumb-item active">تفاصيل المادة</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="/academic/courses" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>العودة للقائمة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (course != null)
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">@course.Name</h5>
+                            <span class="badge @(course.IsActive ? "bg-success" : "bg-secondary")">
+                                @(course.IsActive ? "نشط" : "غير نشط")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-hashtag me-2"></i>رمز المادة: <strong>@course.Code</strong></h6>
+                                <h6><i class="fas fa-building me-2"></i>القسم: <strong>@course.DepartmentName</strong></h6>
+                                <h6><i class="fas fa-user me-2"></i>المحاضر: <strong>@course.Instructor</strong></h6>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-clock me-2"></i>الساعات: <strong>@course.Credits</strong></h6>
+                                <h6><i class="fas fa-money-bill-wave me-2"></i>الكلفة: <strong>@course.Fee.ToString("C")</strong></h6>
+                                <h6><i class="fas fa-calendar me-2"></i>الفصل الدراسي: <strong>@course.Semester</strong></h6>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>الوصف:</h6>
+                            <p class="text-muted">@course.Description</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3"><i class="fas fa-list me-2"></i>المتطلبات السابقة:</h6>
+                            @if (!string.IsNullOrEmpty(course.Prerequisites))
+                            {
+                                <p class="text-muted">@course.Prerequisites</p>
+                            }
+                            else
+                            {
+                                <p class="text-muted">لا توجد متطلبات سابقة</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- جدول المحاضرات -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>جدول المحاضرات</h5>
+                            <a href="/academic/courses/@course.Id/lectures" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus me-2"></i>إضافة محاضرة
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (lectures.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>الوقت</th>
+                                            <th>المكان</th>
+                                            <th>النوع</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var lecture in lectures.Take(5))
+                                        {
+                                            <tr class="@(lecture.IsCancelled ? "table-secondary" : "")">
+                                                <td>@lecture.LectureDate.ToString("yyyy-MM-dd")</td>
+                                                <td>@lecture.StartTime.ToString(@"hh\:mm") - @lecture.EndTime.ToString(@"hh\:mm")</td>
+                                                <td>@lecture.Location</td>
+                                                <td>
+                                                    <span class="badge bg-info">@lecture.LectureType</span>
+                                                </td>
+                                                <td>
+                                                    @if (lecture.IsCancelled)
+                                                    {
+                                                        <span class="badge bg-danger">ملغاة</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success">مجدولة</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a href="/academic/lectures/@lecture.Id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            @if (lectures.Count > 5)
+                            {
+                                <div class="text-center mt-3">
+                                    <a href="/academic/courses/@course.Id/lectures" class="btn btn-outline-info">
+                                        <i class="fas fa-eye me-2"></i>عرض جميع المحاضرات
+                                    </a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">لا توجد محاضرات مجدولة لهذه المادة</p>
+                                <a href="/academic/courses/@course.Id/lectures" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>إضافة محاضرة
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- الإحصائيات -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>الإحصائيات</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="text-primary mb-0">@Courses.Count(e=>e.CourseType=="مسجل")</h4>
+                                    <small class="text-muted">الطلاب المسجلون</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="text-success mb-0">@Courses.Select(e=>e.Fee).Sum().ToString("C")</h4>
+                                    <small class="text-muted">الإيرادات</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="text-info mb-0">@course.CurrentStudents</h4>
+                                    <small class="text-muted">الحضور الفعلي</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="text-warning mb-0">@course.MaxStudents</h4>
+                                    <small class="text-muted">الحد الأقصى</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الإجراءات -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>الإجراءات</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/academic/courses/@course.Id/lectures" class="btn btn-outline-primary">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>إدارة المحاضرات
+                            </a>
+                            <a href="/academic/courses/@course.Id/students" class="btn btn-outline-success">
+                                <i class="fas fa-users me-2"></i>الطلاب المسجلون
+                            </a>
+                            <a href="/academic/courses/@course.Id/attendance" class="btn btn-outline-info">
+                                <i class="fas fa-user-check me-2"></i>تقرير الحضور
+                            </a>
+                            <button class="btn btn-outline-secondary" @onclick="EditCourse">
+                                <i class="fas fa-edit me-2"></i>تعديل المادة
+                            </button>
+                            <button class="btn btn-outline-danger" @onclick="DeleteCourse">
+                                <i class="fas fa-trash me-2"></i>حذف المادة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- المعلومات الإضافية -->
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>المعلومات الإضافية</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-calendar-plus me-2"></i>
+                                <strong>تاريخ الإنشاء:</strong>
+                                <span class="float-end">@course.CreatedDate.ToString("yyyy-MM-dd")</span>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-layer-group me-2"></i>
+                                <strong>نوع المادة:</strong>
+                                <span class="float-end">@course.CourseType</span>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-users me-2"></i>
+                                <strong>الحضور الحالي:</strong>
+                                <span class="float-end">@course.CurrentStudents / @course.MaxStudents</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-percentage me-2"></i>
+                                <strong>نسبة الاشغال:</strong>
+                                <span class="float-end">
+                                    @(course.MaxStudents > 0 ? Math.Round((double)course.CurrentStudents / course.MaxStudents * 100, 1) : 0)%
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+            <h4>المادة غير موجودة</h4>
+            <p>المادة المطلوبة غير موجودة أو قد تم حذفها.</p>
+            <a href="/academic/courses" class="btn btn-primary">العودة للقائمة</a>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private CourseDto course;
+    private List<LectureDto> lectures = new();
+    private List<CourseDto> Courses = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadCourse();
+        await LoadLectures();
+    }
+
+    private async Task LoadCourse()
+    {
+        try
+        {
+            course = await CourseService.GetCourseByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading course: {ex.Message}");
+        }
+    }
+
+    private async Task LoadLectures()
+    {
+        try
+        {
+            lectures = await LectureService.GetLecturesByCourseAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading lectures: {ex.Message}");
+        }
+    }
+
+    private void EditCourse()
+    {
+        // إعادة التوجيه لصفحة التعديل
+        Navigation.NavigateTo($"/academic/courses/{Id}/edit");
+    }
+
+    private async Task DeleteCourse()
+    {
+        if (course != null)
+        {
+            try
+            {
+                await CourseService.DeleteCourseAsync(course.Id);
+                Navigation.NavigateTo("/academic/courses");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting course: {ex.Message}");
+            }
+        }
+    }
+}

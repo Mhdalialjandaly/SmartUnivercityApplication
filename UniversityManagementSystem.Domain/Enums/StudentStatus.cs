@@ -7,6 +7,7 @@ namespace UniversityManagementSystem.Domain.Enums
         Active,
         New,
         Graduated,
-        Stoped
+        Inactive,
+        Suspended
     }
 }

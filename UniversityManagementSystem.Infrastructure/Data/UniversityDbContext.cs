@@ -1,17 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 using UniversityManagementSystem.Domain.Entities;
 using UniversityManagementSystem.Domain.Entities.UniversityManagementSystem.Core.Entities;
 
 namespace UniversityManagementSystem.Infrastructure.Data
 {
-    public partial class UniversityDbContext : IdentityDbContext<User>
+    public partial class UniversityDbContext : IdentityDbContext<User, IdentityRole, string>
     {
         public UniversityDbContext(DbContextOptions<UniversityDbContext> options)
             : base(options) { }
 
         public DbSet<Student> Students { get; set; }
+        public DbSet<FinanceRecord> FinanceRecord { get; set; }
         public DbSet<StudentApplication> StudentApplications { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Course> Courses { get; set; }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -7,7 +8,7 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class EmployeeSalaryService : IEmployeeSalaryService
+    public class EmployeeSalaryService : Injectable, IEmployeeSalaryService
     {
         private readonly IRepository<EmployeeSalary> _salaryRepository;
         private readonly IMapper _mapper;
@@ -35,7 +36,7 @@ namespace UniversityManagementSystem.Application.Services
             return _mapper.Map<List<EmployeeSalaryDto>>(salaries);
         }
 
-        public async Task<EmployeeSalaryDto?> GetSalaryByIdAsync(int id)
+        public async Task<EmployeeSalaryDto> GetSalaryByIdAsync(int id)
         {
             var salary = await _salaryRepository.GetByIdAsync(id);
             return salary != null ? _mapper.Map<EmployeeSalaryDto>(salary) : null;
@@ -112,6 +113,17 @@ namespace UniversityManagementSystem.Application.Services
         public async Task<decimal> CalculateNetSalaryAsync(decimal baseSalary, decimal allowances, decimal deductions, decimal bonus)
         {
             return baseSalary + allowances + bonus - deductions;
+        }
+
+        public async Task<List<EmployeeSalaryDto>> GetRecentSalariesAsync(int count)
+        {
+            var salaries = await _salaryRepository.GetAllAsync();
+            var recentSalariess = salaries
+                .OrderByDescending(p => p.SalaryDate)
+                .Take(count)
+                .ToList();
+
+            return _mapper.Map<List<EmployeeSalaryDto>>(salaries);
         }
     }
 }

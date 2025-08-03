@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using UniversityManagementSystem.Application.Abstractions;
 using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Interfaces;
 using UniversityManagementSystem.Domain.Common.Interfaces;
@@ -7,7 +8,7 @@ using UniversityManagementSystem.Domain.Interfaces;
 
 namespace UniversityManagementSystem.Application.Services
 {
-    public class CourseRegistrationService : ICourseRegistrationService
+    public class CourseRegistrationService : Injectable, ICourseRegistrationService
     {
         private readonly IRepository<CourseRegistration> _registrationRepository;
         private readonly IRepository<Student> _studentRepository;
@@ -74,13 +75,18 @@ namespace UniversityManagementSystem.Application.Services
         public async Task<CourseRegistrationDto> CreateRegistrationAsync(CourseRegistrationDto registrationDto)
         {
             var registration = _mapper.Map<CourseRegistration>(registrationDto);
+
             registration.RegistrationDate = DateTime.Now;
             registration.PaymentDate = DateTime.Now;
+
+            // تحقق من وجود الطالب باستخدام المفتاح الأساسي string
+            var student = await _studentRepository.GetByIdAsync(registration.StudentId);
+            if (student == null)
+                throw new Exception("الطالب غير موجود");
 
             await _registrationRepository.AddAsync(registration);
             await _unitOfWork.CommitAsync();
 
-            // تحديث عدد الطلاب في المادة
             var course = await _courseRepository.GetByIdAsync(registration.CourseId);
             if (course != null)
             {
