@@ -4,269 +4,800 @@
 @inject IStudentServices _studentService
 @inject ICourseService _courseService
 @rendermode InteractiveServer
+
 <PageTitle>تسجيل المواد - الجامعة الذكية</PageTitle>
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0 fw-bold text-primary">تسجيل المواد</h1>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
-                            <li class="breadcrumb-item"><a href="/students">شؤون الطلاب</a></li>
-                            <li class="breadcrumb-item active">تسجيل المواد</li>
-                        </ol>
-                    </nav>
+<div class="registrations-container">
+    <!-- شريط العنوان والتنقل -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="title-section">
+                <h1 class="page-title">
+                    <i class="fas fa-book-open me-2"></i>تسجيل المواد
+                </h1>
+                <nav class="breadcrumb-nav">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
+                        <li class="breadcrumb-item"><a href="/students">شؤون الطلاب</a></li>
+                        <li class="breadcrumb-item active">تسجيل المواد</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-main" data-bs-toggle="modal" data-bs-target="#addRegistrationModal">
+                    <i class="fas fa-plus me-2"></i>تسجيل مادة جديدة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات الإحصائيات -->
+    <div class="stats-cards-container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-info">
+                        <span class="stat-label">إجمالي التسجيلات</span>
+                        <span class="stat-value">@registrationSummary.TotalRegistrations</span>
+                    </div>
+                    <div class="stat-icon bg-primary-light">
+                        <i class="fas fa-book-open text-primary"></i>
+                    </div>
                 </div>
-                <div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRegistrationModal">
-                        <i class="fas fa-plus me-2"></i>تسجيل مادة جديدة
-                    </button>
+                <div class="stat-footer">
+                    <a href="#" @onclick="() => LoadRegistrations()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-info">
+                        <span class="stat-label">النشطة</span>
+                        <span class="stat-value">@registrationSummary.ActiveRegistrations</span>
+                    </div>
+                    <div class="stat-icon bg-success-light">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <a href="#" @onclick="() => FilterByStatus(StatusOfFilter[1])">عرض النشطة <i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-info">
+                        <span class="stat-label">الملغية</span>
+                        <span class="stat-value">@registrationSummary.CancelledRegistrations</span>
+                    </div>
+                    <div class="stat-icon bg-warning-light">
+                        <i class="fas fa-times-circle text-warning"></i>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <a href="#" @onclick="() => FilterByStatus(StatusOfFilter[2])">عرض الملغية <i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-info">
+                        <span class="stat-label">الإيرادات</span>
+                        <span class="stat-value">@registrationSummary.TotalRevenue.ToString("C")</span>
+                    </div>
+                    <div class="stat-icon bg-info-light">
+                        <i class="fas fa-money-bill-wave text-info"></i>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <a href="#">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- إحصائيات سريعة -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-primary border-start border-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="text-muted">إجمالي التسجيلات</h5>
-                            <h2 class="mb-0 fw-bold">@registrationSummary.TotalRegistrations</h2>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-book-open fa-2x text-primary"></i>
-                        </div>
-                    </div>
+    <!-- لوحة التحكم الرئيسية -->
+    <div class="main-panel">
+        <!-- شريط البحث والتصفية -->
+        <div class="panel-toolbar">
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="ابحث عن طالب أو مادة..." @bind="searchTerm" @oninput="SearchRegistrations">
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-success border-start border-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="text-muted">النشطة</h5>
-                            <h2 class="mb-0 fw-bold">@registrationSummary.ActiveRegistrations</h2>
-                        </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-warning border-start border-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="text-muted">الملغية</h5>
-                            <h2 class="mb-0 fw-bold">@registrationSummary.CancelledRegistrations</h2>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-times-circle fa-2x text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-info border-start border-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="text-muted">الإيرادات</h5>
-                            <h2 class="mb-0 fw-bold">@registrationSummary.TotalRevenue.ToString("C")</h2>
-                        </div>
-                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-money-bill-wave fa-2x text-info"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- قائمة التسجيلات -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h5 class="mb-0">قائمة التسجيلات</h5>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-md-end gap-2">
-                                <div class="input-group" style="max-width: 300px;">
-                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control" placeholder="بحث عن طالب أو مادة..." @bind="searchTerm" @oninput="SearchRegistrations">
-                                </div>
-                                <select class="form-select" style="max-width: 150px;" @onchange="FilterByStatus">
-                                    <option value="">جميع الحالات</option>
-                                    <option value="مسجل">مسجل</option>
-                                    <option value="ملغي">ملغي</option>
-                                    <option value="مكتمل">مكتمل</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                <div class="filter-options">
+                    <select class="form-select" >
+                        <option value="">جميع الحالات</option>
+                        <option value="مسجل">مسجل</option>
+                        <option value="ملغي">ملغي</option>
+                        <option value="مكتمل">مكتمل</option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
+            </div>
+        </div>
+
+        <!-- جدول التسجيلات -->
+        <div class="registrations-table-container">
+            <div class="table-responsive">
+                <table class="registrations-table">
+                    <thead>
+                        <tr>
+                            <th width="60px">#</th>
+                            <th>الطالب</th>
+                            <th>المادة</th>
+                            <th width="150px">القسم</th>
+                            <th width="120px">تاريخ التسجيل</th>
+                            <th width="120px">المبلغ المدفوع</th>
+                            <th width="120px">تاريخ الدفع</th>
+                            <th width="100px">الحالة</th>
+                            <th width="80px">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (registrations.Any())
+                        {
+                            @foreach (var registration in registrations)
+                            {
                                 <tr>
-                                    <th>#</th>
-                                    <th>الطالب</th>
-                                    <th>المادة</th>
-                                    <th>القسم</th>
-                                    <th>تاريخ التسجيل</th>
-                                    <th>المبلغ المدفوع</th>
-                                    <th>تاريخ الدفع</th>
-                                    <th>الحالة</th>
-                                    <th>الإجراءات</th>
+                                    <td>@registration.Id</td>
+                                    <td>
+                                        <div class="student-info">
+                                            <div class="student-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="student-details">
+                                                <span class="student-name">@registration.Student.FullName</span>
+                                                <span class="student-id">@registration.Student.Id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@registration.Course.Name</td>
+                                    <td>@registration.DepartmentName</td>
+                                    <td>@registration.RegistrationDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@registration.AmountPaid.ToString("C")</td>
+                                    <td>@registration.PaymentDate.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <span class="status-badge @GetStatusClass(registration.Status)">
+                                            @registration.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown actions-dropdown">
+                                            <button class="btn btn-actions" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="javascript:void(0)" @onclick="() => ViewRegistrationDetails(registration)">
+                                                        <i class="fas fa-eye me-2"></i>عرض التفاصيل
+                                                    </a>
+                                                </li>
+                                                @if (registration.Status == "مسجل")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item text-warning" href="javascript:void(0)" @onclick="() => CancelRegistration(registration.Id)">
+                                                            <i class="fas fa-times me-2"></i>إلغاء التسجيل
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-success" href="javascript:void(0)" @onclick="() => CompleteRegistration(registration.Id)">
+                                                            <i class="fas fa-check me-2"></i>إكمال التسجيل
+                                                        </a>
+                                                    </li>
+                                                }
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteRegistration(registration.Id)">
+                                                        <i class="fas fa-trash me-2"></i>حذف
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @if (registrations.Any())
-                                {
-                                    @for (int i = 0; i < registrations.Count; i++)
-                                    {
-                                        var registration = registrations[i];
-                                        <tr>
-                                            <td>@registration.Id</td>
-                                            <td>@registration.Student.FullName</td>
-                                            <td>@registration.Course.Name</td>
-                                            <td>@registration.DepartmentName</td>
-                                            <td>@registration.RegistrationDate.ToString("yyyy-MM-dd")</td>
-                                            <td>@registration.AmountPaid.ToString("C")</td>
-                                            <td>@registration.PaymentDate.ToString("yyyy-MM-dd")</td>
-                                            <td>
-                                                <span class="badge @(registration.Status == "مسجل" ? "bg-success" :
-                                                                    registration.Status == "ملغي" ? "bg-danger" :
-                                                                    registration.Status == "مكتمل" ? "bg-info" : "bg-secondary")">
-                                                    @registration.Status
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                        <i class="fas fa-ellipsis-v"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu">
-                                                        <li><a class="dropdown-item" href="javascript:void(0)" @onclick="() => ViewRegistrationDetails(registration)"><i class="fas fa-eye me-2"></i>عرض التفاصيل</a></li>
-                                                        @if (registration.Status == "مسجل")
-                                                        {
-                                                            <li><a class="dropdown-item text-warning" href="javascript:void(0)" @onclick="() => CancelRegistration(registration.Id)"><i class="fas fa-times me-2"></i>إلغاء التسجيل</a></li>
-                                                            <li><a class="dropdown-item text-info" href="javascript:void(0)" @onclick="() => CompleteRegistration(registration.Id)"><i class="fas fa-check me-2"></i>إكمال التسجيل</a></li>
-                                                        }
-                                                        <li><hr class="dropdown-divider"></li>
-                                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteRegistration(registration.Id)"><i class="fas fa-trash me-2"></i>حذف</a></li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="9" class="text-center">لا توجد تسجيلات</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="no-data">
+                                <td colspan="9">
+                                    <div class="empty-state">
+                                        <i class="fas fa-book"></i>
+                                        <p>لا توجد تسجيلات متاحة</p>
+                                        <button class="btn btn-main" data-bs-toggle="modal" data-bs-target="#addRegistrationModal">
+                                            <i class="fas fa-plus me-2"></i>إضافة تسجيل جديد
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal تسجيل مادة جديدة -->
-<div class="modal fade" id="addRegistrationModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addRegistrationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تسجيل مادة جديدة</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i>تسجيل مادة جديدة
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form>
-                    <div class="row">
-                        <p>Selected Student ID: @newRegistration.StudentId</p>
-                       @*  <div class="col-md-6 mb-3">
-                            <label class="form-label">الطالب *</label>
-                            <select @bind="newRegistration.StudentId" class="form-control">
-                                <option disabled selected value="">اختر طالبًا</option>
-                                @foreach (var student in students)
-                                {
-                                    <option value="@student.Id"> @($"{student.FullName} - {student.Id}")</option>
-                                }
-                            </select>
-                        </div> *@
-                        <EditForm Model="@newRegistration">
-                            <DataAnnotationsValidator />
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">الطالب *</label>
-                                <InputSelect @bind-Value="newRegistration.StudentId" class="form-control">
-                                    <option disabled selected value="">اختر طالبًا</option>
+            <div class="modal-body">
+                <EditForm Model="@newRegistration" OnValidSubmit="CreateRegistration">
+                    <DataAnnotationsValidator />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">الطالب</label>
+                                <InputSelect @bind-Value="newRegistration.StudentId" class="form-select">
+                                    <option value="">اختر طالبًا</option>
                                     @foreach (var student in students)
                                     {
-                                        <option value="@student.Id">@student.FullName</option>
+                                        <option value="@student.Id">@student.FullName (@student.Id)</option>
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => newRegistration.StudentId)" />
                             </div>
-                        </EditForm>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">المادة *</label>
-                            <select class="form-select" @bind="newRegistration.CourseId" required>
-                                <option value="">اختر المادة</option>
-                                @foreach (var course in courses)
-                                {
-                                    <option value="@course.Id">@course.Name</option>
-                                }
-                            </select>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">المبلغ المدفوع *</label>
-                            <input type="number" step="0.01" class="form-control" placeholder="أدخل المبلغ المدفوع" @bind="newRegistration.AmountPaid" required>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">المادة</label>
+                                <InputSelect @bind-Value="newRegistration.CourseId" class="form-select">
+                                    <option value="">اختر المادة</option>
+                                    @foreach (var course in courses)
+                                    {
+                                        <option value="@course.Id">@course.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => newRegistration.CourseId)" />
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">تاريخ الدفع *</label>
-                            <input type="date" class="form-control" @bind="newRegistration.PaymentDate" required>
-                        </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">الحالة *</label>
-                        <select class="form-select" @bind="newRegistration.Status" required>
-                            <option value="مسجل">مسجل</option>
-                            <option value="ملغي">ملغي</option>
-                            <option value="مكتمل">مكتمل</option>
-                        </select>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">المبلغ المدفوع</label>
+                                <InputNumber @bind-Value="newRegistration.AmountPaid" class="form-control" />
+                                <ValidationMessage For="@(() => newRegistration.AmountPaid)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">تاريخ الدفع</label>
+                                <InputDate @bind-Value="newRegistration.PaymentDate" class="form-control" />
+                                <ValidationMessage For="@(() => newRegistration.PaymentDate)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">الحالة</label>
+                                <InputSelect @bind-Value="newRegistration.Status" class="form-select">
+                                    <option value="مسجل">مسجل</option>
+                                    <option value="ملغي">ملغي</option>
+                                    <option value="مكتمل">مكتمل</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => newRegistration.Status)" />
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </EditForm>
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <button type="button" class="btn btn-primary" @onclick="CreateRegistration">حفظ التسجيل</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="CreateRegistration">
+                    <i class="fas fa-save me-2"></i>حفظ التسجيل
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* أنماط عامة */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #3498db;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --gray-color: #95a5a6;
+        --border-color: #dfe6e9;
+    }
+
+    body {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+    }
+
+    /* تصميم الصفحة الرئيسية */
+    .registrations-container {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .title-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .breadcrumb-nav {
+        margin-top: 8px;
+    }
+
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--gray-color);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary-color);
+        }
+
+    .breadcrumb-item.active {
+        color: var(--primary-color);
+    }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-main {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-main:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+    /* بطاقات الإحصائيات */
+    .stats-cards-container {
+        margin-bottom: 20px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .stat-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .stat-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        color: var(--gray-color);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-value {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .bg-primary-light {
+        background-color: rgba(52, 152, 219, 0.1);
+    }
+
+    .bg-success-light {
+        background-color: rgba(46, 204, 113, 0.1);
+    }
+
+    .bg-warning-light {
+        background-color: rgba(241, 196, 15, 0.1);
+    }
+
+    .bg-info-light {
+        background-color: rgba(52, 152, 219, 0.1);
+    }
+
+    .text-primary {
+        color: var(--accent-color);
+    }
+
+    .text-success {
+        color: var(--success-color);
+    }
+
+    .text-warning {
+        color: var(--warning-color);
+    }
+
+    .text-info {
+        color: var(--accent-color);
+    }
+
+    .stat-footer {
+        border-top: 1px solid var(--border-color);
+        padding-top: 10px;
+    }
+
+        .stat-footer a {
+            color: var(--gray-color);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+            .stat-footer a:hover {
+                color: var(--primary-color);
+            }
+
+    /* لوحة التحكم الرئيسية */
+    .main-panel {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* شريط البحث والتصفية */
+    .panel-toolbar {
+        margin-bottom: 20px;
+    }
+
+    .search-filter-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        position: relative;
+        min-width: 250px;
+    }
+
+        .search-box i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+        }
+
+        .search-box input {
+            padding-right: 35px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            height: 38px;
+        }
+
+    .filter-options {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-select {
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        height: 38px;
+        min-width: 180px;
+    }
+
+    /* جدول التسجيلات */
+    .registrations-table-container {
+        margin-bottom: 20px;
+    }
+
+    .registrations-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .registrations-table thead th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: right;
+        }
+
+        .registrations-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+            .registrations-table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .registrations-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(52, 152, 219, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-color);
+    }
+
+    .student-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .student-name {
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    .student-id {
+        font-size: 0.8rem;
+        color: var(--gray-color);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-active {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: var(--success-color);
+    }
+
+    .status-cancelled {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+
+    .status-completed {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--accent-color);
+    }
+
+    .btn-actions {
+        background: none;
+        border: none;
+        color: var(--gray-color);
+        padding: 5px;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-actions:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+    .no-data td {
+        padding: 40px;
+        text-align: center;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray-color);
+        }
+
+        .empty-state p {
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+    /* مودال إضافة تسجيل جديد */
+    .modal-content {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-bottom: none;
+        padding: 15px 20px;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .btn-close {
+        filter: invert(1);
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 15px 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(44, 62, 80, 0.1);
+        }
+
+    /* تصميم متجاوب */
+    @@media (max-width: 992px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .panel-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .search-filter-container, .filter-options {
+            width: 100%;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .form-select {
+            width: 100%;
+        }
+
+        .registrations-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .modal-dialog {
+            margin: 10px;
+        }
+    }
+</style>
 
 @code {
     private List<CourseRegistrationDto> registrations = new();
@@ -276,7 +807,7 @@
     private CourseRegistrationSummaryDto registrationSummary = new();
     private string searchTerm = "";
     private string selectedStatus = "";
-
+    public List<string> StatusOfFilter { get; set; } = new List<string> {"مسجل","ملغية" };
     protected override async Task OnInitializedAsync()
     {
         await LoadStudents();
@@ -315,7 +846,6 @@
         {
             registrations = await _courseRegistrationService.GetAllRegistrationsAsync();
 
-            // تطبيق الفلاتر
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 registrations = registrations.Where(r =>
@@ -362,9 +892,9 @@
         await LoadRegistrations();
     }
 
-    private async Task FilterByStatus(ChangeEventArgs e)
+    private async Task FilterByStatus(string status)
     {
-        selectedStatus = e.Value?.ToString() ?? "";
+        selectedStatus = status;
         await LoadRegistrations();
     }
 
@@ -404,11 +934,8 @@
         try
         {
             await _courseRegistrationService.CancelRegistrationAsync(registrationId);
-
-            // تحديث القائمة والإحصائيات
             await LoadRegistrationSummary();
             await LoadRegistrations();
-
             StateHasChanged();
         }
         catch (Exception ex)
@@ -422,11 +949,8 @@
         try
         {
             await _courseRegistrationService.CompleteRegistrationAsync(registrationId);
-
-            // تحديث القائمة والإحصائيات
             await LoadRegistrationSummary();
             await LoadRegistrations();
-
             StateHasChanged();
         }
         catch (Exception ex)
@@ -440,16 +964,24 @@
         try
         {
             await _courseRegistrationService.DeleteRegistrationAsync(registrationId);
-
-            // تحديث القائمة والإحصائيات
             await LoadRegistrationSummary();
             await LoadRegistrations();
-
             StateHasChanged();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error deleting registration: {ex.Message}");
         }
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "مسجل" => "status-active",
+            "ملغي" => "status-cancelled",
+            "مكتمل" => "status-completed",
+            _ => ""
+        };
     }
 }
