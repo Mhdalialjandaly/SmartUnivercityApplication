@@ -1,77 +1,119 @@
 ﻿@implements IDisposable
-
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
+<div class="top-row navbar navbar-dark bg-dark shadow-sm px-3">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">الرئيسية</a>
+        <a class="navbar-brand text-white fw-bold" href="/">الرئيسية</a>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="Navigation menu" class="navbar-toggler d-none" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
+<div class="nav-scrollable bg-white shadow-sm border-end" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column py-3">
+        <div class="nav-item px-3 mb-2">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> الرئيسية
+                <i class="bi bi-house-door-fill me-2"></i> الرئيسية
             </NavLink>
         </div>
-       
-        <div class="nav-item px-3">
+
+        <div class="nav-item px-3 mb-2">
             <NavLink class="nav-link" href="academic-calendar">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> التقويم الاكاديمي
+                <i class="bi bi-calendar-event-fill me-2"></i> التقويم الأكاديمي
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
+        <div class="nav-item px-3 mb-2">
             <NavLink class="nav-link" href="students-managment">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> ادارة الطلاب
+                <i class="bi bi-people-fill me-2"></i> إدارة الطلاب
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
+        <div class="nav-item px-3 mb-2">
             <NavLink class="nav-link" href="admin/applications">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> قبول الطلاب من الادارة
+                <i class="bi bi-check2-square me-2"></i> قبول الطلاب من الإدارة
             </NavLink>
-        </div> 
-        <div class="nav-item px-3">
+        </div>
+
+        <div class="nav-item px-3 mb-2">
             <NavLink class="nav-link" href="documents">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> ادارة الكتب الرسمية
+                <i class="bi bi-folder2-open me-2"></i> إدارة الكتب الرسمية
             </NavLink>
-        </div> 
+        </div>
+
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
+                <div class="nav-item px-3 mb-2">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <i class="bi bi-person-circle me-2"></i> @context.User.Identity?.Name
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item px-3 mb-2">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> تسجيل الجروج
+                        <button type="submit" class="nav-link btn btn-link text-start p-0">
+                            <i class="bi bi-box-arrow-right me-2"></i> تسجيل الخروج
                         </button>
                     </form>
                 </div>
             </Authorized>
             <NotAuthorized>
-                <div class="nav-item px-3">
+                <div class="nav-item px-3 mb-2">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> انشاء جديد
+                        <i class="bi bi-person-plus-fill me-2"></i> إنشاء حساب جديد
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item px-3 mb-2">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> تسجيل دخول
+                        <i class="bi bi-box-arrow-in-right me-2"></i> تسجيل الدخول
                     </NavLink>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
     </nav>
 </div>
+
+<style>
+    .nav-scrollable {
+        width: 250px;
+        min-height: 100vh;
+        background-color: #ffffff;
+        border-right: 1px solid #e5e7eb;
+    }
+
+    .nav-link {
+        color: black;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: #333;
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            color: inherit;
+        }
+
+    form button.nav-link {
+        background: none;
+        border: none;
+        color: #333;
+    }
+
+        form button.nav-link:hover {
+            color: #dc2626;
+        }
+</style>
 
 @code {
     private string? currentUrl;
@@ -93,4 +135,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-

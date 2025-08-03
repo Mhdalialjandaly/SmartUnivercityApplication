@@ -58,7 +58,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #f4f6f8;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -74,30 +74,24 @@
     }
 
     .login-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        padding: 2.5rem;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
         width: 100%;
-        max-width: 450px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 400px;
+        border: 1px solid #e5e7eb;
     }
 
     .login-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
         .login-header h1 {
-            color: #333;
+            color: #1f2937;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 2rem;
-        }
-
-        .login-header p {
-            color: #666;
+            font-size: 1.75rem;
             margin: 0;
         }
 
@@ -106,7 +100,7 @@
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .input-icon {
@@ -119,71 +113,69 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #667eea;
-            font-size: 1.1rem;
+            color: #6b7280;
+            font-size: 1rem;
         }
 
     .form-control {
         width: 100%;
-        padding: 1rem 3.5rem 1rem 1rem;
-        border: 2px solid #e1e5f2;
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.8);
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+        background-color: #f9fafb;
         direction: rtl;
     }
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: white;
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
 
         .form-control::placeholder {
-            color: #a0aec0;
-            font-size: 0.95rem;
+            color: #9ca3af;
+            font-size: 0.9rem;
         }
 
     .btn-login {
-        background: linear-gradient(135deg, #27a327 0%, #208a20 100%);
+        background-color: #10b981;
         color: white;
         border: none;
-        padding: 1rem;
-        border-radius: 10px;
-        font-size: 1.1rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        width: 100%;
+        transition: background-color 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        width: 100%;
-        box-shadow: 0 4px 15px rgba(39, 163, 39, 0.3);
     }
 
         .btn-login:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(39, 163, 39, 0.4);
+            background-color: #0f9f75;
         }
 
         .btn-login:disabled {
-            opacity: 0.7;
+            background-color: #a7f3d0;
             cursor: not-allowed;
-            transform: none;
         }
 
     .text-danger {
-        font-size: 0.875rem;
+        font-size: 0.85rem;
+        color: #dc2626;
         margin-top: 0.25rem;
     }
 
     .validation-errors {
-        background: #fee;
-        border: 1px solid #fcc;
-        border-radius: 5px;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
         padding: 1rem;
         margin-bottom: 1rem;
     }
@@ -191,7 +183,7 @@
     @@media (max-width: 576px) {
         .login-card {
             margin: 1rem;
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.25rem;
         }
 
         .login-header h1 {
