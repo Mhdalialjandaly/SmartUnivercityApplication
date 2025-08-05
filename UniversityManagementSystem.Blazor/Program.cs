@@ -5,38 +5,41 @@ namespace UniversityManagementSystem.Blazor
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddServices(builder.Configuration);       
-            
-            var app = builder.Build();
+			builder.Services.AddServices(builder.Configuration);
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseMigrationsEndPoint();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+			var app = builder.Build();
 
-            app.UseHttpsRedirection();
+			// Configure the HTTP request pipeline.
+			if (app.Environment.IsDevelopment())
+			{
+				app.UseMigrationsEndPoint();
+			}
+			else
+			{
+				app.UseExceptionHandler("/Error");
+				app.UseHsts();
+			}
 
-            app.UseStaticFiles();
-            app.UseAntiforgery();
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
 
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
+			// أضف هذه السطور قبل UseAntiforgery
+			app.UseRouting();
+			app.UseAuthentication();
+			app.UseAuthorization();
 
-            // Add additional endpoints required by the Identity /Account Razor components.
-            app.MapAdditionalIdentityEndpoints();
+			app.UseAntiforgery();
 
-            app.Run();
-        }
-    }
+			app.MapRazorComponents<App>()
+				.AddInteractiveServerRenderMode();
+
+			app.MapAdditionalIdentityEndpoints();
+
+			app.Run();
+		}
+	}
 }

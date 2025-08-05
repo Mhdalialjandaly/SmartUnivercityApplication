@@ -1,122 +1,531 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
+<div class="wrapper">
+    <div class="main-header">
 
-<div class="top-row navbar navbar-dark bg-dark shadow-sm px-3">
-    <div class="container-fluid">
-        <a class="navbar-brand text-white fw-bold" href="/">الرئيسية</a>
-    </div>
-</div>
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="dark2">
+            <a href="index.html" class="logo">
+                <img src="assets/img/logo.svg" alt="navbar brand" class="navbar-brand" />
+            </a>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler d-none" />
+            <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse"
+                    data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"><i class="icon-menu"></i></span>
+            </button>
 
-<div class="nav-scrollable bg-white shadow-sm border-end" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column py-3">
-        <div class="nav-item px-3 mb-2">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <i class="bi bi-house-door-fill me-2"></i> الرئيسية
-            </NavLink>
+            <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                    <i class="icon-menu"></i>
+                </button>
+            </div>
         </div>
+        <!-- End Logo Header -->
+        <!-- Navbar Header -->
+        <nav class="navbar navbar-header navbar-expand-lg" data-background-color="dark">
+            <div class="container-fluid">
 
-        <div class="nav-item px-3 mb-2">
-            <NavLink class="nav-link" href="academic-calendar">
-                <i class="bi bi-calendar-event-fill me-2"></i> التقويم الأكاديمي
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3 mb-2">
-            <NavLink class="nav-link" href="students-managment">
-                <i class="bi bi-people-fill me-2"></i> إدارة الطلاب
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3 mb-2">
-            <NavLink class="nav-link" href="admin/applications">
-                <i class="bi bi-check2-square me-2"></i> قبول الطلاب من الإدارة
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3 mb-2">
-            <NavLink class="nav-link" href="documents">
-                <i class="bi bi-folder2-open me-2"></i> إدارة الكتب الرسمية
-            </NavLink>
-        </div>
-
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3 mb-2">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <i class="bi bi-person-circle me-2"></i> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3 mb-2">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link btn btn-link text-start p-0">
-                            <i class="bi bi-box-arrow-right me-2"></i> تسجيل الخروج
-                        </button>
+                <div class="collapse" id="search-nav">
+                    <form class="navbar-left navbar-form nav-search mr-md-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button type="submit" class="btn btn-search pr-1">
+                                    <i class="fa fa-search search-icon"></i>
+                                </button>
+                            </div>
+                            <input type="text" placeholder="Search ..." class="form-control" />
+                        </div>
                     </form>
                 </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3 mb-2">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <i class="bi bi-person-plus-fill me-2"></i> إنشاء حساب جديد
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3 mb-2">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> تسجيل الدخول
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
+
+                <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+
+                    <!-- Search toggle -->
+                    <li class="nav-item toggle-nav-search hidden-caret">
+                        <a class="nav-link" data-toggle="collapse" href="#search-nav" role="button"
+                           aria-expanded="false" aria-controls="search-nav">
+                            <i class="fa fa-search"></i>
+                        </a>
+                    </li>
+
+                    <!-- Messages -->
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-envelope"></i>
+                        </a>
+
+                        <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                            <li>
+                                <div class="dropdown-title d-flex justify-content-between align-items-center">
+                                    الرسائل
+                                    <a href="#" class="small">تحديد الكل كمقروء</a>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="message-notif-scroll scrollbar-outer">
+                                    <div class="notif-center">
+
+                                        <!-- رسالة من أستاذ -->
+                                        <a href="/messages/1">
+                                            <div class="notif-img">
+                                                <img src="assets/img/professor1.jpg" alt="صورة الأستاذ" />
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="subject">د. أحمد الخالدي</span>
+                                                <span class="block">تم نشر نتائج مقرر الرياضيات</span>
+                                                <span class="time">قبل 5 دقائق</span>
+                                            </div>
+                                        </a>
+
+                                        <!-- رسالة من الإدارة -->
+                                        <a href="/messages/2">
+                                            <div class="notif-img">
+                                                <img src="assets/img/admin.jpg" alt="صورة الإدارة" />
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="subject">إدارة القبول والتسجيل</span>
+                                                <span class="block">يرجى تحديث بياناتك قبل نهاية الأسبوع</span>
+                                                <span class="time">قبل 12 دقيقة</span>
+                                            </div>
+                                        </a>
+
+                                        <!-- إشعار محاضرة -->
+                                        <a href="/messages/3">
+                                            <div class="notif-img">
+                                                <img src="assets/img/professor2.jpg" alt="صورة الأستاذ" />
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="subject">د. منى الشافعي</span>
+                                                <span class="block">سيتم تقديم موعد محاضرة الفيزياء غدًا</span>
+                                                <span class="time">قبل 20 دقيقة</span>
+                                            </div>
+                                        </a>
+
+                                        <!-- رسالة دعم فني -->
+                                        <a href="/messages/4">
+                                            <div class="notif-img">
+                                                <img src="assets/img/support.jpg" alt="الدعم الفني" />
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="subject">الدعم الفني</span>
+                                                <span class="block">تم حل مشكلتك في تسجيل المقررات</span>
+                                                <span class="time">قبل 30 دقيقة</span>
+                                            </div>
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <a class="see-all" href="/messages">عرض جميع الرسائل<i class="fa fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Notifications -->
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-bell"></i>
+                            <span class="notification">4</span>
+                        </a>
+
+                        <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                            <li>
+                                <div class="dropdown-title">لديك 4 إشعارات جديدة</div>
+                            </li>
+                            <li>
+                                <div class="notif-scroll scrollbar-outer">
+                                    <div class="notif-center">
+                                        <a href="#">
+                                            <div class="notif-icon notif-primary"><i class="fa fa-user-plus"></i></div>
+                                            <div class="notif-content">
+                                                <span class="block">تسجيل طالب جديد</span>
+                                                <span class="time">قبل 5 دقائق</span>
+                                            </div>
+                                        </a>
+                                        <a href="#">
+                                            <div class="notif-icon notif-success"><i class="fa fa-comment"></i></div>
+                                            <div class="notif-content">
+                                                <span class="block">تعليق جديد على منتدى الجامعة</span>
+                                                <span class="time">قبل 12 دقيقة</span>
+                                            </div>
+                                        </a>
+                                        <a href="#">
+                                            <div class="notif-img">
+                                                <img src="assets/img/profile2.jpg" alt="صورة" />
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="block">ريزا أرسل لك رسالة</span>
+                                                <span class="time">قبل 12 دقيقة</span>
+                                            </div>
+                                        </a>
+                                        <a href="#">
+                                            <div class="notif-icon notif-danger"><i class="fa fa-heart"></i></div>
+                                            <div class="notif-content">
+                                                <span class="block">فراح أعجبتها منشوراتك</span>
+                                                <span class="time">قبل 17 دقيقة</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <a class="see-all" href="/notifications">عرض جميع الإشعارات<i class="fa fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Quick Actions -->
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+                            <i class="fas fa-bolt"></i>
+                        </a>
+
+                        <div class="dropdown-menu quick-actions quick-actions-info animated fadeIn">
+                            <div class="quick-actions-header">
+                                <span class="title mb-1">إجراءات سريعة</span>
+                                <span class="subtitle op-8">اختصارات النظام</span>
+                            </div>
+
+                            <div class="quick-actions-scroll scrollbar-outer">
+                                <div class="quick-actions-items">
+                                    <div class="row m-0">
+
+                                        <!-- للأساتذة والإداريين -->
+                                        <AuthorizeView Roles="Admin,Professor">
+                                            <Authorized>
+                                                <a class="col-6 col-md-4 p-0" href="/grades/upload">
+                                                    <div class="quick-actions-item">
+                                                        <i class="fas fa-file-upload"></i>
+                                                        <span class="text">رفع الدرجات</span>
+                                                    </div>
+                                                </a>
+                                                <a class="col-6 col-md-4 p-0" href="/attendance/record">
+                                                    <div class="quick-actions-item">
+                                                        <i class="fas fa-user-check"></i>
+                                                        <span class="text">تسجيل الحضور</span>
+                                                    </div>
+                                                </a>
+                                            </Authorized>
+                                        </AuthorizeView>
+
+                                        <!-- للإداريين فقط -->
+                                        <AuthorizeView Roles="Admin">
+                                            <Authorized>
+                                                <a class="col-6 col-md-4 p-0" href="/students/register">
+                                                    <div class="quick-actions-item">
+                                                        <i class="fas fa-user-plus"></i>
+                                                        <span class="text">تسجيل طالب جديد</span>
+                                                    </div>
+                                                </a>
+                                                <a class="col-6 col-md-4 p-0" href="/reports/generate">
+                                                    <div class="quick-actions-item">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                        <span class="text">إنشاء تقرير</span>
+                                                    </div>
+                                                </a>
+                                            </Authorized>
+                                        </AuthorizeView>
+
+                                        <!-- للطلاب -->
+                                        <AuthorizeView Roles="Student">
+                                            <Authorized>
+                                                <a class="col-6 col-md-4 p-0" href="/courses/register">
+                                                    <div class="quick-actions-item">
+                                                        <i class="fas fa-book"></i>
+                                                        <span class="text">تسجيل المقررات</span>
+                                                    </div>
+                                                </a>
+                                                <a class="col-6 col-md-4 p-0" href="/grades/view">
+                                                    <div class="quick-actions-item">
+                                                        <i class="fas fa-graduation-cap"></i>
+                                                        <span class="text">عرض الدرجات</span>
+                                                    </div>
+                                                </a>
+                                            </Authorized>
+                                        </AuthorizeView>
+
+                                        <!-- مشتركة للجميع -->
+                                        <a class="col-6 col-md-4 p-0" href="/schedule/view">
+                                            <div class="quick-actions-item">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                <span class="text">الجدول الدراسي</span>
+                                            </div>
+                                        </a>
+                                        <a class="col-6 col-md-4 p-0" href="/notifications">
+                                            <div class="quick-actions-item">
+                                                <i class="fas fa-bell"></i>
+                                                <span class="text">الإشعارات</span>
+                                            </div>
+                                        </a>
+                                        <a class="col-6 col-md-4 p-0" href="/support">
+                                            <div class="quick-actions-item">
+                                                <i class="fas fa-question-circle"></i>
+                                                <span class="text">الدعم الفني</span>
+                                            </div>
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Profile -->
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+                            <div class="avatar-sm">
+                                <img src="assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle" />
+                            </div>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-user animated fadeIn">
+                            <div class="dropdown-user-scroll scrollbar-outer">
+                            <li>
+                                <div class="user-box">
+                                    <div class="avatar-lg">
+                                        <img src="assets/img/profile.jpg" alt="image profile" class="avatar-img rounded" />
+                                    </div>
+                                    <div class="u-text">
+                                        <h4>@userName</h4>
+                                        <p class="text-muted">@userEmail</p>
+                                        <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">عرض الملف الشخصي</a>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/profile">ملفي الشخصي</a>
+                                <a class="dropdown-item" href="/finance">الرصيد المالي</a>
+                                <a class="dropdown-item" href="/inbox">الرسائل</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/settings">إعدادات الحساب</a>
+                                <div class="dropdown-divider"></div>
+                                <form action="Account/Logout" method="post">
+                                    <AntiforgeryToken />
+                                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                    <button type="submit" class="nav-link btn btn-link text-start p-0 slide-in-animation hover-effect" style="animation-delay: 0.7s">
+                                        <i class="bi bi-box-arrow-right me-2"></i> تسجيل الخروج
+                                        <span class="hover-arrow">→</span>
+                                    </button>
+                                </form>
+                            </li>
+            </div>
+            </ul>
+            </li>
+
+            </ul>
+    </div>
     </nav>
+    <!-- End Navbar -->
+    <!-- Sidebar -->
+    <div class="sidebar sidebar-style-2" data-background-color="dark2">
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+            <div class="sidebar-content">
+
+                <!-- User info -->
+                <div class="user">
+                    <div class="avatar-sm float-left mr-2">
+                        <img src="assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle" />
+                    </div>
+
+                    <div class="info">
+                        <a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+                            <span>
+                                <span id="usernameDisplay">@userName</span>
+                                <span class="user-level">
+                                    <AuthorizeView Roles="Admin">
+                                        <Authorized><text>مدير النظام</text></Authorized>
+                                    </AuthorizeView>
+                                    <AuthorizeView Roles="Employee">
+                                        <Authorized><text>أستاذ</text></Authorized>
+                                    </AuthorizeView>
+                                    <AuthorizeView Roles="Student">
+                                        <Authorized><text>طالب</text></Authorized>
+                                    </AuthorizeView>
+                                </span>
+                                <span class="caret"></span>
+                            </span>
+                        </a>
+                        <div class="clearfix"></div>
+
+                        <div class="collapse in" id="collapseExample">
+                            <ul class="nav">
+                                <li>
+                                    <a asp-page="/Account/Manage/Index">
+                                        <span class="link-collapse">الملف الشخصي</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-page="/Account/Manage/Email">
+                                        <span class="link-collapse">تعديل البيانات</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-page="/Account/Manage/ChangePassword">
+                                        <span class="link-collapse">تغيير كلمة المرور</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <form action="Account/Logout" method="post">
+                                        <AntiforgeryToken />
+                                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                        <button type="submit" class="nav-link btn btn-link text-start p-0 slide-in-animation hover-effect" style="animation-delay: 0.7s">
+                                            <i class="bi bi-box-arrow-right me-2"></i> تسجيل الخروج
+                                            <span class="hover-arrow">→</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <ul class="nav nav-primary">
+                    <li class="nav-item active">
+                        <a asp-page="/Dashboard" class="collapsed" aria-expanded="false">
+                            <i class="fas fa-home"></i>
+                            <p>لوحة التحكم</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                        <h4 class="text-section">إدارة الجامعة</h4>
+                    </li>
+
+                    <!-- الهيكل الأكاديمي -->
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#academics">
+                            <i class="fas fa-university"></i>
+                            <p>الهيكل الأكاديمي</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="academics">
+                            <ul class="nav nav-collapse">
+                                <li><a asp-page="/Colleges/Index"><span class="sub-item">الكليات</span></a></li>
+                                <li><a asp-page="/Departments/Index"><span class="sub-item">الأقسام</span></a></li>
+                                <li><a asp-page="/Programs/Index"><span class="sub-item">البرامج الدراسية</span></a></li>
+                                <li><a asp-page="/Courses/Index"><span class="sub-item">المقررات الدراسية</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- إدارة الطلاب -->
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#students">
+                            <i class="fas fa-users"></i>
+                            <p>إدارة الطلاب</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="students">
+                            <ul class="nav nav-collapse">
+                                <li><a asp-page="/Students/Index"><span class="sub-item">سجل الطلاب</span></a></li>
+                                <li><a asp-page="/Students/Registration"><span class="sub-item">تسجيل الطلاب</span></a></li>
+                                <li><a asp-page="/Students/Attendance"><span class="sub-item">الحضور والغياب</span></a></li>
+                                <li><a asp-page="/Students/Grades"><span class="sub-item">الدرجات والتقييم</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- أعضاء هيئة التدريس -->
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#faculty">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <p>أعضاء هيئة التدريس</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="faculty">
+                            <ul class="nav nav-collapse">
+                                <li><a asp-page="/Faculty/Index"><span class="sub-item">سجل الأساتذة</span></a></li>
+                                <li><a asp-page="/Faculty/AssignCourses"><span class="sub-item">توزيع المقررات</span></a></li>
+                                <li><a asp-page="/Faculty/Schedule"><span class="sub-item">الجداول الدراسية</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- الجداول والمواعيد -->
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#scheduling">
+                            <i class="fas fa-calendar-alt"></i>
+                            <p>الجداول والمواعيد</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="scheduling">
+                            <ul class="nav nav-collapse">
+                                <li><a asp-page="/Schedule/Classes"><span class="sub-item">جداول المحاضرات</span></a></li>
+                                <li><a asp-page="/Schedule/Exams"><span class="sub-item">جداول الامتحانات</span></a></li>
+                                <li><a asp-page="/Schedule/Rooms"><span class="sub-item">إدارة القاعات</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- التقارير والإحصائيات -->
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#reports">
+                            <i class="fas fa-chart-pie"></i>
+                            <p>التقارير والإحصائيات</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="reports">
+                            <ul class="nav nav-collapse">
+                                <li><a asp-page="/Reports/Students"><span class="sub-item">تقارير الطلاب</span></a></li>
+                                <li><a asp-page="/Reports/Financial"><span class="sub-item">تقارير مالية</span></a></li>
+                                <li><a asp-page="/Reports/Academic"><span class="sub-item">تقارير أكاديمية</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- الإعدادات -->
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#settings">
+                            <i class="fas fa-cogs"></i>
+                            <p>الإعدادات</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="settings">
+                            <ul class="nav nav-collapse">
+                                <li><a asp-page="/Settings/System"><span class="sub-item">إعدادات النظام</span></a></li>
+                                <li><a asp-page="/Settings/AcademicYear"><span class="sub-item">السنة الأكاديمية</span></a></li>
+                                <li><a asp-page="/Settings/Roles"><span class="sub-item">إدارة الصلاحيات</span></a></li>
+                                <li><a asp-page="/Settings/Users"><span class="sub-item">إدارة المستخدمين</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- تسجيل الدخول للزوار -->
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <li class="nav-item">
+                                <a asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    <p>تسجيل الدخول</p>
+                                </a>
+                            </li>
+                        </NotAuthorized>
+                    </AuthorizeView>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- End Sidebar -->
+
+</div>
 </div>
 
-<style>
-    .nav-scrollable {
-        width: 250px;
-        min-height: 100vh;
-        background-color: #ffffff;
-        border-right: 1px solid #e5e7eb;
-    }
-
-    .nav-link {
-        color: black;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0;
-        border-radius: 6px;
-        transition: background-color 0.2s ease;
-    }
-
-        .nav-link:hover,
-        .nav-link.active {
-            background-color: #333;
-            color: #10b981;
-            font-weight: 500;
-        }
-
-        .nav-link i {
-            font-size: 1.1rem;
-            color: inherit;
-        }
-
-    form button.nav-link {
-        background: none;
-        border: none;
-        color: #333;
-    }
-
-        form button.nav-link:hover {
-            color: #dc2626;
-        }
-</style>
-
 @code {
-    private string? currentUrl;
+    private string currentUrl;
+    private string userName;
+    private string userEmail;
 
     protected override void OnInitialized()
     {
@@ -124,7 +533,7 @@
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();

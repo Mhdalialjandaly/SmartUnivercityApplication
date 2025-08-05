@@ -29,14 +29,14 @@ namespace UniversityManagementSystem.Blazor.SetUp
             services.AddScoped<IdentityRedirectManager>();
             services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultScheme = IdentityConstants.ApplicationScheme;
-            //    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-            //})
-            //    .AddIdentityCookies();
+			//services.AddAuthentication(options =>
+			//{
+			//    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+			//    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+			//})
+			//    .AddIdentityCookies();
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+			var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             services.AddDbContext<UniversityDbContext>(options =>
                 options.UseSqlServer(connectionString));
             services.AddDatabaseDeveloperPageExceptionFilter();

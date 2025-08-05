@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page" dir="rtl">
+<div class="page" >
    <AuthorizeView>
        <Authorized>
     <div class="sidebar">
@@ -9,9 +9,7 @@
         </Authorized>
     </AuthorizeView>
     <main>
-       @*  <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div> *@
+    
 
         <article class="content px-4">
             @Body
@@ -24,111 +22,3 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div> *@
-<style>
-/* الصفحة الرئيسية */
-.page {
-    display: flex;
-    flex-direction: row-reverse; /* لعكس الترتيب للسايدبار على اليمين */
-    height: 100vh;
-    width: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
-    overflow: hidden; /* منع ظهور السكرول في الصفحة ككل */
-}
-
-/* السايدبار بدون سكرول */
-.sidebar {
-    width: 250px;
-    background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
-    color: white;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    overflow: hidden; /* إزالة السكرول العمودي */
-}
-
-/* المحتوى الرئيسي */
-main {
-    flex: 1;
-    overflow-y: auto; /* السكرول فقط للمحتوى الرئيسي */
-    padding: 20px;
-    background-color: #ffffff;
-}
-
-.content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-/* تأثيرات تفاعلية */
-.sidebar:hover {
-    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
-}
-
-/* التكيف مع الشاشات الصغيرة */
-@@media (max-width: 768px) {
-    .page {
-        flex-direction: column;
-        overflow: auto; /* السماح بالسكرول في الهواتف */
-    }
-    
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        overflow: visible; /* إظهار المحتوى في الهواتف */
-    }
-    
-    main {
-        padding: 10px;
-    }
-}
-
-/* تحسينات للعرض RTL */
-[dir="rtl"] .content {
-    text-align: right;
-}
-
-[dir="rtl"] .sidebar {
-    border-left: none;
-    border-right: 1px solid #e1e1e1;
-}
-
-/* تعديلات لـ NavMenu */
-.nav-menu {
-    padding: 20px 0;
-    height: 100%; /* لملء ارتفاع السايدبار */
-    overflow: hidden; /* منع السكرول */
-}
-
-.nav-menu .nav-item {
-    padding: 10px 20px;
-    border-left: 3px solid transparent;
-    transition: all 0.3s ease;
-    white-space: nowrap; /* منع تكرار النص */
-}
-
-.nav-menu .nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-left: 3px solid #3498db;
-}
-
-.nav-menu .nav-link {
-    color: #ecf0f1;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    overflow: hidden; /* منع ظهور السكرول الأفقي */
-    text-overflow: ellipsis; /* إظهار ... عند طول النص */
-}
-
-.nav-menu .nav-link:hover {
-    color: #ffffff;
-}
-</style>

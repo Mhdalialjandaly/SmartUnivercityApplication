@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using UniversityManagementSystem.Domain.Entities;
 using UniversityManagementSystem.Domain.Entities.UniversityManagementSystem.Core.Entities;
 
@@ -44,7 +45,10 @@ namespace UniversityManagementSystem.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             OnModelCreatingPartial(builder);
-        }
+			
+			builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+		}
+
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

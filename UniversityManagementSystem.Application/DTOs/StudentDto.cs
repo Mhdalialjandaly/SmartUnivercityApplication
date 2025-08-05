@@ -52,6 +52,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public double GPA { get; set; }
         public string FullAddress { get; set; }
         public string AcademicYear { get; set; }
+        public string Image { get; set; }
 
         // العلاقات
         public DepartmentDto Department { get; set; }

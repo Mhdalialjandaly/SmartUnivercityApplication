@@ -1,646 +1,1151 @@
 ﻿@page "/"
+@using System.Text.Json
 @attribute [Authorize]
-@inject IStudentServices StudentService
-@inject IEmployeeService EmployeeService
-@inject IDepartmentService DepartmentService
-@inject ICourseService CourseService
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
-@inject UserManager<User> UserManager
-@inject RoleManager<IdentityRole> RoleManager
-@inject SignInManager<User> SignInManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+
+@inject IStudentServices StudentServices
+@inject ICourseService CourseService
+@inject IJSRuntime JS
+@inject IDepartmentService DepartmentService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<User> UserManager
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - نظام إدارة الجامعة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --dark-color: #2c3e50;
-            --light-color: #ecf0f1;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-        }
+<body data-background-color="dark">	
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
+	
 
-        body {
-            background-color: #f5f6fa;
-            color: #333;
-        }
+	<div class="main-panel">
+		<div class="content">
+			<div class="page-inner">
+				<div class="mt-2 mb-4">
+					<AuthorizeView>
+						<Authorized>
+							@if (userName != null)
+								{
+								<h2 class="text-white pb-2">مرحباً بعودتك، @userName!</h2>
+								<h5 class="text-white op-7 mb-4">@welcomeMessage</h5>
+								}
+						</Authorized>
+						<NotAuthorized>
+							<h2 class="text-white pb-2">مرحباً بك في نظام الجامعة الذكية</h2>
+							<h5 class="text-white op-7 mb-4">الرجاء تسجيل الدخول للوصول إلى النظام</h5>
+						</NotAuthorized>
+					</AuthorizeView>
+				</div>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="card card-dark bg-primary-gradient">
+							<div class="card-body pb-0">
+								<div class="h1 fw-bold float-right">@UsersOnlineTrendText</div>
+								<h2 class="mb-2">@UsersOnlineCount</h2>
+								<p>المستخدمون النشطون</p>
+								<div class="pull-in sparkline-fix chart-as-background">
+									<div id="lineChart"><canvas></canvas></div>
+								</div>
+							</div>
+						</div>
+					</div>
 
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
+					<div class="col-md-4">
+						<div class="card card-dark bg-secondary-gradient">
+							<div class="card-body pb-0">
+								<div class="h1 fw-bold float-right">@NewUsersTrendText</div>
+								<h2 class="mb-2">@NewUsersCount</h2>
+								<p>المستخدمون الجدد</p>
+								<div class="pull-in sparkline-fix chart-as-background">
+									<div id="lineChart2"><canvas></canvas></div>
+								</div>
+							</div>
+						</div>
+					</div>
 
-        /* الشريط الجانبي */
-        .sidebar {
-            width: 250px;
-            background-color: var(--dark-color);
-            color: white;
-            transition: all 0.3s;
-        }
+					<div class="col-md-4">
+						<div class="card card-dark bg-success2">
+							<div class="card-body pb-0">
+								<div class="h1 fw-bold float-right">@TransactionsTrendText</div>
+								<h2 class="mb-2">@TransactionsCountOrAmount</h2>
+								<p>المعاملات (إجمالي الإيرادات)</p>
+								<div class="pull-in sparkline-fix chart-as-background">
+									<div id="lineChart3"><canvas></canvas></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-8">
+						<div class="card">
+							<div class="card-header">
+								<div class="card-head-row">
+									<div class="card-title">إحصائيات المستخدمين</div>
+									<div class="card-tools">
+										<a href="#" class="btn btn-info btn-border btn-round btn-sm mr-2" @onclick="ExportStatistics">
+											<span class="btn-label"><i class="fa fa-pencil"></i></span>تصدير
+										</a>
+										<a href="#" class="btn btn-info btn-border btn-round btn-sm" @onclick="PrintStatistics">
+											<span class="btn-label"><i class="fa fa-print"></i></span>طباعة
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="chart-container" style="min-height: 375px">
+									<canvas id="statisticsChart"></canvas>
+								</div>
+								<div id="myChartLegend"></div>
+							</div>
+						</div>
+					</div>
 
-        .sidebar-header {
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-        }
+					<div class="col-md-4">
+						<div class="card card-secondary">
+							<div class="card-header">
+								<div class="card-title">الإيرادات اليومية</div>
+								<div class="card-category">@salesPeriodLabel</div>
+							</div>
+							<div class="card-body pb-0">
+								<div class="mb-4 mt-2">
+									<h1>@TotalRevenueDisplay</h1>
+								</div>
+								<div class="pull-in">
+									<canvas id="dailySalesChart"></canvas>
+								</div>
+							</div>
+						</div>
 
-            .sidebar-header img {
-                width: 40px;
-                height: 40px;
-                margin-left: 10px;
-            }
+						<div class="card card-primary bg-primary-gradient">
+							<div class="card-body">
+								<h4 class="mb-1 fw-bold">تقدم المهام</h4>
+								<div id="task-complete" class="chart-circle mt-4 mb-3"></div>
+								<div class="text-muted small">المهام المنجزة من إجمالي المهام</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row row-card-no-pd">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header">
+								<div class="card-head-row">
+									<h4 class="card-title">توزيع الطلاب حسب الموقع الجغرافي</h4>
+									<div class="card-tools">
+										<button class="btn btn-icon btn-link btn-primary btn-xs" @onclick="ToggleCard"><span class="fa fa-angle-down"></span></button>
+										<button class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card" @onclick="ReloadData"><span class="fa fa-sync-alt"></span></button>
+										<button class="btn btn-icon btn-link btn-primary btn-xs" @onclick="CloseCard"><span class="fa fa-times"></span></button>
+									</div>
+								</div>
+								<p class="card-category">
+									خريطة توزيع الطلاب حسب الدولة
+								</p>
+							</div>
 
-            .sidebar-header h3 {
-                font-size: 18px;
-            }
+							<div class="card-body">
+								<div class="row">
+									<!-- جدول الإحصائيات -->
+									<div class="col-md-6">
+										<div class="table-responsive table-hover table-sales">
+											<table class="table">
+												<thead>
+													<tr>
+														<th></th>
+														<th>الدولة</th>
+														<th class="text-right">عدد الطلاب</th>
+														<th class="text-right">النسبة</th>
+													</tr>
+												</thead>
+												<tbody>
+														@if (countriesGrouped is null)
+														{
+														<tr><td colspan="4">جاري التحميل...</td></tr>
+														}
+														else if (!countriesGrouped.Any())
+														{
+														<tr><td colspan="4">لا توجد بيانات لعرضها</td></tr>
+														}
+														else
+														{
+															@foreach (var item in countriesGrouped)
+															{
+															<tr>
+																<td>
+																	<div class="flag">
+																		<img src="@GetFlagPath(item.CountryCode)" alt="@item.CountryName" />
+																	</div>
+																</td>
+																<td>@item.CountryName</td>
+																<td class="text-right">@item.Count.ToString("N0")</td>
+																<td class="text-right">@item.Percentage.ToString("0.##")%</td>
+															</tr>
+															}
+														}
+												</tbody>
+											</table>
+										</div>
+									</div>
 
-        .sidebar-menu {
-            padding: 20px 0;
-        }
+									<!-- خريطة -->
+									<div class="col-md-6">
+										<div class="mapcontainer">
+											<div id="map-example" class="vmap"></div>
+										</div>
+									</div>
+								</div>
+							</div>
 
-            .sidebar-menu h4 {
-                color: #b8c7ce;
-                padding: 10px 20px;
-                font-size: 14px;
-                margin-top: 10px;
-            }
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<!-- أعلى المقررات -->
+					<div class="col-md-4">
+						<div class="card">
+							<div class="card-header">
+								<div class="card-title">أعلى المقررات</div>
+							</div>
+							<div class="card-body pb-0">
+									@if (topCourses is null)
+									{
+									<div>جاري التحميل...</div>
+									}
+									else if (!topCourses.Any())
+									{
+									<div>لا توجد بيانات</div>
+									}
+									else
+									{
+										@foreach (var c in topCourses)
+										{
+										<div class="d-flex">
+											<div class="avatar">
+												@* <img src="@GetCourseImage(c)" alt="@c.Title" class="avatar-img rounded-circle"> *@
+											</div>
+											<div class="flex-1 pt-1 ml-2">
+												<h6 class="fw-bold mb-1">@c.Title</h6>
+												<small class="text-muted">@c.Code — @c.DepartmentName</small>
+											</div>
+											<div class="d-flex ml-auto align-items-center">
+												<h3 class="text-info fw-bold">@c.EnrolledCount</h3>
+											</div>
+										</div>
+										<div class="separator-dashed"></div>
+										}
+									}
 
-            .sidebar-menu ul {
-                list-style: none;
-            }
+								<div class="pull-in">
+									<canvas id="topCoursesChart"></canvas>
+								</div>
+							</div>
+						</div>
+					</div>
 
-            .sidebar-menu li a {
-                display: block;
-                padding: 12px 20px;
-                color: #b8c7ce;
-                text-decoration: none;
-                transition: all 0.3s;
-            }
+					<!-- أشخاص مقترحون (أعضاء هيئة تدريس / إداريون / طلاب مميزون) -->
+					<div class="col-md-4">
+						<div class="card">
+							<div class="card-body">
+								<div class="card-title fw-mediumbold">مقترحون للتواصل</div>
 
-                .sidebar-menu li a:hover,
-                .sidebar-menu li a.active {
-                    color: white;
-                    background-color: rgba(0, 0, 0, 0.2);
-                    border-right: 3px solid var(--primary-color);
-                }
+								<div class="card-list">
+										@if (suggestedPeople is null)
+										{
+										<div>جاري التحميل...</div>
+										}
+										else if (!suggestedPeople.Any())
+										{
+										<div>لا توجد اقتراحات</div>
+										}
+										else
+										{
+											@foreach (var p in suggestedPeople)
+											{
+											<div class="item-list">
+												<div class="avatar">
+													<img src="@GetPersonImage(p)" alt="@p.Name" class="avatar-img rounded-circle">
+												</div>
+												<div class="info-user ml-3">
+													<div class="username">@p.Name</div>
+													<div class="status">@p.Title</div>
+												</div>
+												<button class="btn btn-icon btn-primary btn-round btn-xs" @onclick="() => ConnectWith(p.Id)">
+													<i class="fa fa-plus"></i>
+												</button>
+											</div>
+											}
+										}
+								</div>
+							</div>
+						</div>
+					</div>
 
-                .sidebar-menu li a i {
-                    margin-left: 10px;
-                    width: 20px;
-                    text-align: center;
-                }
+					<!-- المستخدمون النشطون الآن -->
+					<div class="col-md-4">
+						<div class="card card-primary bg-primary-gradient">
+							<div class="card-body">
+								<h4 class="mt-3 b-b1 pb-2 mb-4 fw-bold">الطلاب النشطون الآن</h4>
+								<h1 class="mb-4 fw-bold">@ActiveUsersCount</h1>
 
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+								<h4 class="mt-3 b-b1 pb-2 mb-5 fw-bold">مشاهدات الصفحات في الدقيقة</h4>
+								<div id="activeUsersChart"></div>
 
-        /* شريط التنقل العلوي */
-        .top-navbar {
-            background-color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+								<h4 class="mt-5 pb-3 mb-0 fw-bold">أهم الصفحات نشاطاً</h4>
+								<ul class="list-unstyled">
+										@if (topActivePages is null || !topActivePages.Any())
+										{
+										<li>لا توجد بيانات</li>
+										}
+										else
+										{
+											@foreach (var p in topActivePages)
+											{
+											<li class="d-flex justify-content-between pb-1 pt-1"><small>@p.Path</small> <span>@p.Views</span></li>
+											}
+										}
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="card">
+							<div class="card-header">
+								<div class="card-title">Feed Activity</div>
+							</div>
+							<div class="card-body">
+								<ol class="activity-feed">
+									<li class="feed-item feed-item-secondary">
+										<time class="date" datetime="9-25">Sep 25</time>
+										<span class="text">Responded to need <a href="#">"Volunteer opportunity"</a></span>
+									</li>
+									<li class="feed-item feed-item-success">
+										<time class="date" datetime="9-24">Sep 24</time>
+										<span class="text">Added an interest <a href="#">"Volunteer Activities"</a></span>
+									</li>
+									<li class="feed-item feed-item-info">
+										<time class="date" datetime="9-23">Sep 23</time>
+										<span class="text">Joined the group <a href="single-group.php">"Boardsmanship Forum"</a></span>
+									</li>
+									<li class="feed-item feed-item-warning">
+										<time class="date" datetime="9-21">Sep 21</time>
+										<span class="text">Responded to need <a href="#">"In-Kind Opportunity"</a></span>
+									</li>
+									<li class="feed-item feed-item-danger">
+										<time class="date" datetime="9-18">Sep 18</time>
+										<span class="text">Created need <a href="#">"Volunteer Opportunity"</a></span>
+									</li>
+									<li class="feed-item">
+										<time class="date" datetime="9-17">Sep 17</time>
+										<span class="text">Attending the event <a href="single-event.php">"Some New Event"</a></span>
+									</li>
+								</ol>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="card">
+							<div class="card-header">
+								<div class="card-head-row">
+									<div class="card-title">Support Tickets</div>
+									<div class="card-tools">
+										<ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-sm" id="pills-tab" role="tablist">
+											<li class="nav-item">
+												<a class="nav-link" id="pills-today" data-toggle="pill" href="#pills-today" role="tab" aria-selected="true">Today</a>
+											</li>
+											<li class="nav-item">
+												<a class="nav-link active" id="pills-week" data-toggle="pill" href="#pills-week" role="tab" aria-selected="false">Week</a>
+											</li>
+											<li class="nav-item">
+												<a class="nav-link" id="pills-month" data-toggle="pill" href="#pills-month" role="tab" aria-selected="false">Month</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="d-flex">
+									<div class="avatar avatar-online">
+										<span class="avatar-title rounded-circle border border-white bg-info">J</span>
+									</div>
+									<div class="flex-1 ml-3 pt-1">
+										<h6 class="text-uppercase fw-bold mb-1">Joko Subianto <span class="text-warning pl-3">pending</span></h6>
+										<span class="text-muted">I am facing some trouble with my viewport. When i start my</span>
+									</div>
+									<div class="float-right pt-1">
+										<small class="text-muted">8:40 PM</small>
+									</div>
+								</div>
+								<div class="separator-dashed"></div>
+								<div class="d-flex">
+									<div class="avatar avatar-offline">
+										<span class="avatar-title rounded-circle border border-white bg-secondary">P</span>
+									</div>
+									<div class="flex-1 ml-3 pt-1">
+										<h6 class="text-uppercase fw-bold mb-1">Prabowo Widodo <span class="text-success pl-3">open</span></h6>
+										<span class="text-muted">I have some query regarding the license issue.</span>
+									</div>
+									<div class="float-right pt-1">
+										<small class="text-muted">1 Day Ago</small>
+									</div>
+								</div>
+								<div class="separator-dashed"></div>
+								<div class="d-flex">
+									<div class="avatar avatar-away">
+										<span class="avatar-title rounded-circle border border-white bg-danger">L</span>
+									</div>
+									<div class="flex-1 ml-3 pt-1">
+										<h6 class="text-uppercase fw-bold mb-1">Lee Chong Wei <span class="text-muted pl-3">closed</span></h6>
+										<span class="text-muted">Is there any update plan for RTL version near future?</span>
+									</div>
+									<div class="float-right pt-1">
+										<small class="text-muted">2 Days Ago</small>
+									</div>
+								</div>
+								<div class="separator-dashed"></div>
+								<div class="d-flex">
+									<div class="avatar avatar-offline">
+										<span class="avatar-title rounded-circle border border-white bg-secondary">P</span>
+									</div>
+									<div class="flex-1 ml-3 pt-1">
+										<h6 class="text-uppercase fw-bold mb-1">Peter Parker <span class="text-success pl-3">open</span></h6>
+										<span class="text-muted">I have some query regarding the license issue.</span>
+									</div>
+									<div class="float-right pt-1">
+										<small class="text-muted">2 Day Ago</small>
+									</div>
+								</div>
+								<div class="separator-dashed"></div>
+								<div class="d-flex">
+									<div class="avatar avatar-away">
+										<span class="avatar-title rounded-circle border border-white bg-danger">L</span>
+									</div>
+									<div class="flex-1 ml-3 pt-1">
+										<h6 class="text-uppercase fw-bold mb-1">Logan Paul <span class="text-muted pl-3">closed</span></h6>
+										<span class="text-muted">Is there any update plan for RTL version near future?</span>
+									</div>
+									<div class="float-right pt-1">
+										<small class="text-muted">2 Days Ago</small>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<footer class="footer">
+			<div class="container-fluid">
+				<nav class="pull-left">
+					<ul class="nav">
+						<li class="nav-item">
+							<a class="nav-link" href="https://www.themekita.com">
+								ThemeKita
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#">
+								Help
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#">
+								Licenses
+							</a>
+						</li>
+					</ul>
+				</nav>
+				<div class="copyright ml-auto">
+					2018, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">ThemeKita</a>
+				</div>
+			</div>
+		</footer>
+	</div>
 
-        .search-box {
-            display: flex;
-            align-items: center;
-            background-color: #f5f6fa;
-            border-radius: 20px;
-            padding: 8px 15px;
-        }
+	<!-- Custom template | don't include it in your project! -->
+	<div class="custom-template">
+		<div class="title">Settings</div>
+		<div class="custom-content">
+			<div class="switcher">
+				<div class="switch-block">
+					<h4>Logo Header</h4>
+					<div class="btnSwitch">
+						<button type="button" class="changeLogoHeaderColor" data-color="dark"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="blue"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="purple"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="light-blue"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="green"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="orange"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="red"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="white"></button>
+						<br />
+						<button type="button" class="selected changeLogoHeaderColor" data-color="dark2"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="blue2"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="purple2"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="light-blue2"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="green2"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="orange2"></button>
+						<button type="button" class="changeLogoHeaderColor" data-color="red2"></button>
+					</div>
+				</div>
+				<div class="switch-block">
+					<h4>Navbar Header</h4>
+					<div class="btnSwitch">
+						<button type="button" class="selected changeTopBarColor" data-color="dark"></button>
+						<button type="button" class="changeTopBarColor" data-color="blue"></button>
+						<button type="button" class="changeTopBarColor" data-color="purple"></button>
+						<button type="button" class="changeTopBarColor" data-color="light-blue"></button>
+						<button type="button" class="changeTopBarColor" data-color="green"></button>
+						<button type="button" class="changeTopBarColor" data-color="orange"></button>
+						<button type="button" class="changeTopBarColor" data-color="red"></button>
+						<button type="button" class="changeTopBarColor" data-color="white"></button>
+						<br />
+						<button type="button" class="changeTopBarColor" data-color="dark2"></button>
+						<button type="button" class="changeTopBarColor" data-color="blue2"></button>
+						<button type="button" class="changeTopBarColor" data-color="purple2"></button>
+						<button type="button" class="changeTopBarColor" data-color="light-blue2"></button>
+						<button type="button" class="changeTopBarColor" data-color="green2"></button>
+						<button type="button" class="changeTopBarColor" data-color="orange2"></button>
+						<button type="button" class="changeTopBarColor" data-color="red2"></button>
+					</div>
+				</div>
+				<div class="switch-block">
+					<h4>Sidebar</h4>
+					<div class="btnSwitch">
+						<button type="button" class="changeSideBarColor" data-color="white"></button>
+						<button type="button" class="changeSideBarColor" data-color="dark"></button>
+						<button type="button" class="selected changeSideBarColor" data-color="dark2"></button>
+					</div>
+				</div>
+				<div class="switch-block">
+					<h4>Background</h4>
+					<div class="btnSwitch">
+						<button type="button" class="changeBackgroundColor" data-color="bg2"></button>
+						<button type="button" class="changeBackgroundColor selected" data-color="bg1"></button>
+						<button type="button" class="changeBackgroundColor" data-color="bg3"></button>
+						<button type="button" class="selected changeBackgroundColor" data-color="dark"></button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="custom-toggle">
+			<i class="flaticon-settings"></i>
+		</div>
+	</div>
+	<!-- End Custom template -->
+	
+	<script>
+		WebFont.load({
+			google: { "families": ["Lato:300,400,700,900"] },
+			custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['assets/css/fonts.min.css'] },
+			active: function () {
+				sessionStorage.fonts = true;
+			}
+		});
 
-            .search-box input {
-                border: none;
-                background: transparent;
-                outline: none;
-                padding: 5px;
-                width: 200px;
-            }
+		$('#lineChart').sparkline([102, 109, 120, 99, 110, 105, 115], {
+			type: 'line',
+			height: '70',
+			width: '100%',
+			lineWidth: '2',
+			lineColor: 'rgba(255, 255, 255, .5)',
+			fillColor: 'rgba(255, 255, 255, .15)'
+		});
 
-        .user-menu {
-            display: flex;
-            align-items: center;
-        }
+		$('#lineChart2').sparkline([99, 125, 122, 105, 110, 124, 115], {
+			type: 'line',
+			height: '70',
+			width: '100%',
+			lineWidth: '2',
+			lineColor: 'rgba(255, 255, 255, .5)',
+			fillColor: 'rgba(255, 255, 255, .15)'
+		});
 
-            .user-menu img {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                margin-left: 15px;
-            }
+		$('#lineChart3').sparkline([105, 103, 123, 100, 95, 105, 115], {
+			type: 'line',
+			height: '70',
+			width: '100%',
+			lineWidth: '2',
+			lineColor: 'rgba(255, 255, 255, .5)',
+			fillColor: 'rgba(255, 255, 255, .15)'
+		});
+	</script>
 
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-            .user-info span:first-child {
-                font-weight: bold;
-            }
-
-            .user-info span:last-child {
-                font-size: 12px;
-                color: #7f8c8d;
-            }
-
-        /* التبويبات الرئيسية */
-        .main-tabs {
-            background-color: white;
-            border-bottom: 1px solid #eee;
-        }
-
-            .main-tabs ul {
-                display: flex;
-                list-style: none;
-                padding: 0 20px;
-            }
-
-            .main-tabs li a {
-                display: block;
-                padding: 15px 20px;
-                text-decoration: none;
-                color: #7f8c8d;
-                font-weight: bold;
-                border-bottom: 3px solid transparent;
-                transition: all 0.3s;
-            }
-
-                .main-tabs li a:hover,
-                .main-tabs li a.active {
-                    color: var(--primary-color);
-                    border-bottom: 3px solid var(--primary-color);
-                }
-
-        /* محتوى الصفحة */
-        .page-content {
-            flex: 1;
-            padding: 20px;
-            background-color: #f5f6fa;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-            .page-header h2 {
-                color: var(--dark-color);
-            }
-
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-            .btn-primary:hover {
-                background-color: var(--secondary-color);
-            }
-
-        /* بطاقات الإحصائيات */
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-            .stat-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 4px;
-                height: 100%;
-                background-color: var(--primary-color);
-            }
-
-            .stat-card h3 {
-                color: #7f8c8d;
-                font-size: 14px;
-                margin-bottom: 10px;
-            }
-
-            .stat-card .value {
-                font-size: 24px;
-                font-weight: bold;
-                color: var(--dark-color);
-                margin-bottom: 10px;
-            }
-
-            .stat-card .change {
-                font-size: 12px;
-                color: var(--success-color);
-            }
-
-                .stat-card .change.negative {
-                    color: var(--danger-color);
-                }
-
-            .stat-card i {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                font-size: 40px;
-                color: rgba(52, 152, 219, 0.2);
-            }
-
-        /* الجداول */
-        .table-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-            table th, table td {
-                padding: 12px 15px;
-                text-align: right;
-                border-bottom: 1px solid #eee;
-            }
-
-            table th {
-                background-color: #f5f6fa;
-                color: var(--dark-color);
-                font-weight: bold;
-            }
-
-            table tr:hover {
-                background-color: #f9f9f9;
-            }
-
-        .status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-            .status.active {
-                background-color: rgba(46, 204, 113, 0.2);
-                color: var(--success-color);
-            }
-
-            .status.inactive {
-                background-color: rgba(231, 76, 60, 0.2);
-                color: var(--danger-color);
-            }
-
-        .action-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-right: 5px;
-        }
-
-            .action-btn.edit {
-                background-color: rgba(52, 152, 219, 0.2);
-                color: var(--primary-color);
-            }
-
-            .action-btn.delete {
-                background-color: rgba(231, 76, 60, 0.2);
-                color: var(--danger-color);
-            }
-
-        /* تذييل الصفحة */
-        .footer {
-            text-align: center;
-            padding: 15px;
-            background-color: white;
-            color: #7f8c8d;
-            font-size: 12px;
-            border-top: 1px solid #eee;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard">
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <!-- شريط التنقل العلوي -->
-            <div class="top-navbar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="بحث...">
-                </div>
-
-                <AuthorizeView>
-                    <Authorized>   
-                        <div class="user-menu">
-                            <img src="@profileImage" alt="صورة المستخدم" class="user-image">
-                            <div class="user-info">
-                                <span>@fullName</span>
-                                <span>@userRole</span>
-                            </div>
-                        </div>                       
-                    </Authorized>
-                    <NotAuthorized>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="Account/Register">
-                                <span class="bi bi-person-nav-menu" aria-hidden="true"></span> انشاء جديد
-                            </NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="Account/Login">
-                                <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> تسجيل دخول
-                            </NavLink>
-                        </div>
-                    </NotAuthorized>
-                </AuthorizeView>
-             
-            </div>
-
-            <!-- التبويبات الرئيسية -->
-            <div class="main-tabs">
-                <ul>
-                    <li><a href="#" class="active"><i class="fas fa-home"></i> الرئيسية</a></li>
-                    <li><a href="#"><i class="fas fa-users"></i> الطلاب</a></li>
-                    <li><a href="#"><i class="fas fa-chalkboard-teacher"></i> الموظفين</a></li>
-                    <li><a href="#"><i class="fas fa-book"></i> المقررات</a></li>
-                    <li><a href="#"><i class="fas fa-calendar-alt"></i> الجداول</a></li>
-                    <li><a href="#"><i class="fas fa-chart-bar"></i> التقارير</a></li>
-                    <li><a href="#"><i class="fas fa-cog"></i> الإعدادات</a></li>
-                </ul>
-            </div>
-
-            <!-- محتوى الصفحة -->
-            <div class="page-content">
-                <div class="page-header">
-                    <h2>لوحة التحكم</h2>
-                    <button class="btn btn-primary"><i class="fas fa-plus"></i> إضافة جديد</button>
-                </div>
-
-                <!-- بطاقات الإحصائيات -->
-                <div class="stats-cards">
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <h3>إجمالي الطلاب</h3>
-                        <div class="value">@totalStudents</div>
-                        <div class="change">
-                            <i class="fas @(studentChangePercentage >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
-                            @Math.Abs(studentChangePercentage)% عن الشهر الماضي
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        <h3>أعضاء هيئة التدريس</h3>
-                        <div class="value">@facultyCount</div>
-                        <div class="change">
-                            <i class="fas @(facultyChangePercentage >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
-                            @Math.Abs(facultyChangePercentage)% عن الشهر الماضي
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <i class="fas fa-book"></i>
-                        <h3>المقررات الدراسية</h3>
-                        <div class="value">@coursesCount</div>
-                        <div class="change">
-                            <i class="fas @(coursesChangePercentage >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
-                            @Math.Abs(coursesChangePercentage)% عن العام الماضي
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <h3>إجمالي الرسوم</h3>
-                        <div class="value">@totalFees.ToString("N0") ر.س</div>
-                        <div class="change @(feesChangePercentage < 0 ? "negative" : "")">
-                            <i class="fas @(feesChangePercentage >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
-                            @Math.Abs(feesChangePercentage)% عن الشهر الماضي
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الجداول -->
-                <div class="table-container">
-                    <h3>أحدث الطلاب المسجلين</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الطالب</th>
-                                <th>الاسم</th>
-                                <th>القسم</th>
-                                <th>المستوى</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (recentStudents != null)
-                            {
-                                @foreach (var student in recentStudents)
-                                {
-                                    <tr>
-                                        <td>@student.StudentId</td>
-                                        <td>@student.FullName</td>
-                                        <td>@(departments.FirstOrDefault(d => d.Id == student.DepartmentId)?.Name)</td>
-                                        <td>@student.Branch</td>
-                                        <td>
-                                            <span class="status @(student.Status == StudentStatus.Active ? "active" : "inactive")">
-                                                @GetStatusText(student.Status)
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button class="action-btn edit" @onclick="() => EditStudent(student.StudentId)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="action-btn delete" @onclick="() => DeleteStudent(student.StudentId)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- تذييل الصفحة -->
-            <div class="footer">
-                جميع الحقوق محفوظة &copy; 2023 نظام إدارة الجامعة
-            </div>
-        </div>
-    </div>
 </body>
-</html>
+
 @code {
-    public string profileImage { get; set; } = "/images/default-user.png";
-    public User user { get; set; }
-    public string fullName { get; set; }
-    public IList<string> roles { get; set; }
-    public string userRole { get; set; }
-    private int totalStudents = 0;
-    private int facultyCount = 0;
-    private int coursesCount = 0;
-    private decimal totalFees = 0;
-    private double studentChangePercentage = 0;
-    private double facultyChangePercentage = 0;
-    private double coursesChangePercentage = 0;
-    private double feesChangePercentage = 0;
-    private List<StudentDto> recentStudents = new();
-    private List<DepartmentDto> departments = new();
+	// القيم المعروضة
+	private int UsersOnlineCount { get; set; } = 0;
+	private int NewUsersCount { get; set; } = 0;
+	// نعرض المعاملات كعدد أو كمبلغ - هنا نعرض المبلغ بصيغة عملة
+	private string TransactionsCountOrAmount { get; set; } = "0";
+
+	// نص الاتجاه (على سبيل المثال +5% / -3%). يمكنك حسابه من بيانات تاريخية إن توفرت.
+	private string UsersOnlineTrendText { get; set; } = string.Empty;
+	private string NewUsersTrendText { get; set; } = string.Empty;
+	private string TransactionsTrendText { get; set; } = string.Empty;
+
+	// بيانات للرسوم البيانية (سلسلة نقاط بسيطة لكل مؤشر)
+	private List<double> usersOnlineSeries = new();
+	private List<double> newUsersSeries = new();
+	private List<double> transactionsSeries = new();
+    private string currentUrl;
+    private string userName;
+    private string welcomeMessage;
+	// نموذج داخلي لعرض بيانات الدول في الجدول
+	private record CountryStats(string CountryCode, string CountryName, int Count, double Percentage);
+
+	private List<CountryStats> countriesGrouped;
+	private int totalStudents;
+	private bool _firstRender = true;
+    private static readonly List<string> WelcomeMessages = new()
+    {
+        "التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم",
+        "النجاح هو مجموع الجهود الصغيرة التي تتكرر يومياً",
+        "كلما زادت المعرفة، زادت مسؤولية العطاء",
+        "التعليم ليس تعلم الحقائق فقط، بل تدريب العقل على التفكير"
+    };
+	private record CourseOverview(int Id, string Title, string Code, string DepartmentName, int EnrolledCount);
+	private record PersonOverview(string Id, string Name, string Title, string AvatarPath);
+	private record ActivePage(string Path, int Views);
+
+	// بيانات
+	private List<CourseOverview> topCourses;
+	private List<PersonOverview> suggestedPeople;
+	private int ActiveUsersCount;
+	private List<ActivePage> topActivePages;
+
+	private List<double> topCoursesSeries = new();
+	private List<double> activeUsersSeries = new();
+
+	private string GetCourseImage(CourseOverview c) => $"assets/img/course-{c.Id % 5}.svg"; // placeholder
+	private string GetPersonImage(PersonOverview p) => string.IsNullOrEmpty(p.AvatarPath) ? "assets/img/default-avatar.png" : p.AvatarPath;
+
+	private int activeStudents;
+	private int newStudents;
+	private int totalCourses;
+	private Dictionary<string, int> studentsByDepartment = new();
+
+	// بيانات الإيرادات اليومية (مثال: مصفوفة 7 أيام)
+	private List<double> dailyRevenueSeries = new();
+	private string salesPeriodLabel = "";
+	private decimal totalRevenue = 0m;
+	private string TotalRevenueDisplay => totalRevenue.ToString("C0");
+
+	// بيانات تقدم المهام (مثال: نسبة إنجاز إدارة/نظامية)
+	private int tasksCompleted = 0;
+	private int tasksTotal = 0;
+	private int tasksCompletionPercent => tasksTotal == 0 ? 0 : (int)Math.Round((double)tasksCompleted / tasksTotal * 100);
+
+	private void ConnectWith(string personId)
+	{
+		// منطق لإرسال دعوة تواصل أو فتح نافذة مراسلة
+		NavigationManager.NavigateTo($"/messages/compose?to={personId}");
+	}
     protected override async Task OnInitializedAsync()
     {
-        await LoadStatistics();
-        await LoadRecentStudents();
-        await LoadDepartments();
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userClaim = authState.User;
+		await LoadUserData();
+		await LoadGeolocationDataAsync();
+		await LoadMetricsAsync();
+		await LoadTopCoursesAsync();
+		await LoadSuggestedPeopleAsync();
+		await LoadActiveUsersAsync();
+		await LoadStatisticsAsync();
+		await LoadDailyRevenueAsync();
+		await LoadTasksProgressAsync();
+		// بعد تحميل البيانات، نمرّرها إلى JS لعرض السباركلين/Chart.js
+		
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await RenderChartsAsync();
+			_firstRender = false;
+		}
+	}
+	private async Task LoadStatisticsAsync()
+	{
+		try
+		{
+			totalStudents = await StudentServices.GetTotalStudentsCountAsync();
+			activeStudents = await StudentServices.GetActiveStudentsCountAsync();
+			newStudents = await StudentServices.GetNewStudentsCountAsync();
+			totalCourses = await CourseService.GetCoursesCountAsync();
 
-        if (userClaim.Identity.IsAuthenticated)
+			// جلب عدد الطلاب حسب القسم (إن توفّر)
+			var departments = await DepartmentService.GetAllDepartmentsAsync();
+			studentsByDepartment.Clear();
+			foreach (var dept in departments)
+			{
+				try
+				{
+					var count = await DepartmentService.GetDepartmentStudentCountAsync(dept.Id);
+					studentsByDepartment[dept.Name ?? $"Dept {dept.Id}"] = count;
+				}
+				catch
+				{
+					studentsByDepartment[dept.Name ?? $"Dept {dept.Id}"] = 0;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"LoadStatisticsAsync error: {ex.Message}");
+			// في حال خطأ اترك القيم الافتراضية الصفرية
+		}
+	}
+	private async Task LoadDailyRevenueAsync()
+	{
+		try
+		{
+			// افتراض: CourseService.GetTotalRevenueAsync() يعطي إجمالي الإيرادات الكلي
+			totalRevenue = await CourseService.GetTotalRevenueAsync();
+
+			// مثال: نجهز سلسلة بيانات لـ 7 أيام. الأفضل أن يكون هناك endpoint يعيد إيرادات الأيام.
+			// هنا نولّد بيانات تقريبية بناءً على إجمالي الإيرادات.
+			var rnd = new Random();
+			dailyRevenueSeries = Enumerable.Range(0, 7)
+				.Select(i => Math.Round((double)(totalRevenue / 7) * (0.7 + rnd.NextDouble() * 0.6), 2))
+				.ToList();
+
+			var start = DateTime.UtcNow.Date.AddDays(-6);
+			var end = DateTime.UtcNow.Date;
+			salesPeriodLabel = $"{start:MMM dd} - {end:MMM dd}";
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"LoadDailyRevenueAsync error: {ex.Message}");
+			dailyRevenueSeries = new List<double> { 0, 0, 0, 0, 0, 0, 0 };
+			salesPeriodLabel = "";
+		}
+	}
+	private async Task LoadTasksProgressAsync()
+	{
+		try
+		{
+			// لا توجد دوال مهام في الواجهات المرسلة؛ سنستخدم هنا أمثلة:
+			// في تطبيق حقيقي تريد استدعاء خدمة المهام TaskService للحصول على الأرقام.
+			tasksTotal = 42; // افتراض
+			tasksCompleted = 28; // افتراض
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"LoadTasksProgressAsync error: {ex.Message}");
+			tasksTotal = 0;
+			tasksCompleted = 0;
+		}
+	}
+	private async Task LoadTopCoursesAsync()
+	{
+		try
+		{
+			// طريقة مبسطة: جلب جميع المقررات الشائعة (يمكنك استدعاء CourseService.GetPopularCoursesAsync(count))
+			var courses = await CourseService.GetPopularCoursesAsync(5);
+			topCourses = courses.Select(c => new CourseOverview(
+				c.Id,
+				c.Name ?? c.Name ?? "غير معروف",
+				c.Code ?? string.Empty,
+				c.DepartmentName ?? string.Empty,
+				c.Credits // افتراض وجود EnrolledCount في DTO، إن لم توجد احسبها عبر خدمة أخرى
+			)).ToList();
+
+			// إعداد سلسلة بيانية بسيطة (عدد الملتحقين لكل مقرر)
+			topCoursesSeries = topCourses.Select(c => (double)c.EnrolledCount).ToList();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"LoadTopCoursesAsync error: {ex.Message}");
+			topCourses = new List<CourseOverview>();
+		}
+	}
+	private async Task LoadSuggestedPeopleAsync()
+	{
+		try
+		{
+			// مثال: اقتراح أعضاء هيئة تدريس أو طلاب متميزين
+			// هنا نأخذ أول عدد محدود من الطلاب والأساتذة كمقترحين (ستحتاج API أو منطق أفضل)
+			var students = await StudentServices.GetAllStudentsAsync();
+			suggestedPeople = students
+				.Take(6)
+				.Select(s => new PersonOverview(
+					s.Id,
+					s.FullName ?? s.FullName ?? "طالب",
+					s.TrueIsEmployee ? "موظف" : "طالب", // افتراض وجود IsStaff أو خصائص مشابهة
+					s.Image ?? "assets/img/default-avatar.png"
+				)).ToList();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"LoadSuggestedPeopleAsync error: {ex.Message}");
+			suggestedPeople = new List<PersonOverview>();
+		}
+	}
+	private async Task LoadActiveUsersAsync()
+	{
+		try
+		{
+			// مثال مبسط: عدد الطلاب النشطين (Active).
+			ActiveUsersCount = await StudentServices.GetActiveStudentsCountAsync();
+
+			// بيانات صفحات نشطة (مثال ثابت — يمكنك جلبها من خدمة Analytics إن وُجدت)
+			topActivePages = new List<ActivePage>
+			{
+				new ActivePage("/courses/register", 12),
+				new ActivePage("/grades/view", 8)
+			};
+
+			// سلسلة بيانات بسيطة للمخطط
+			activeUsersSeries = GenerateSeries(ActiveUsersCount, 10);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"LoadActiveUsersAsync error: {ex.Message}");
+			ActiveUsersCount = 0;
+			topActivePages = new List<ActivePage>();
+		}
+	}
+	public void Dispose()
+	{
+		NavigationManager.LocationChanged -= OnLocationChanged;
+	}
+
+	private async Task LoadMetricsAsync()
+	{
+		try
+		{
+			// اجلب الأرقام عبر الخدمات المتاحة
+			// 1. المستخدمون النشطون — نستخدم عدد الطلاب النشطين (Active)
+			UsersOnlineCount = await StudentServices.GetActiveStudentsCountAsync();
+
+			// 2. المستخدمون الجدد — نستخدم عدد الطلاب الجدد
+			NewUsersCount = await StudentServices.GetNewStudentsCountAsync();
+
+			// 3. المعاملات/الإيرادات — نستخدم إجمالي الإيرادات من CourseService (يفترض أن يعيد قيمة decimal)
+			decimal totalRevenue = 0;
+			try
+			{
+				totalRevenue = await CourseService.GetTotalRevenueAsync();
+			}
+			catch
+			{
+				// لو لم تكن الخدمة توفر الإيرادات غطِّ الحالة
+				totalRevenue = 0;
+			}
+			TransactionsCountOrAmount = totalRevenue.ToString("C0"); // عرض بصيغة عملة بدون كسور
+
+			// إعداد بيانات تاريخية بسيطة للرسوم البيانية (من الممكن جلبها من API خاص بالزمن)
+			// هنا أمثلة توليدية: يمكنك استبدالها بسلاسل حقيقية من بيانات السجل
+			usersOnlineSeries = GenerateSeries(UsersOnlineCount, 8);
+			newUsersSeries = GenerateSeries(NewUsersCount, 8);
+			transactionsSeries = GenerateSeries((double)totalRevenue, 8);
+
+			// حساب نص الاتجاه (مثال بسيط: مقارنة آخر نقطتين)
+			UsersOnlineTrendText = ComputeTrendText(usersOnlineSeries);
+			NewUsersTrendText = ComputeTrendText(newUsersSeries);
+			TransactionsTrendText = ComputeTrendText(transactionsSeries);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"خطأ أثناء جلب مؤشرات اللوحة: {ex.Message}");
+			// إبقاء القيم الافتراضية عند وجود خطأ
+		}
+	}
+	// Export / Print handlers (مبسطة — يمكنك استبدالها بتنفيذ حقيقي)
+	private async Task ExportStatistics()
+	{
+		// مثال: توليد JSON وتنزيله، أو تنفيذ استدعاء API يُعيد ملف CSV/XLSX
+		var payload = new
+		{
+			totalStudents,
+			activeStudents,
+			newStudents,
+			totalCourses,
+			studentsByDepartment
+		};
+
+		var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+		await JS.InvokeVoidAsync("downloadTextFile", "user-statistics.json", json);
+	}
+
+	private async Task PrintStatistics()
+	{
+		// نستخدم JS لطباعة القسم الذي يحتوي المخططات
+		await JS.InvokeVoidAsync("printElement", ".chart-container");
+	}
+	// يمرّر بيانات السلاسل إلى جافاسكربت لِعرض السباركلين/الخطوط
+	private async Task RenderChartsAsync()
+	{
+		try
+		{
+			// يتوقع اسكربت JS دالة مسجلة باسم: renderSparklines
+			// ستأخذ ثلاث مجموعات بيانات ومعرفات العناصر: lineChart, lineChart2, lineChart3
+			await JS.InvokeVoidAsync("renderSparklines", new
+			{
+				id = "lineChart",
+				data = usersOnlineSeries
+			});
+			await JS.InvokeVoidAsync("renderSparklines", new
+			{
+				id = "lineChart2",
+				data = newUsersSeries
+			});
+			await JS.InvokeVoidAsync("renderSparklines", new
+			{
+				id = "lineChart3",
+				data = transactionsSeries
+			});
+
+			try
+			{
+				// دوال JS يجب أن تكون معرفة في wwwroot/js/dashboard-charts.js
+				await JS.InvokeVoidAsync("renderBarChart", "topCoursesChart", topCoursesSeries);
+				await JS.InvokeVoidAsync("renderLineChart", "activeUsersChart", activeUsersSeries);
+			}
+			catch (JSException jsEx)
+			{
+				Console.Error.WriteLine($"RenderChartsAsync JS error: {jsEx.Message}");
+			}
+		}
+		catch (JSException jsEx)
+		{
+			// إذا لم يكن الـ JS مسجّلًا بعد، لا نوقف التنفيذ
+			Console.Error.WriteLine($"JS error render charts: {jsEx.Message}");
+		}
+		try
+		{
+			// تمرير بيانات الرسم: احفظ أسماء الدوال في JS كما تحب (مثال renderStatisticsChart)
+			var statsPayload = new
+			{
+				labels = studentsByDepartment.Keys.ToArray(),
+				values = studentsByDepartment.Values.ToArray(),
+				summary = new
+				{
+					totalStudents,
+					activeStudents,
+					newStudents,
+					totalCourses
+				}
+			};
+
+			await JS.InvokeVoidAsync("renderStatisticsChart", "statisticsChart", statsPayload);
+
+			// daily sales
+			await JS.InvokeVoidAsync("renderDailySalesChart", "dailySalesChart", dailyRevenueSeries);
+
+			// task progress: نمرر نسبة الإنجاز
+			await JS.InvokeVoidAsync("renderTaskProgress", "task-complete", tasksCompletionPercent);
+		}
+		catch (JSException jsEx)
+		{
+			Console.Error.WriteLine($"RenderChartsAsync JS error: {jsEx.Message}");
+		}
+	}
+
+	// توليد سلسلة بيانات بسيطة (يمكنك استبدالها بقراءة من API تاريخي)
+	private static List<double> GenerateSeries(double centerValue, int points)
+	{
+		var rnd = new Random();
+		var series = new List<double>(points);
+		for (int i = 0; i < points; i++)
+		{
+			// نحافظ على قيم حول المركز مع بعض التذبذب
+			var noise = (rnd.NextDouble() - 0.5) * centerValue * 0.2;
+			var value = Math.Max(0, centerValue + noise);
+			series.Add(Math.Round(value, 2));
+		}
+		return series;
+	}
+
+	// حساب اتجاه بسيط من آخر نقطتين: +n% أو -n%
+	private static string ComputeTrendText(List<double> series)
+	{
+		if (series == null || series.Count < 2) return string.Empty;
+
+		double last = series[^1];
+		double prev = series[^2];
+		if (prev == 0)
+		{
+			return last == 0 ? "0%" : "+100%";
+		}
+
+		double pct = (last - prev) / Math.Abs(prev) * 100.0;
+		var sign = pct >= 0 ? "+" : string.Empty;
+		return $"{sign}{pct:0.#}%";
+	}
+	private async Task LoadGeolocationDataAsync()
+	{
+		try
+		{
+			var students = await StudentServices.GetAllStudentsAsync();
+
+			// افتراض: StudentDto يحتوي على خاصية Country أو Nationality أو Location
+			// سنحاول استخدام عدة أسماء محتملة (عدل حسب DTO الفعلي لديك)
+			var studentCountries = students.Select(s =>
+			{
+				// تغيير هذا الجزء إذا كانت الخاصية باسم آخر
+				var country = GetStudentCountry(s);
+				return string.IsNullOrWhiteSpace(country) ? "Unknown" : country.Trim();
+			}).ToList();
+
+			totalStudents = studentCountries.Count();
+
+			var grouped = studentCountries
+				.GroupBy(c => c)
+				.Select(g => new
+				{
+					CountryName = g.Key,
+					Count = g.Count()
+				})
+				.OrderByDescending(x => x.Count)
+				.ToList();
+
+			countriesGrouped = grouped.Select(g =>
+			{
+				var code = CountryNameToIso2(g.CountryName); // محاولة تحويل اسم البلد إلى كود علم (iso2)
+				var pct = totalStudents == 0 ? 0 : (double)g.Count / totalStudents * 100.0;
+				return new CountryStats(code ?? "unknown", g.CountryName, g.Count, pct);
+			}).ToList();
+
+			// ---- تمرير بيانات الخريطة إلى جافاسكربت (إن رغبت)
+			// يمكنك استدعاء JS لتحديث الخريطة وتمرير countriesGrouped
+			// مثال (يتطلب تسجيل IJSRuntime): await JS.InvokeVoidAsync("updateMapData", countriesGrouped);
+
+		}
+		catch (Exception ex)
+		{
+			// هنا يمكنك تسجيل الخطأ أو عرض رسالة للمستخدم
+			Console.Error.WriteLine($"خطأ أثناء تحميل بيانات التوزيع: {ex.Message}");
+			countriesGrouped = new List<CountryStats>();
+			totalStudents = 0;
+		}
+	}
+
+	// دوال مساعدة — عدّلها بحسب DTO لديك أو قواعد بيانات الأعلام
+	private static string GetFlagPath(string countryCode)
+	{
+		// يفترض أن صور الأعلام موجودة في: assets/img/flags/{code}.png
+		// إذا كان countryCode غير معروف نعرض علم افتراضي أو صورة placeholder
+		if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Equals("unknown", StringComparison.OrdinalIgnoreCase))
+			return "assets/img/flags/unknown.png";
+
+		// مثال: if code is "US" -> assets/img/flags/us.png
+		return $"assets/img/flags/{countryCode.ToLower()}.png";
+	}
+
+	private static string GetStudentCountry(object student)
+	{
+		// هذا تابع تعريفي: يفترض أن StudentDto له خاصية Country أو Nationality
+		// لأننا لا نعرف البنية الدقيقة لِStudentDto، نستخدم الانعكاس Reflection كحل عام.
+		// إذا كنت تعرف الخاصية بشكل قطعي فعدل لتصبح: return student.Country;
+		if (student == null) return null;
+
+		var type = student.GetType();
+		// أسماء محتملة لخاصية البلد
+		var possibleNames = new[] { "Country", "Nationality", "Location", "CountryName" };
+
+		foreach (var name in possibleNames)
+		{
+			var prop = type.GetProperty(name);
+			if (prop != null)
+			{
+				var val = prop.GetValue(student);
+				if (val != null) return val.ToString();
+			}
+		}
+
+		// إذا لم توجد خاصية بلد، حاول العثور على Address.Country أو Profile.Country
+		var addressProp = type.GetProperty("Address");
+		if (addressProp != null)
+		{
+			var address = addressProp.GetValue(student);
+			if (address != null)
+			{
+				var countryProp = address.GetType().GetProperty("Country");
+				if (countryProp != null)
+				{
+					var val = countryProp.GetValue(address);
+					if (val != null) return val.ToString();
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static string CountryNameToIso2(string countryName)
+	{
+		if (string.IsNullOrWhiteSpace(countryName)) return null;
+
+		// خريطة بسيطة لأشهر البلدان (أضف أو عدّل حسب حاجتك).
+		// من الأفضل أن تعتمد على مكتبة أو جدول Countries في قاعدة البيانات.
+		var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			{ "Indonesia", "id" },
+			{ "Indonesia ", "id" },
+			{ "USA", "us" },
+			{ "United States", "us" },
+			{ "United States of America", "us" },
+			{ "Australia", "au" },
+			{ "Russia", "ru" },
+			{ "China", "cn" },
+			{ "Brasil", "br" },
+			{ "Brazil", "br" },
+			{ "Egypt", "eg" },
+			{ "Saudi Arabia", "sa" },
+			{ "Unknown", "unknown" }
+            // أضف المزيد حسب البيانات الفعلية لديك
+        };
+
+		// إذا الاسم مباشر في الخريطة نعيد الكود
+		if (map.TryGetValue(countryName.Trim(), out var code)) return code;
+
+		// محاولة اختصار: نأخذ أول حرفين (غير موثوق لكن كحل احتياطي)
+		var parts = countryName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length == 1 && parts[0].Length >= 2)
+			return parts[0].Substring(0, 2).ToLowerInvariant();
+
+		return null;
+	}
+
+	// أزرار الأدوات (وظائف توضيحية فقط — لا تغيّر التصميم)
+	private void ToggleCard()
+	{
+		// من الممكن تنفيذ طيات card عبر JS أو CSS
+	}
+
+	private async Task ReloadData()
+	{
+		await LoadGeolocationDataAsync();
+	}
+
+	private void CloseCard()
+	{
+		// تنفيذ غلق البطاقة إن رغبت (مثلاً إخفاؤها)
+	}
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    private async Task LoadUserData()
+    {
+        try
         {
-            user = await UserManager.GetUserAsync(userClaim);
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = await UserManager.GetUserAsync(authState.User);
 
             if (user != null)
             {
-                profileImage = user.PhotoUrl ?? "/images/default-user.png";
-                fullName = $"{user.FirstName} {user.LastName}".Trim();
-                if (string.IsNullOrEmpty(fullName))
-                {
-                    fullName = userClaim.Identity.Name;
-                }
-
-                roles = await UserManager.GetRolesAsync(user);
-                userRole = roles.FirstOrDefault() ?? "مستخدم";
+                userName = user.UserName;
+                welcomeMessage = WelcomeMessages[Random.Shared.Next(WelcomeMessages.Count)];
             }
         }
-    }
-    private async Task LoadStatistics()
-    {
-        try
-        {
-            // إحصائيات الطلاب
-            totalStudents = await StudentService.GetTotalStudentsCountAsync();
-            studentChangePercentage = 12; // يمكن استبدالها بقيمة من خدمة الإحصائيات
-
-            // إحصائيات أعضاء هيئة التدريس
-            var allEmployees = await EmployeeService.GetAllAsync();
-            facultyCount = allEmployees.Count(e => e.JobTitle == "Techer");
-            facultyChangePercentage = 5; // يمكن استبدالها بقيمة من خدمة الإحصائيات
-
-            // إحصائيات المقررات
-            coursesCount = await CourseService.GetCoursesCountAsync();
-            coursesChangePercentage = 8; // يمكن استبدالها بقيمة من خدمة الإحصائيات
-
-            // إحصائيات الرسوم
-            totalFees = await CourseService.GetTotalRevenueAsync();
-            feesChangePercentage = -3; // يمكن استبدالها بقيمة من خدمة الإحصائيات
-        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading statistics: {ex.Message}");
+            Console.Error.WriteLine($"خطأ أثناء تحميل بيانات المستخدم: {ex.Message}");
         }
     }
 
-    private async Task LoadRecentStudents()
-    {
-        try
-        {
-            var result = await StudentService.GetStudentsPagedAsync(1, 5, "", null, StudentStatus.Active);
-            recentStudents = result.Data.ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading recent students: {ex.Message}");
-        }
-    }
-
-    private async Task LoadDepartments()
-    {
-        try
-        {
-            departments = await DepartmentService.GetAllDepartmentsAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading departments: {ex.Message}");
-        }
-    }
-
-    private string GetStatusText(StudentStatus status)
-    {
-        return status switch
-        {
-            StudentStatus.Active => "نشط",
-            StudentStatus.Inactive => "غير نشط",
-            StudentStatus.Suspended => "موقوف",
-            StudentStatus.Graduated => "متخرج",
-            _ => "غير معروف"
-        };
-    }
-
-    private async Task EditStudent(string studentId)
-    {
-        // تنفيذ منطق التعديل
-        NavigationManager.NavigateTo($"/students/edit/{studentId}");
-    }
-
-    private async Task DeleteStudent(string studentId)
-    {
-        try
-        {
-            await StudentService.DeleteStudentAsync(studentId);
-            await LoadRecentStudents(); // إعادة تحميل البيانات بعد الحذف
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error deleting student: {ex.Message}");
-        }
-    }
-  
+    
 }

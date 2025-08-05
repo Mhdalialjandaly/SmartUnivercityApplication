@@ -15,8 +15,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1>تسجيل الدخول</h1>
-                @* <p>مرحباً بك في النظام</p> *@
+                <h1 class="title-animation">تسجيل الدخول</h1>
             </div>
 
             <div class="login-form">
@@ -28,7 +27,8 @@
                     <div class="form-group">
                         <div class="input-icon">
                             <i class="fas fa-envelope"></i>
-                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="البريد الإلكتروني" />
+                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="" />
+                            <span class="placeholder-text typing-animation">البريد الإلكتروني</span>
                         </div>
                         <ValidationMessage For="() => Input.Email" class="text-danger" />
                     </div>
@@ -36,12 +36,13 @@
                     <div class="form-group">
                         <div class="input-icon">
                             <i class="fas fa-lock"></i>
-                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="كلمة المرور" />
+                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="" />
+                            <span class="placeholder-text typing-animation delay-1">كلمة المرور</span>
                         </div>
                         <ValidationMessage For="() => Input.Password" class="text-danger" />
                     </div>
 
-                    <button type="submit" class="btn-login">
+                    <button type="submit" class="btn-login pulse-animation">
                         <i class="fas fa-sign-in-alt me-2"></i>
                         تسجيل الدخول
                     </button>
@@ -50,24 +51,26 @@
         </div>
     </div>
 </div>
-
 <style>
+    /* الصفحة: تصميم مناسب لداشبورد الجامعة - RTL */
     .login-background {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: #f4f6f8;
+        background: linear-gradient(180deg, #f3f7fb 0%, #08051f 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        direction: rtl;
     }
 
     .login-container {
         width: 100%;
-        height: 100%;
+        max-width: 480px;
+        padding: 1rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -76,31 +79,98 @@
     .login-card {
         background-color: #ffffff;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 30px rgba(16, 24, 40, 0.08);
         padding: 2rem;
         width: 100%;
-        max-width: 400px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e6eef2;
+        animation: fadeIn 0.45s ease-out;
     }
 
+    /* header */
     .login-header {
-        text-align: center;
-        margin-bottom: 1.5rem;
+        gap: 0.75rem;
     }
 
-        .login-header h1 {
-            color: #1f2937;
-            font-weight: 600;
-            font-size: 1.75rem;
-            margin: 0;
+    .uni-logo {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+    }
+
+    /* تأثيرات الحركة - ثابتة كما طلبت (صححت @@keyframes) */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
         }
-
-    .login-form {
-        width: 100%;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
+    @@keyframes typing {
+        0% { width: 0; }
+        50% { width: 100%; }
+        100% { width: 50%; }
+    }
+
+    @@keyframes blink-caret {
+        from, to { border-color: transparent; }
+        50% { border-color: #9ca3af; }
+    }
+
+    @@keyframes titleAnimation {
+        0% { letter-spacing: -0.5em; opacity: 0; }
+        40% { opacity: 0.6; }
+        100% { letter-spacing: normal; opacity: 1; }
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+
+    /* Title */
+    .title-animation {
+        animation: titleAnimation 1.2s ease-out both;
+        color: #0f1724;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin: 0;
+        display: inline-block;
+    }
+
+    .pulse-animation {
+        animation: pulse 2.2s infinite;
+    }
+    .pulse-animation:hover { animation: none; transform: translateY(-2px); }
+
+    .delay-1 { animation-delay: 0.45s; }
+
+    /* placeholder & inputs (حافظت على الحركات) */
     .form-group {
-        margin-bottom: 1.25rem;
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .placeholder-text {
+        position: absolute;
+        right: 3rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 0.95rem;
+        pointer-events: none;
+        white-space: nowrap;
+        overflow: hidden;
+        width: calc(60% - 3.5rem);
+    }
+
+    .typing-animation {
+        border-right: 2px solid #9ca3af;
+        animation: typing 3.5s steps(70, end) infinite, blink-caret 0.75s step-end infinite;
     }
 
     .input-icon {
@@ -108,14 +178,14 @@
         direction: rtl;
     }
 
-        .input-icon i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-size: 1rem;
-        }
+    .input-icon i {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 1rem;
+    }
 
     .form-control {
         width: 100%;
@@ -123,77 +193,73 @@
         border: 1px solid #d1d5db;
         border-radius: 8px;
         font-size: 0.95rem;
-        transition: border-color 0.2s ease;
-        background-color: #f9fafb;
+        transition: all 0.22s ease;
+        background-color: #08051f;
         direction: rtl;
     }
 
-        .form-control:focus {
-            outline: none;
-            border-color: #10b981;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-        }
+    .form-control:focus {
+        outline: none;
+        border-color: #0ea37a;
+            background-color: #08051f;
+        box-shadow: 0 0 0 6px rgba(14, 163, 122, 0.06);
+    }
 
-        .form-control::placeholder {
-            color: #9ca3af;
-            font-size: 0.9rem;
-        }
+    /* عند التركيز أو وجود قيمة، نخفي عنصر placeholder للحفاظ على التجربة */
+    .form-control:focus + .placeholder-text { display: none; }
+    .form-control:not(:placeholder-shown) + .placeholder-text { display: none; }
 
+    /* زر الدخول */
     .btn-login {
-        background-color: #10b981;
+        background-color: #03000f;
         color: white;
         border: none;
         padding: 0.75rem;
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 1rem;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         width: 100%;
-        transition: background-color 0.2s ease;
+        transition: all 0.18s ease;
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .btn-login:hover:not(:disabled) {
+            background-color: #08051f;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(3, 105, 88, 0.08);
+    }
+
+    .btn-login:disabled {
+        background-color: #9fe7d0;
+        cursor: not-allowed;
+    }
+
+    .text-danger { font-size: 0.87rem; color: #dc2626; margin-top: 0.25rem; }
+
+    .form-check {
+        display: inline-flex;
+        align-items: center;
         gap: 0.5rem;
     }
 
-        .btn-login:hover:not(:disabled) {
-            background-color: #0f9f75;
-        }
+    .form-check-input { width: 18px; height: 18px; }
 
-        .btn-login:disabled {
-            background-color: #a7f3d0;
-            cursor: not-allowed;
-        }
-
-    .text-danger {
-        font-size: 0.85rem;
-        color: #dc2626;
-        margin-top: 0.25rem;
-    }
-
-    .validation-errors {
-        background-color: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 6px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
+    /* Responsive */
     @@media (max-width: 576px) {
-        .login-card {
-            margin: 1rem;
-            padding: 2rem 1.25rem;
-        }
-
-        .login-header h1 {
-            font-size: 1.5rem;
-        }
+        .login-card { margin: 1rem; padding: 1.25rem; }
+        .login-header h1 { font-size: 1.1rem; }
+        .uni-logo { width: 44px; height: 44px; }
+        .placeholder-text { width: calc(55% - 3.5rem); }
     }
 </style>
 
+
 @code {
-    private string? errorMessage;
+    private string errorMessage;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -202,21 +268,18 @@
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    private string ReturnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
     }
 
     public async Task LoginUser()
     {
-        // This doesn't count login failures towards account lockout
-        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
