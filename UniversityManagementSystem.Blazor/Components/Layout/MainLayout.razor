@@ -16,7 +16,30 @@
         </article>
     </main>
 </div>
+<style>
+    .page {
+        display: flex; /* يجعل العناصر أفقية */
+        min-height: 100vh; /* يأخذ ارتفاع الصفحة كاملة */
+    }
 
+    .sidebar {
+        width: 250px; /* عرض ثابت للشريط الجانبي */
+        background: #f8f9fa; /* لون الخلفية (اختياري) */
+        height: 100vh; /* ارتفاع كامل */
+        position: sticky; /* يثبت الشريط عند التمرير */
+        top: 0;
+    }
+
+    .main-content {
+        flex: 1; /* يأخذ المساحة المتبقية */
+        padding: 20px; /* هامش داخلي (اختياري) */
+    }
+
+    .content {
+        width: 100%; /* عرض كامل داخل main */
+    }
+}
+</style>
 @* <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>

@@ -8,341 +8,359 @@
 
 <PageTitle>شؤون الطلاب - الجامعة الذكية</PageTitle>
 
-<div class="student-management-container">
-    <!-- شريط العنوان والتنقل -->
-    <div class="page-header">
-        <div class="header-content">
-            <div class="title-section">
-                <h1 class="page-title">
+<div class="content" data-background-color="dark">
+    <div class="page-inner">
+        <!-- شريط العنوان والتنقل -->
+        <div class="page-header">
+            <div class="d-flex align-items-center">
+                <h4 class="page-title text-white">
                     <i class="fas fa-users-cog me-2"></i>إدارة الطلاب
-                </h1>
-                <nav class="breadcrumb-nav">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-                        <li class="breadcrumb-item active">إدارة الطلاب</li>
-                    </ol>
-                </nav>
+                </h4>
+                <div class="ml-md-auto">
+                    <ul class="breadcrumbs">
+                        <li class="nav-home">
+                            <a href="/">
+                                <i class="fas fa-home text-white"></i>
+                            </a>
+                        </li>
+                        <li class="separator">
+                            <i class="fas fa-chevron-left text-white"></i>
+                        </li>
+                        <li class="nav-item">
+                            <span class="text-white">إدارة الطلاب</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقات الإحصائيات -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card card-dark bg-primary-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@totalStudents</h2>
+                                <p class="mb-0">إجمالي الطلاب</p>
+                            </div>
+                            <div class="icon-shape bg-primary-light rounded-circle">
+                                <i class="fas fa-users text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" @onclick="() => LoadStudents(StudentStatus.All)" class="text-white">
+                                عرض الكل <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="action-buttons">
-                <div class="quick-actions">
-                    <button class="btn btn-main" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                        <i class="fas fa-user-plus me-2"></i>طالب جديد
-                    </button>
-                    <div class="dropdown quick-links">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-bolt me-2"></i>روابط سريعة
+            <div class="col-md-3">
+                <div class="card card-dark bg-success-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@activeStudents</h2>
+                                <p class="mb-0">طلاب نشطين</p>
+                            </div>
+                            <div class="icon-shape bg-success-light rounded-circle">
+                                <i class="fas fa-user-check text-success"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" @onclick="() => LoadStudents(StudentStatus.Active)" class="text-white">
+                                عرض النشطين <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card card-dark bg-warning-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@newStudents</h2>
+                                <p class="mb-0">طلاب جدد</p>
+                            </div>
+                            <div class="icon-shape bg-warning-light rounded-circle">
+                                <i class="fas fa-user-plus text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" @onclick="() => LoadStudents(StudentStatus.New)" class="text-white">
+                                عرض الجدد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card card-dark bg-info-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@averageGPA.ToString("F2")</h2>
+                                <p class="mb-0">متوسط المعدل</p>
+                            </div>
+                            <div class="icon-shape bg-info-light rounded-circle">
+                                <i class="fas fa-chart-line text-info"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" class="text-white">
+                                تحليل النتائج <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم الرئيسية -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title">قائمة الطلاب</h4>
+                    <div class="ml-auto">
+                        <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#addStudentModal">
+                            <i class="fas fa-user-plus me-2"></i>طالب جديد
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/apply/status"><i class="fas fa-search me-2"></i>متابعة الطلبات</a></li>
-                            <li><a class="dropdown-item" href="/apply"><i class="fas fa-file-alt me-2"></i>طلبات التقديم</a></li>
-                            <li><a class="dropdown-item" href="/admin/applications"><i class="fas fa-tasks me-2"></i>متابعة الإدارة</a></li>
-                            <li><a class="dropdown-item" href="/student/registrations"><i class="fas fa-book me-2"></i>تسجيل المواد</a></li>
-                        </ul>
+                        <div class="dropdown d-inline">
+                            <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                <i class="fas fa-bolt me-2"></i>روابط سريعة
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/apply/status"><i class="fas fa-search me-2"></i>متابعة الطلبات</a>
+                                <a class="dropdown-item" href="/apply"><i class="fas fa-file-alt me-2"></i>طلبات التقديم</a>
+                                <a class="dropdown-item" href="/admin/applications"><i class="fas fa-tasks me-2"></i>متابعة الإدارة</a>
+                                <a class="dropdown-item" href="/student/registrations"><i class="fas fa-book me-2"></i>تسجيل المواد</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- بطاقات الإحصائيات -->
-    <div class="stats-cards-container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">إجمالي الطلاب</span>
-                        <span class="stat-value">@totalStudents</span>
-                    </div>
-                    <div class="stat-icon bg-primary-light">
-                        <i class="fas fa-users text-primary"></i>
-                    </div>
-                </div>
-                <div class="stat-footer">
-                    <a href="#" @onclick="() => LoadStudents(StudentStatus.All)">عرض الكل <i class="fas fa-arrow-left"></i></a>
-                </div>
-            </div>
+            <div class="card-body">
+                <!-- علامات التبويب -->
+                <ul class="nav nav-pills nav-secondary" id="studentTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="all-tab" data-toggle="pill" href="#all" role="tab" @onclick="() => LoadStudents(StudentStatus.All)">
+                            <i class="fas fa-list me-2"></i>الكل
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="active-tab" data-toggle="pill" href="#active" role="tab" @onclick="() => LoadStudents(StudentStatus.Active)">
+                            <i class="fas fa-check-circle me-2"></i>نشطين
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="new-tab" data-toggle="pill" href="#new" role="tab" @onclick="() => LoadStudents(StudentStatus.New)">
+                            <i class="fas fa-user-clock me-2"></i>جدد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="graduated-tab" data-toggle="pill" href="#graduated" role="tab" @onclick="() => LoadStudents(StudentStatus.Graduated)">
+                            <i class="fas fa-user-graduate me-2"></i>خريجون
+                        </a>
+                    </li>
+                </ul>
 
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">طلاب نشطين</span>
-                        <span class="stat-value">@activeStudents</span>
+                <!-- شريط البحث والتصفية -->
+                <div class="row mt-3">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <div class="input-icon">
+                                <input type="text" class="form-control" placeholder="ابحث عن طالب..." @bind="searchTerm" @oninput="SearchStudents">
+                                <span class="input-icon-addon">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-icon bg-success-light">
-                        <i class="fas fa-user-check text-success"></i>
-                    </div>
-                </div>
-                <div class="stat-footer">
-                    <a href="#" @onclick="() => LoadStudents(StudentStatus.Active)">عرض النشطين <i class="fas fa-arrow-left"></i></a>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">طلاب جدد</span>
-                        <span class="stat-value">@newStudents</span>
-                    </div>
-                    <div class="stat-icon bg-warning-light">
-                        <i class="fas fa-user-plus text-warning"></i>
-                    </div>
-                </div>
-                <div class="stat-footer">
-                    <a href="#" @onclick="() => LoadStudents(StudentStatus.New)">عرض الجدد <i class="fas fa-arrow-left"></i></a>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">متوسط المعدل</span>
-                        <span class="stat-value">@averageGPA.ToString("F2")</span>
-                    </div>
-                    <div class="stat-icon bg-info-light">
-                        <i class="fas fa-chart-line text-info"></i>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <select class="form-control" @onchange="FilterByDepartment">
+                                <option value="">كل الأقسام</option>
+                                @foreach (var dept in departments)
+                                {
+                                    <option value="@dept.Id">@dept.Name</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-footer">
-                    <a href="#">تحليل النتائج <i class="fas fa-arrow-left"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- لوحة التحكم الرئيسية -->
-    <div class="main-panel">
-        <!-- علامات التبويب -->
-        <div class="panel-tabs">
-            <ul class="nav nav-tabs" id="studentTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" @onclick="() => LoadStudents(StudentStatus.All)">
-                        <i class="fas fa-list me-2"></i>الكل
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" @onclick="() => LoadStudents(StudentStatus.Active)">
-                        <i class="fas fa-check-circle me-2"></i>نشطين
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="new-tab" data-bs-toggle="tab" data-bs-target="#new" type="button" role="tab" @onclick="() => LoadStudents(StudentStatus.New)">
-                        <i class="fas fa-user-clock me-2"></i>جدد
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="graduated-tab" data-bs-toggle="tab" data-bs-target="#graduated" type="button" role="tab" @onclick="() => LoadStudents(StudentStatus.Graduated)">
-                        <i class="fas fa-user-graduate me-2"></i>خريجون
-                    </button>
-                </li>
-            </ul>
-        </div>
-
-        <!-- شريط البحث والتصفية -->
-        <div class="panel-toolbar">
-            <div class="search-filter-container">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="ابحث عن طالب..." @bind="searchTerm" @oninput="SearchStudents">
-                </div>
-
-                <div class="filter-options">
-                    <select class="form-select" @onchange="FilterByDepartment">
-                        <option value="">كل الأقسام</option>
-                        @foreach (var dept in departments)
-                        {
-                            <option value="@dept.Id">@dept.Name</option>
-                        }
-                    </select>
-
-                    <button class="btn btn-filter">
-                        <i class="fas fa-sliders-h"></i> المزيد من الفلاتر
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-actions">
-                <button class="btn btn-export">
-                    <i class="fas fa-file-export me-2"></i>تصدير
-                </button>
-            </div>
-        </div>
-
-        <!-- جدول الطلاب -->
-        <div class="students-table-container">
-            <div class="table-responsive">
-                <table class="students-table">
-                    <thead>
-                        <tr>
-                            <th width="50px">#</th>
-                            <th>الطالب</th>
-                            <th width="120px">الرقم الجامعي</th>
-                            <th width="150px">القسم</th>
-                            <th width="120px">المستوى</th>
-                            <th width="100px">المعدل</th>
-                            <th width="100px">الحالة</th>
-                            <th width="80px">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (StudentsList.Any())
-                        {
-                            @for (int i = 0; i < StudentsList.Count; i++)
+                <!-- جدول الطلاب -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="50px">#</th>
+                                <th>الطالب</th>
+                                <th width="120px">الرقم الجامعي</th>
+                                <th width="150px">القسم</th>
+                                <th width="120px">المستوى</th>
+                                <th width="100px">المعدل</th>
+                                <th width="100px">الحالة</th>
+                                <th width="80px">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (StudentsList.Any())
                             {
-                                var student = StudentsList[i];
-                                <tr>
-                                    <td>@((currentPage - 1) * pageSize + i + 1)</td>
-                                    <td>
-                                        <div class="student-info">
-                                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(student.FullName)&background=2c3e50&color=fff"
-                                                 class="student-avatar"
-                                                 alt="صورة الطالب" />
-                                            <div class="student-details">
-                                                <span class="student-name">@student.FullName</span>
-                                                <span class="student-meta">
-                                                    <i class="fas fa-phone-alt"></i> @student.Phone
-                                                </span>
+                                @for (int i = 0; i < StudentsList.Count; i++)
+                                {
+                                    var student = StudentsList[i];
+                                    <tr>
+                                        <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(student.FullName)&background=2c3e50&color=fff"
+                                                     class="rounded-circle mr-3"
+                                                     width="40" height="40"
+                                                     alt="صورة الطالب" />
+                                                <div>
+                                                    <span class="d-block font-weight-bold">@student.FullName</span>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-phone-alt mr-1"></i> @student.Phone
+                                                    </small>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>@student.StudentId</td>
-                                    <td>
-                                        <span class="badge department-badge">
-                                            @GetDepartmentName(student.DepartmentId)
-                                        </span>
-                                    </td>
-                                    <td>@GetAcademicYear(student.RegistrationDate)</td>
-                                    <td>
-                                        <div class="gpa-indicator @GetGpaClass(student.GPA)">
-                                            @(student.GPA != 0 ? student.GPA.ToString("F2") : "-")
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge @GetStatusClass(student.Status)">
-                                            @GetStatusText(student.Status)
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown actions-dropdown">
-                                            <button class="btn btn-actions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li>
+                                        </td>
+                                        <td>@student.StudentId</td>
+                                        <td>
+                                            <span class="badge badge-primary">
+                                                @GetDepartmentName(student.DepartmentId)
+                                            </span>
+                                        </td>
+                                        <td>@GetAcademicYear(student.RegistrationDate)</td>
+                                        <td>
+                                            <span class="badge @GetGpaClass(student.GPA)">
+                                                @(student.GPA != 0 ? student.GPA.ToString("F2") : "-")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetStatusClass(student.Status)">
+                                                @GetStatusText(student.Status)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
                                                     <a class="dropdown-item" href="/students/@student.Id">
-                                                        <i class="fas fa-eye me-2"></i>عرض
+                                                        <i class="fas fa-eye mr-2"></i>عرض
                                                     </a>
-                                                </li>
-                                                <li>
                                                     <a class="dropdown-item" href="/students/@student.Id/edit">
-                                                        <i class="fas fa-edit me-2"></i>تعديل
+                                                        <i class="fas fa-edit mr-2"></i>تعديل
                                                     </a>
-                                                </li>
-                                                <li>
                                                     <a class="dropdown-item" href="/students/@student.Id/invoices">
-                                                        <i class="fas fa-file-invoice me-2"></i>الفواتير
+                                                        <i class="fas fa-file-invoice mr-2"></i>الفواتير
                                                     </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
+                                                    <div class="dropdown-divider"></div>
                                                     <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteStudent(student.Id)">
-                                                        <i class="fas fa-trash me-2"></i>حذف
+                                                        <i class="fas fa-trash mr-2"></i>حذف
                                                     </a>
-                                                </li>
-                                            </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">لا توجد بيانات للطلاب</p>
+                                            <button class="btn btn-primary" data-toggle="modal" data-target="#addStudentModal">
+                                                <i class="fas fa-plus mr-2"></i>إضافة طالب جديد
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr class="no-data">
-                                <td colspan="8">
-                                    <div class="empty-state">
-                                        <i class="fas fa-user-slash"></i>
-                                        <p>لا توجد بيانات للطلاب</p>
-                                        <button class="btn btn-main" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                                            <i class="fas fa-plus me-2"></i>إضافة طالب جديد
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ترقيم الصفحات -->
-        @if (totalPages > 1)
-        {
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalStudents) من @totalStudents
+                        </tbody>
+                    </table>
                 </div>
 
-                <ul class="pagination">
-                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                        <a class="page-link" href="#" @onclick="() => GoToPage(1)">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                        <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                    </li>
+                <!-- ترقيم الصفحات -->
+                @if (totalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalStudents) من @totalStudents
+                        </div>
+                        <ul class="pagination">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
 
-                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
-                    {
-                        <li class="page-item @(i == currentPage ? "active" : "")">
-                            <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
-                        </li>
-                    }
+                            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                </li>
+                            }
 
-                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                        <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                        <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                    </li>
-                </ul>
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
             </div>
-        }
+        </div>
     </div>
 </div>
 
 <!-- مودال إضافة طالب جديد -->
-<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-user-plus me-2"></i>إضافة طالب جديد
+                    <i class="fas fa-user-plus mr-2"></i>إضافة طالب جديد
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div class="modal-body">
                 <!-- شريط التقدم -->
-                <div class="form-progress">
-                    <div class="progress-steps">
+                <div class="form-progress mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
                         @for (int i = 1; i <= totalSteps; i++)
                         {
-                            <div class="step @(i <= currentStep ? "active" : "") @(i < currentStep ? "completed" : "")">
-                                <div class="step-circle">@i</div>
+                            <div class="text-center">
+                                <div class="step-circle @(i <= currentStep ? "active" : "") @(i < currentStep ? "completed" : "")">
+                                    @i
+                                </div>
                                 <div class="step-label">المرحلة @i</div>
                             </div>
-
-                            @if (i < totalSteps)
-                            {
-                                <div class="step-connector @(i < currentStep ? "active" : "")"></div>
-                            }
                         }
                     </div>
                 </div>
@@ -353,58 +371,74 @@
                     @if (currentStep == 1)
                     {
                         <div class="form-step active">
-                            <h6 class="form-step-title">
-                                <i class="fas fa-id-card me-2"></i>المعلومات الأساسية
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-id-card mr-2"></i>المعلومات الأساسية
                             </h6>
 
-                            <div class="row g-3">
+                            <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label required">رقم الطالب</label>
-                                    <input type="text" class="form-control" placeholder="أدخل رقم الطالب" @bind="newStudent.StudentId" required>
+                                    <div class="form-group">
+                                        <label>رقم الطالب</label>
+                                        <input type="text" class="form-control" placeholder="أدخل رقم الطالب" @bind="newStudent.StudentId" required>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label required">القسم</label>
-                                    <select class="form-select" @bind="newStudent.DepartmentId" required>
-                                        <option value="">اختر القسم</option>
-                                        @foreach (var dept in departments)
-                                        {
-                                            <option value="@dept.Id">@dept.Name</option>
-                                        }
-                                    </select>
+                                    <div class="form-group">
+                                        <label>القسم</label>
+                                        <select class="form-control" @bind="newStudent.DepartmentId" required>
+                                            <option value="">اختر القسم</option>
+                                            @foreach (var dept in departments)
+                                            {
+                                                <option value="@dept.Id">@dept.Name</option>
+                                            }
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label required">الاسم الأول</label>
-                                    <input type="text" class="form-control" placeholder="الاسم الأول" @bind="FirstName" required>
+                                    <div class="form-group">
+                                        <label>الاسم الأول</label>
+                                        <input type="text" class="form-control" placeholder="الاسم الأول" @bind="FirstName" required>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label required">اسم العائلة</label>
-                                    <input type="text" class="form-control" placeholder="اسم العائلة" @bind="LastName" required>
+                                    <div class="form-group">
+                                        <label>اسم العائلة</label>
+                                        <input type="text" class="form-control" placeholder="اسم العائلة" @bind="LastName" required>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label">السنة الدراسية</label>
-                                    <input type="text" class="form-control" placeholder="السنة الدراسية" @bind="newStudent.AcademicYear">
+                                    <div class="form-group">
+                                        <label>السنة الدراسية</label>
+                                        <input type="text" class="form-control" placeholder="السنة الدراسية" @bind="newStudent.AcademicYear">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label">تاريخ الولادة</label>
-                                    <input type="date" class="form-control" @bind="newStudent.BirthOfDate">
+                                    <div class="form-group">
+                                        <label>تاريخ الولادة</label>
+                                        <input type="date" class="form-control" @bind="newStudent.BirthOfDate">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label">الجنس</label>
-                                    <select class="form-select" @bind="newStudent.Sexual">
-                                        <option value="true">ذكر</option>
-                                        <option value="false">أنثى</option>
-                                    </select>
+                                    <div class="form-group">
+                                        <label>الجنس</label>
+                                        <select class="form-control" @bind="newStudent.Sexual">
+                                            <option value="true">ذكر</option>
+                                            <option value="false">أنثى</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label">الديانة</label>
-                                    <input type="text" class="form-control" placeholder="الديانة" @bind="newStudent.Religion">
+                                    <div class="form-group">
+                                        <label>الديانة</label>
+                                        <input type="text" class="form-control" placeholder="الديانة" @bind="newStudent.Religion">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -414,39 +448,51 @@
                     @if (currentStep == 2)
                     {
                         <div class="form-step active">
-                            <h6 class="form-step-title">
-                                <i class="fas fa-phone-alt me-2"></i>معلومات الاتصال
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-phone-alt mr-2"></i>معلومات الاتصال
                             </h6>
 
-                            <div class="row g-3">
+                            <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label required">رقم الهاتف</label>
-                                    <input type="tel" class="form-control" placeholder="رقم الهاتف" @bind="newStudent.Phone" required>
+                                    <div class="form-group">
+                                        <label>رقم الهاتف</label>
+                                        <input type="tel" class="form-control" placeholder="رقم الهاتف" @bind="newStudent.Phone" required>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">رقم هاتف إضافي</label>
-                                    <input type="tel" class="form-control" placeholder="رقم هاتف إضافي" @bind="newStudent.SecoundPhone">
+                                    <div class="form-group">
+                                        <label>رقم هاتف إضافي</label>
+                                        <input type="tel" class="form-control" placeholder="رقم هاتف إضافي" @bind="newStudent.SecoundPhone">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">البريد الإلكتروني</label>
-                                    <input type="email" class="form-control" placeholder="البريد الإلكتروني" @bind="Email">
+                                    <div class="form-group">
+                                        <label>البريد الإلكتروني</label>
+                                        <input type="email" class="form-control" placeholder="البريد الإلكتروني" @bind="Email">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label required">محل السكن</label>
-                                    <input type="text" class="form-control" placeholder="محافظة - منطقة - حي" @bind="newStudent.HomeAddress" required>
+                                    <div class="form-group">
+                                        <label>محل السكن</label>
+                                        <input type="text" class="form-control" placeholder="محافظة - منطقة - حي" @bind="newStudent.HomeAddress" required>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label">رقم المنزل</label>
-                                    <input type="text" class="form-control" placeholder="رقم المنزل" @bind="newStudent.HomeNumber">
+                                    <div class="form-group">
+                                        <label>رقم المنزل</label>
+                                        <input type="text" class="form-control" placeholder="رقم المنزل" @bind="newStudent.HomeNumber">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-8">
-                                    <label class="form-label required">العنوان الدائم</label>
-                                    <textarea class="form-control" rows="2" placeholder="العنوان بالتفصيل" @bind="newStudent.FullAddress" required></textarea>
+                                    <div class="form-group">
+                                        <label>العنوان الدائم</label>
+                                        <textarea class="form-control" rows="2" placeholder="العنوان بالتفصيل" @bind="newStudent.FullAddress" required></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -454,772 +500,37 @@
 
                     <!-- المراحل الأخرى (3-6) تبقى كما هي مع تعديل التنسيق -->
                     <!-- ... -->
-
                 </form>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>إلغاء
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
                 </button>
 
                 @if (currentStep > 1)
                 {
                     <button type="button" class="btn btn-outline-primary" @onclick="PreviousStep">
-                        <i class="fas fa-arrow-right me-2"></i>السابق
+                        <i class="fas fa-arrow-right mr-2"></i>السابق
                     </button>
                 }
 
                 @if (currentStep < totalSteps)
                 {
                     <button type="button" class="btn btn-primary" @onclick="NextStep">
-                        التالي <i class="fas fa-arrow-left ms-2"></i>
+                        التالي <i class="fas fa-arrow-left ml-2"></i>
                     </button>
                 }
                 else
                 {
                     <button type="button" class="btn btn-success" @onclick="SaveStudent">
-                        <i class="fas fa-save me-2"></i>حفظ الطالب
+                        <i class="fas fa-save mr-2"></i>حفظ الطالب
                     </button>
                 }
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    /* أنماط عامة */
-    :root {
-        --primary-color: #2c3e50;
-        --secondary-color: #34495e;
-        --accent-color: #3498db;
-        --success-color: #27ae60;
-        --warning-color: #f39c12;
-        --danger-color: #e74c3c;
-        --light-color: #ecf0f1;
-        --dark-color: #2c3e50;
-        --gray-color: #95a5a6;
-        --border-color: #dfe6e9;
-    }
-
-    body {
-        font-family: 'Tajawal', sans-serif;
-        background-color: #f5f7fa;
-        color: #333;
-    }
-
-    /* تصميم الصفحة الرئيسية */
-    .student-management-container {
-        padding: 20px;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    .page-header {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-
-    .title-section {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .page-title {
-        color: var(--primary-color);
-        font-weight: 700;
-        margin: 0;
-        font-size: 1.5rem;
-    }
-
-    .breadcrumb-nav {
-        margin-top: 8px;
-    }
-
-    .breadcrumb {
-        background: none;
-        padding: 0;
-        margin: 0;
-        font-size: 0.9rem;
-    }
-
-    .breadcrumb-item a {
-        color: var(--gray-color);
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-        .breadcrumb-item a:hover {
-            color: var(--primary-color);
-        }
-
-    .breadcrumb-item.active {
-        color: var(--primary-color);
-    }
-
-    .action-buttons {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .quick-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-main {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-
-        .btn-main:hover {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-    .btn-outline-secondary {
-        border-color: var(--border-color);
-        color: var(--gray-color);
-    }
-
-    .dropdown-menu {
-        border-radius: 8px;
-        border: none;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .dropdown-item {
-        padding: 8px 16px;
-        font-size: 0.9rem;
-    }
-
-    /* بطاقات الإحصائيات */
-    .stats-cards-container {
-        margin-bottom: 20px;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-    }
-
-    .stat-card {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s;
-    }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-    .stat-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .stat-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .stat-label {
-        color: var(--gray-color);
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-    }
-
-    .stat-value {
-        color: var(--primary-color);
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-    }
-
-    .bg-primary-light {
-        background-color: rgba(52, 152, 219, 0.1);
-    }
-
-    .bg-success-light {
-        background-color: rgba(46, 204, 113, 0.1);
-    }
-
-    .bg-warning-light {
-        background-color: rgba(241, 196, 15, 0.1);
-    }
-
-    .bg-info-light {
-        background-color: rgba(52, 152, 219, 0.1);
-    }
-
-    .text-primary {
-        color: var(--accent-color);
-    }
-
-    .text-success {
-        color: var(--success-color);
-    }
-
-    .text-warning {
-        color: var(--warning-color);
-    }
-
-    .text-info {
-        color: var(--accent-color);
-    }
-
-    .stat-footer {
-        border-top: 1px solid var(--border-color);
-        padding-top: 10px;
-    }
-
-        .stat-footer a {
-            color: var(--gray-color);
-            font-size: 0.85rem;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-            .stat-footer a:hover {
-                color: var(--primary-color);
-            }
-
-    /* لوحة التحكم الرئيسية */
-    .main-panel {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .panel-tabs {
-        margin-bottom: 20px;
-    }
-
-    .nav-tabs {
-        border-bottom: 1px solid var(--border-color);
-    }
-
-        .nav-tabs .nav-link {
-            border: none;
-            color: var(--gray-color);
-            font-weight: 500;
-            padding: 10px 20px;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-            .nav-tabs .nav-link:hover {
-                color: var(--primary-color);
-            }
-
-            .nav-tabs .nav-link.active {
-                color: var(--primary-color);
-                border-bottom: 3px solid var(--primary-color);
-                background: transparent;
-            }
-
-    /* شريط البحث والتصفية */
-    .panel-toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .search-filter-container {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .search-box {
-        position: relative;
-        min-width: 250px;
-    }
-
-        .search-box i {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-color);
-        }
-
-        .search-box input {
-            padding-right: 35px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            height: 38px;
-        }
-
-    .filter-options {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .form-select {
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-        height: 38px;
-        min-width: 180px;
-    }
-
-    .btn-filter {
-        background-color: white;
-        border: 1px solid var(--border-color);
-        color: var(--gray-color);
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-    }
-
-    .btn-export {
-        background-color: white;
-        border: 1px solid var(--border-color);
-        color: var(--gray-color);
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-    }
-
-    /* جدول الطلاب */
-    .students-table-container {
-        margin-bottom: 20px;
-    }
-
-    .students-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-        .students-table thead th {
-            background-color: #f8f9fa;
-            color: var(--primary-color);
-            font-weight: 600;
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
-            text-align: right;
-        }
-
-        .students-table tbody tr {
-            transition: background-color 0.2s;
-        }
-
-            .students-table tbody tr:hover {
-                background-color: #f8f9fa;
-            }
-
-        .students-table td {
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-    .student-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .student-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .student-details {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .student-name {
-        font-weight: 500;
-        color: var(--primary-color);
-    }
-
-    .student-meta {
-        font-size: 0.8rem;
-        color: var(--gray-color);
-    }
-
-    .department-badge {
-        background-color: rgba(52, 152, 219, 0.1);
-        color: var(--accent-color);
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-    }
-
-    .gpa-indicator {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-align: center;
-    }
-
-    .gpa-excellent {
-        background-color: rgba(46, 204, 113, 0.1);
-        color: var(--success-color);
-    }
-
-    .gpa-good {
-        background-color: rgba(241, 196, 15, 0.1);
-        color: var(--warning-color);
-    }
-
-    .gpa-weak {
-        background-color: rgba(231, 76, 60, 0.1);
-        color: var(--danger-color);
-    }
-
-    .gpa-na {
-        background-color: rgba(149, 165, 166, 0.1);
-        color: var(--gray-color);
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-
-    .status-active {
-        background-color: rgba(46, 204, 113, 0.1);
-        color: var(--success-color);
-    }
-
-    .status-suspended {
-        background-color: rgba(241, 196, 15, 0.1);
-        color: var(--warning-color);
-    }
-
-    .status-inactive {
-        background-color: rgba(149, 165, 166, 0.1);
-        color: var(--gray-color);
-    }
-
-    .btn-actions {
-        background: none;
-        border: none;
-        color: var(--gray-color);
-        padding: 5px;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-        .btn-actions:hover {
-            background-color: #f8f9fa;
-            color: var(--primary-color);
-        }
-
-    .no-data td {
-        padding: 40px;
-        text-align: center;
-    }
-
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
-
-        .empty-state i {
-            font-size: 3rem;
-            color: var(--gray-color);
-        }
-
-        .empty-state p {
-            color: var(--gray-color);
-            margin: 0;
-        }
-
-    /* ترقيم الصفحات */
-    .pagination-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        padding-top: 15px;
-        border-top: 1px solid var(--border-color);
-    }
-
-    .pagination-info {
-        color: var(--gray-color);
-        font-size: 0.9rem;
-    }
-
-    .pagination {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-
-    .page-item .page-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-        color: var(--gray-color);
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .page-item.active .page-link {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-
-    .page-item:not(.active) .page-link:hover {
-        background-color: #f8f9fa;
-        color: var(--primary-color);
-    }
-
-    .page-item.disabled .page-link {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
-    /* مودال إضافة طالب جديد */
-    .modal-content {
-        border: none;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .modal-header {
-        background-color: var(--primary-color);
-        color: white;
-        border-bottom: none;
-        padding: 15px 20px;
-    }
-
-    .modal-title {
-        font-weight: 600;
-    }
-
-    .btn-close {
-        filter: invert(1);
-    }
-
-    .modal-body {
-        padding: 20px;
-    }
-
-    .modal-footer {
-        border-top: 1px solid var(--border-color);
-        padding: 15px 20px;
-    }
-
-    .form-progress {
-        margin-bottom: 20px;
-    }
-
-    .progress-steps {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: relative;
-    }
-
-    .step {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        z-index: 1;
-    }
-
-    .step-circle {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background-color: #f8f9fa;
-        border: 2px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        color: var(--gray-color);
-        transition: all 0.3s;
-    }
-
-    .step.active .step-circle {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-    }
-
-    .step.completed .step-circle {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-
-    .step-label {
-        margin-top: 5px;
-        font-size: 0.8rem;
-        color: var(--gray-color);
-    }
-
-    .step.active .step-label {
-        color: var(--primary-color);
-    }
-
-    .step-connector {
-        flex: 1;
-        height: 2px;
-        background-color: var(--border-color);
-        position: relative;
-        top: -15px;
-    }
-
-        .step-connector.active {
-            background-color: var(--primary-color);
-        }
-
-    .form-step {
-        display: none;
-    }
-
-        .form-step.active {
-            display: block;
-        }
-
-    .form-step-title {
-        color: var(--primary-color);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
-        font-weight: 600;
-    }
-
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-        .form-label.required::after {
-            content: " *";
-            color: var(--danger-color);
-        }
-
-    .form-control, .form-select {
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-        padding: 8px 12px;
-    }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(44, 62, 80, 0.1);
-        }
-
-    /* تصميم متجاوب */
-    @@media (max-width: 992px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .header-content {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .panel-toolbar {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .search-filter-container, .filter-options {
-            width: 100%;
-        }
-
-        .search-box {
-            width: 100%;
-        }
-
-        .form-select {
-            width: 100%;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .modal-dialog {
-            margin: 10px;
-        }
-
-        .progress-steps {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .step-connector {
-            display: none;
-        }
-    }
-</style>
-
 @code {
     private string searchTerm = "";
     private List<StudentDto> StudentsList = new();
