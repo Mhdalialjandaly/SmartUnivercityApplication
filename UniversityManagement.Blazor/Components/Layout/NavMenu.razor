@@ -1,0 +1,378 @@
+﻿@implements IDisposable
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<div class="sidebar sidebar-style-2" data-background-color="dark2">
+	<div class="sidebar-wrapper scrollbar scrollbar-inner">
+		<div class="sidebar-content">
+			<AuthorizeView>
+				<Authorized>	
+					<div class="user">
+						<div class="avatar-sm float-left mr-2">
+							<img src="favicon.png" alt="..." class="avatar-img rounded-circle">
+						</div>
+						<div class="info">
+							<a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+								<span>
+									@context.User.Identity?.Name
+									<span class="user-level">@context.User.Identity?.Name</span>
+									<span class="caret"></span>
+								</span>
+							</a>
+							<div class="clearfix"></div>
+
+							<div class="collapse in" id="collapseExample">
+								<ul class="nav">
+									<li>
+										<a href="#profile">
+											<span class="link-collapse">ملفي الشخصي</span>
+										</a>
+									</li>
+									<li>
+										<a href="#edit">
+											<span class="link-collapse">تعديل الملف</span>
+										</a>
+									</li>
+									<li>
+										<a href="#settings">
+											<span class="link-collapse">الإعدادات</span>
+										</a>
+									</li>	
+									<li>
+										<a href="/Account/Register">
+											<span class="link-collapse">تسجيل مستخدم جديد</span>
+										</a>
+									</li>
+									<li>
+										<a href="Account/Logout">
+											<span class="link-collapse">تسجيل الخروج</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</Authorized>
+			</AuthorizeView>
+			<ul class="nav nav-primary">
+				<li class="nav-item active">
+					<a data-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
+						<i class="fas fa-home"></i>
+						<p>لوحة التحكم</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="dashboard">
+						<ul class="nav nav-collapse">
+							<li>
+								<a href="../dashboard/admin.html">
+									<span class="sub-item">لوحة الإدارة</span>
+								</a>
+							</li>
+							<li>
+								<a href="../dashboard/lecturer.html">
+									<span class="sub-item">محاضر</span>
+								</a>
+							</li>
+							<li>
+								<a href="../dashboard/student.html">
+									<span class="sub-item">طالب</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-section">
+					<span class="sidebar-mini-icon">
+						<i class="fa fa-ellipsis-h"></i>
+					</span>
+					<h4 class="text-section">إدارة الأكاديمية</h4>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#students">
+						<i class="fas fa-user-graduate"></i>
+						<p>الطلاب</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="students">
+						<ul class="nav nav-collapse">
+							<li><a href="students-managment"><span class="sub-item">قائمة الطلاب</span></a></li>
+							<li><a href="studentsattendance"><span class="sub-item">إضافة حضور طالب</span></a></li>
+							<li><a href="studentsattendance"><span class="sub-item">الحضور والانصراف</span></a></li>
+							<li><a href="students/grades"><span class="sub-item">الدرجات والنتائج</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#lecturers">
+						<i class="fas fa-chalkboard-teacher"></i>
+						<p>الأساتذة</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="lecturers">
+						<ul class="nav nav-collapse">
+							<li><a href="professors-management"><span class="sub-item">قائمة الأساتذة</span></a></li>
+							<li><a href="academic-calendar"><span class="sub-item">جدول المحاضرات</span></a></li>
+							<li><a href="hr/attendance"><span class="sub-item">احصائيات الحضور</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#courses">
+						<i class="fas fa-book"></i>
+						<p>المواد الدراسية</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="courses">
+						<ul class="nav nav-collapse">
+							<li><a href="academic/courses"><span class="sub-item">قائمة المواد</span></a></li>
+							<li><a href="courses/curriculum.html"><span class="sub-item">المناهج الدراسية</span></a></li>
+							<li><a href="courses/exams.html"><span class="sub-item">الامتحانات</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#scheduling">
+						<i class="fas fa-calendar-alt"></i>
+						<p>الجداول والمواعيد</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="scheduling">
+						<ul class="nav nav-collapse">
+							<li><a href="academic/lectures"><span class="sub-item">ادارة المحاضرات</span></a></li>
+							<li><a href="academic-calendar"><span class="sub-item"> جدول المحاضرات والامتحانات </span></a></li>
+							@* <li><a href="academic-calendar"><span class="sub-item">جدول الامتحانات</span></a></li> *@
+							<li><a href="scheduling/rooms.html"><span class="sub-item">إدارة القاعات</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#archive">
+						<i class="fas fa-archive"></i>
+						<p>الأرشيف</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="archive">
+						<ul class="nav nav-collapse">
+							<li><a href="academic/archive"><span class="sub-item">الوثائق والأوراق</span></a></li>
+							<li><a href="archive/search.html"><span class="sub-item">البحث في الأرشيف</span></a></li>
+							<li><a href="archive/categories.html"><span class="sub-item">تصنيف الأرشيف</span></a></li>
+							<li><a href="archive/reports.html"><span class="sub-item">تقارير الأرشيف</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#library">
+						<i class="fas fa-book-open"></i>
+						<p>المكتبة الرقمية</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="library">
+						<ul class="nav nav-collapse">
+							<li><a href="library/books.html"><span class="sub-item">الكتب الإلكترونية</span></a></li>
+							<li><a href="library/journals.html"><span class="sub-item">المجلات العلمية</span></a></li>
+							<li><a href="library/search.html"><span class="sub-item">البحث المتقدم</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#financial">
+						<i class="fas fa-money-bill-wave"></i>
+						<p>الادارة المالية</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="financial">
+						<ul class="nav nav-collapse">
+							<li><a href="financial-management"><span class="sub-item">ادارة مدفوعات الطلاب</span></a></li>
+							<li><a href="financial/reports.html"><span class="sub-item">التقارير المالية</span></a></li>
+							<li><a href="financial/budget.html"><span class="sub-item">الميزانية</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#documents">
+						<i class="fas fa-file-alt"></i>
+						<p>الكتب الرسمية</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="documents">
+						<ul class="nav nav-collapse">
+							<li><a href="/documents"><span class="sub-item">الكتب الرسمية</span></a></li>
+							<li><a href="/documents/templates"><span class="sub-item">القوالب</span></a></li>
+							<li><a href="/documents/archives"><span class="sub-item">الأرشيف</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#analytics">
+						<i class="fas fa-chart-line"></i>
+						<p>التحليلات والتقارير</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="analytics">
+						<ul class="nav nav-collapse">
+							<li><a href="analytics/performance.html"><span class="sub-item">أداء الطلاب</span></a></li>
+							<li><a href="analytics/attendance.html"><span class="sub-item">إحصائيات الحضور</span></a></li>
+							<li><a href="analytics/grades.html"><span class="sub-item">تحليل الدرجات</span></a></li>
+						</ul>
+					</div>
+				</li>				
+				<li class="nav-item">
+					<a href="notifications.html">
+						<i class="fas fa-bell"></i>
+						<p>الإشعارات</p>
+						<span class="badge badge-warning">جديد</span>
+					</a>
+				</li>
+
+				<li class="nav-item">
+					<a data-toggle="collapse" href="#settings-menu">
+						<i class="fas fa-cogs"></i>
+						<p>الإعدادات العامة</p>
+						<span class="caret"></span>
+					</a>
+					<div class="collapse" id="settings-menu">
+						<ul class="nav nav-collapse">
+							<li><a href="settings/academic-year.html"><span class="sub-item">السنة الأكاديمية</span></a></li>
+							<li><a href="settings/departments.html"><span class="sub-item">الأقسام</span></a></li>
+							<li><a href="settings/permissions.html"><span class="sub-item">الصلاحيات</span></a></li>
+						</ul>
+					</div>
+				</li>
+
+				<li class="mx-4 mt-2">
+					<a href="https://university.smart/portal" target="_blank" class="btn btn-primary btn-block">
+						<span class="btn-label mr-2">
+							<i class="fa fa-university"></i>
+						</span>
+						منصة الجامعة
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string currentUrl;
+
+	protected override void OnInitialized()
+	{
+		currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+		NavigationManager.LocationChanged += OnLocationChanged;
+	}	
+	private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+	{
+		currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		NavigationManager.LocationChanged -= OnLocationChanged;
+	}
+}
+
+
+@* @implements IDisposable
+
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">SmartUnivercityBlazoreApplication</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="counter">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="weather">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="auth">
+                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+            </NavLink>
+        </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Register">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+ *@

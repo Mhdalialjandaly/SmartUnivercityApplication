@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UniversityManagementSystem.Domain.Entities;
-
+﻿
 namespace UniversityManagementSystem.Application.DTOs
 {
     public class TunnelDto
@@ -14,6 +8,6 @@ namespace UniversityManagementSystem.Application.DTOs
         public string TypeOfkinship { get; set; }
         public string FirstPart { get; set; }
         public string SecoundPart { get; set; }
-        public IList<StudentDto> Students { get; set; }
+        public List<StudentDto> Students { get; set; }
     }
 }

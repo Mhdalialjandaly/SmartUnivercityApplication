@@ -15,5 +15,9 @@ namespace UniversityManagementSystem.Application.DTOs
         public decimal NetSalary { get; set; }
         public string Status { get; set; }
         public string Notes { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public string PaymentMethod { get; set; }
+        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; }
     }
 }

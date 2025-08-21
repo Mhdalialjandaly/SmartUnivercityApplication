@@ -2,19 +2,25 @@
 
 namespace UniversityManagementSystem.Domain.Entities
 {
-    public class Student : User , IEntity
+    public class Student : IEntity
     {
         public Student() {
             CourseRegistrations = new HashSet<CourseRegistration>();
-            Universities = new HashSet<University>();
             StudentDocuments = new HashSet<StudentDocument>();
             Attendances = new HashSet<Attendance>();
+            StudentApplications =new HashSet<StudentApplication>();
+            StudentPayments = new HashSet<StudentPayment>();
+            StudentAttendances = new HashSet<StudentAttendance>();
         }
-
-        public string StudentId { get; set; }
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string FullName { get; set; }
+        public string Email { get; set; }
+        public string StudentId { get; set; }
         public string Phone { get; set; }   
         public int DepartmentId { get; set; }
+        public string PasswordHash { get; set; }
         public decimal AccountBalance { get; set; }
         public string HomeAddress { get; set; }
         public string Religion { get; set; }
@@ -24,7 +30,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public DateTime BirthOfDate { get; set; }
         public bool Sexual { get; set; }
         public string PoliticalNationalism { get; set; }
-        public string Nationality { get; set; }
+        public string NationalityName { get; set; }
         public int HomeNumber { get; set; }
         public string CivilstatusIDNumberAndNationalCard { get; set; }
         public string CivilstatusIDNumberAndNationalCardFrom { get; set; }
@@ -57,17 +63,21 @@ namespace UniversityManagementSystem.Domain.Entities
         public double GPA { get; set; }
         public string FullAddress { get; set; }
         public string AcademicYear { get; set; }
-
+        public int NationalityId { get; set; }
         // العلاقات
         public  Department Department { get; set; }
         public  Tunnel Tunnel { get; set; }
-        public virtual ICollection<University> Universities { get; set; }
+        public Nationality Nationality { get; set; }
         public virtual ICollection<CourseRegistration> CourseRegistrations { get; set; }
         public virtual ICollection<StudentDocument> StudentDocuments { get; set; }
         public virtual ICollection<Attendance> Attendances { get; set; }
+        public virtual ICollection<StudentApplication> StudentApplications { get; set; }
+        public virtual ICollection<StudentPayment> StudentPayments { get; set; }
+        public virtual ICollection<StudentAttendance> StudentAttendances { get; set; }
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }
         public string ModifiedBy { get ; set ; }
         public string DeletedBy { get ; set ; }
+        public DateTime CreatedAt { get; set; }
     }
 }

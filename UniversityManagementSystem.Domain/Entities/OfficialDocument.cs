@@ -42,7 +42,7 @@
 
             public string SignatureData { get; set; } 
 
-            public string Status { get; set; }  // مسودة, موقعة, مطبوعة, ملغاة
+            public string Status { get; set; }  
 
             public string FilePath { get; set; } 
 

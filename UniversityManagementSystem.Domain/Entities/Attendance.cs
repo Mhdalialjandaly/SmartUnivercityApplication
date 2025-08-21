@@ -8,7 +8,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public int EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
 
         [Required]
         public DateTime Date { get; set; }
@@ -25,7 +25,7 @@ namespace UniversityManagementSystem.Domain.Entities
 
         [StringLength(200)]
         public string Notes { get; set; }
-        public string StudentId { get; set; }
+        public int StudentId { get; set; }
         public int LectureId { get; set; }
         // العلاقات
         public  User Employee { get; set; }

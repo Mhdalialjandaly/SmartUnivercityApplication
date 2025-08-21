@@ -65,17 +65,26 @@ namespace UniversityManagementSystem.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<bool> ApproveApplicationAsync(int id, string studentId)
+        public async Task<bool> ApproveApplicationAsync(int id)
         {
-            var application = await _applicationRepository.GetByIdAsync(id);
-            if (application == null)
-                return false;
+            try
+            {
+                var application = await _applicationRepository.GetByIdAsync(id);
+                if (application == null)
+                    return false;
 
-            application.Status = "مقبول";
-            application.StudentId = studentId;
-            _applicationRepository.Update(application);
-            await _unitOfWork.CommitAsync();
-            return true;
+                application.Status = "مقبول";
+
+                _applicationRepository.Update(application);
+                await _unitOfWork.CommitAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // سجل الخطأ للتحليل
+                return false;
+            }
         }
 
         public async Task<bool> RejectApplicationAsync(int id, string reason)

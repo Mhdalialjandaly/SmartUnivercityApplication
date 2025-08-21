@@ -1,0 +1,631 @@
+﻿@page "/professors-management"
+@attribute [Authorize]
+@inject UniversityDbContext _context
+@rendermode InteractiveServer
+@inject IMapper _mapper
+@inject IProfessorServices _professorService
+@inject IDepartmentServices _departmentService
+
+<PageTitle>شؤون الأساتذة - الجامعة الذكية</PageTitle>
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner" >
+            <!-- شريط العنوان والتنقل -->
+            <div class="page-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="page-title text-white">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>إدارة الأساتذة
+                    </h4>
+                    <div class="ml-md-auto">
+                        <ul class="breadcrumbs">
+                            <li class="nav-home">
+                                <a href="/">
+                                    <i class="fas fa-home text-white"></i>
+                                </a>
+                            </li>
+                            <li class="separator">
+                                <i class="fas fa-chevron-left text-white"></i>
+                            </li>
+                            <li class="nav-item">
+                                <span class="text-white">إدارة الأساتذة</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقات الإحصائيات -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card card-dark bg-primary-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@totalProfessors</h2>
+                                    <p class="mb-0">إجمالي الأساتذة</p>
+                                </div>
+                                <div class="icon-shape bg-primary-light rounded-circle">
+                                    <i class="fas fa-users text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" @onclick="() => LoadProfessors(ProfessorStatus.All)" class="text-white">
+                                    عرض الكل <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card card-dark bg-success-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@activeProfessors</h2>
+                                    <p class="mb-0">أساتذة نشطين</p>
+                                </div>
+                                <div class="icon-shape bg-success-light rounded-circle">
+                                    <i class="fas fa-user-check text-success"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" @onclick="() => LoadProfessors(ProfessorStatus.Active)" class="text-white">
+                                    عرض النشطين <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card card-dark bg-warning-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@newProfessors</h2>
+                                    <p class="mb-0">أساتذة جدد</p>
+                                </div>
+                                <div class="icon-shape bg-warning-light rounded-circle">
+                                    <i class="fas fa-user-plus text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" @onclick="() => LoadProfessors(ProfessorStatus.New)" class="text-white">
+                                    عرض الجدد <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card card-dark bg-info-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@averageTeachingLoad.ToString("F1")</h2>
+                                    <p class="mb-0">متوسط الحصص الأسبوعية</p>
+                                </div>
+                                <div class="icon-shape bg-info-light rounded-circle">
+                                    <i class="fas fa-chalkboard text-info"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" class="text-white">
+                                    تحليل الأحمال <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة التحكم الرئيسية -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">قائمة الأساتذة</h4>
+                        <div class="ml-auto">
+                            <button class="btn btn-primary btn-round" @onclick="ShowAddProfessorModal">
+                                <i class="fas fa-user-plus me-2"></i>أستاذ جديد
+                            </button>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                    <i class="fas fa-bolt me-2"></i>روابط سريعة
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="/schedule-management">
+                                        <i class="fas fa-calendar-alt me-2"></i>الجداول الدراسية
+                                    </a>
+                                    <a class="dropdown-item" href="/academic/courses">
+                                        <i class="fas fa-book me-2"></i>المقررات الدراسية
+                                    </a>
+                                    <a class="dropdown-item" href="/workload">
+                                        <i class="fas fa-tasks me-2"></i>توزيع الأحمال
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- علامات التبويب -->
+                    <ul class="nav nav-pills nav-secondary" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" @onclick="() => LoadProfessors(ProfessorStatus.All)">
+                                <i class="fas fa-list me-2"></i>الكل
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="() => LoadProfessors(ProfessorStatus.Active)">
+                                <i class="fas fa-check-circle me-2"></i>نشطين
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="() => LoadProfessors(ProfessorStatus.New)">
+                                <i class="fas fa-user-clock me-2"></i>جدد
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="() => LoadProfessors(ProfessorStatus.OnLeave)">
+                                <i class="fas fa-umbrella-beach me-2"></i>في إجازة
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- شريط البحث والتصفية -->
+                    <div class="row mt-3">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <div class="input-icon">
+                                    <input type="text" class="form-control" placeholder="ابحث عن أستاذ..." 
+                                           @bind="searchTerm" @oninput="SearchProfessors">
+                                    <span class="input-icon-addon">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <select class="form-control" @onchange="FilterByDepartment">
+                                    <option value="">كل الأقسام</option>
+                                    @foreach (var dept in departments)
+                                    {
+                                        <option value="@dept.Id">@dept.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- جدول الأساتذة -->
+                    <div class="table-responsive" dir="rtl">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="50px">#</th>
+                                    <th>الأستاذ</th>
+                                    <th width="120px">الرقم الوظيفي</th>
+                                    <th width="150px">القسم</th>
+                                    <th width="120px">الرتبة</th>
+                                    <th width="100px">الحصص/أسبوع</th>
+                                    <th width="100px">الحالة</th>
+                                    <th width="80px">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ProfessorsList.Any())
+                                {
+                                    @for (int i = 0; i < ProfessorsList.Count; i++)
+                                    {
+                                        var professor = ProfessorsList[i];
+                                        <tr>
+                                            <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(professor.FullName)&background=2c3e50&color=fff"
+                                                         class="rounded-circle mr-3"
+                                                         width="40" height="40"
+                                                         alt="صورة الأستاذ" />
+                                                    <div>
+                                                        <span class="d-block font-weight-bold">@professor.FullName</span>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-envelope mr-1"></i> @professor.Email
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>@professor.EmployeeId</td>
+                                            <td>
+                                                <span class="badge badge-primary">
+                                                    @GetDepartmentName(professor.DepartmentId)
+                                                </span>
+                                            </td>
+                                            <td>@GetAcademicRank(professor.Rank)</td>
+                                            <td>
+                                                <span class="badge @GetWorkloadClass(professor.WeeklyHours)">
+                                                    @professor.WeeklyHours
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetStatusClass(professor.Status)">
+                                                    @GetStatusText(professor.Status)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="/professors/@professor.Id">
+                                                            <i class="fas fa-eye mr-2"></i>عرض
+                                                        </a>
+                                                        <a class="dropdown-item" href="/professors/@professor.Id/edit">
+                                                            <i class="fas fa-edit mr-2"></i>تعديل
+                                                        </a>
+                                                        <a class="dropdown-item" href="/professors/@professor.Id/schedule">
+                                                            <i class="fas fa-calendar-alt mr-2"></i>الجدول
+                                                        </a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteProfessor(professor.Id)">
+                                                            <i class="fas fa-trash mr-2"></i>حذف
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="text-center py-5">
+                                                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">لا توجد بيانات للأساتذة</p>
+                                                <button class="btn btn-primary" @onclick="ShowAddProfessorModal">
+                                                    <i class="fas fa-plus mr-2"></i>إضافة أستاذ جديد
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ترقيم الصفحات -->
+                    @if (totalPages > 1)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted">
+                                عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalProfessors) من @totalProfessors
+                            </div>
+                            <ul class="pagination">
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+
+                                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إضافة أستاذ جديد -->
+@if (showAddModal)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus mr-2"></i>@(editMode ? "تعديل بيانات الأستاذ" : "إضافة أستاذ جديد")
+                    </h5>
+                    <button type="button" class="close" @onclick="CloseModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <EditForm Model="currentProfessor" OnValidSubmit="SaveProfessor">
+                        <DataAnnotationsValidator />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>الرقم الوظيفي</label>
+                                    <InputText @bind-Value="currentProfessor.EmployeeId" class="form-control" />
+                                    <ValidationMessage For="@(() => currentProfessor.EmployeeId)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>القسم</label>
+                                    <InputSelect @bind-Value="currentProfessor.DepartmentId" class="form-control">
+                                        <option value="">اختر القسم</option>
+                                        @foreach (var dept in departments)
+                                        {
+                                            <option value="@dept.Id">@dept.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => currentProfessor.DepartmentId)" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>الاسم الأول</label>
+                                    <InputText @bind-Value="currentProfessor.FirstName" class="form-control" />
+                                    <ValidationMessage For="@(() => currentProfessor.FirstName)" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>اسم العائلة</label>
+                                    <InputText @bind-Value="currentProfessor.LastName" class="form-control" />
+                                    <ValidationMessage For="@(() => currentProfessor.LastName)" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>الرتبة الأكاديمية</label>
+                                    <InputSelect @bind-Value="currentProfessor.Rank" class="form-control">
+                                        <option value="1">أستاذ</option>
+                                        <option value="2">أستاذ مشارك</option>
+                                        <option value="3">أستاذ مساعد</option>
+                                        <option value="4">محاضر</option>
+                                    </InputSelect>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>البريد الإلكتروني</label>
+                                    <InputText @bind-Value="currentProfessor.Email" class="form-control" />
+                                    <ValidationMessage For="@(() => currentProfessor.Email)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>رقم الهاتف</label>
+                                    <InputText @bind-Value="currentProfessor.Phone" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>التخصص</label>
+                                    <InputTextArea @bind-Value="currentProfessor.Specialization" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">
+                                <i class="fas fa-times mr-2"></i>إلغاء
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>حفظ
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // البيانات الأساسية
+    private List<ProfessorDto> ProfessorsList = new();
+    private List<DepartmentDto> departments = new();
+    private ProfessorDto currentProfessor = new();
+    
+    // البحث والتصفية
+    private string searchTerm = "";
+    private int? selectedDepartmentId = null;
+    private ProfessorStatus currentStatus = ProfessorStatus.All;
+    
+    // الإحصائيات
+    private int totalProfessors = 0;
+    private int activeProfessors = 0;
+    private int newProfessors = 0;
+    private double averageTeachingLoad = 0;
+    
+    // ترقيم الصفحات
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private const int pageSize = 10;
+    
+    // إدارة النماذج
+    private bool showAddModal = false;
+    private bool editMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadStatistics();
+        await LoadProfessors(ProfessorStatus.All);
+    }
+
+    private async Task LoadDepartments()
+    {
+        departments = await _departmentService.GetAllDepartmentsAsync();
+    }
+
+    private async Task LoadStatistics()
+    {
+        totalProfessors = await _professorService.GetTotalProfessorsCountAsync();
+        activeProfessors = await _professorService.GetActiveProfessorsCountAsync();
+        newProfessors = await _professorService.GetNewProfessorsCountAsync();
+        averageTeachingLoad = await _professorService.GetAverageTeachingLoadAsync();
+    }
+
+    private async Task LoadProfessors(ProfessorStatus status)
+    {
+        currentStatus = status;
+        var result = await _professorService.GetProfessorsPagedAsync(
+            currentPage,
+            pageSize,
+            searchTerm,
+            selectedDepartmentId,
+            status);
+        
+        ProfessorsList = result.Data.ToList();
+        totalPages = result.TotalPages;
+        totalProfessors = result.TotalRecords;
+    }
+
+    private async Task SearchProfessors(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadProfessors(currentStatus);
+    }
+
+    private async Task FilterByDepartment(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        selectedDepartmentId = string.IsNullOrEmpty(value) ? null : int.Parse(value);
+        currentPage = 1;
+        await LoadProfessors(currentStatus);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadProfessors(currentStatus);
+        }
+    }
+
+    private void ShowAddProfessorModal()
+    {
+        currentProfessor = new ProfessorDto();
+        editMode = false;
+        showAddModal = true;
+    }
+
+    private void ShowEditProfessorModal(ProfessorDto professor)
+    {
+        currentProfessor = professor;
+        editMode = true;
+        showAddModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showAddModal = false;
+    }
+
+    private async Task SaveProfessor()
+    {
+        if (editMode)
+        {
+            await _professorService.UpdateProfessorAsync(currentProfessor.Id,currentProfessor);
+        }
+        else
+        {
+            await _professorService.CreateProfessorAsync(currentProfessor);
+        }
+        
+        await LoadProfessors(currentStatus);
+        showAddModal = false;
+    }
+
+    private async Task DeleteProfessor(int professorId)
+    {
+        if (await ConfirmDelete())
+        {
+            await _professorService.DeleteProfessorAsync(professorId);
+            await LoadProfessors(currentStatus);
+        }
+    }
+
+    private async Task<bool> ConfirmDelete()
+    {
+        // يمكن استبدال هذا بتنفيذ حقيقي لمربع حوار تأكيد
+        return await Task.FromResult(true);
+    }
+
+    // دوال مساعدة
+    private string GetDepartmentName(int departmentId)
+    {
+        return departments.FirstOrDefault(d => d.Id == departmentId)?.Name ?? "غير محدد";
+    }
+
+    private string GetAcademicRank(AcademicRank rank)
+    {
+        return rank switch
+        {
+            AcademicRank .Professor=> "أستاذ",
+            AcademicRank.AssociateProfessor => "أستاذ مشارك",
+            AcademicRank.AssistantProfessor => "أستاذ مساعد",
+            AcademicRank.Lecturer => "محاضر",
+            _ => "غير محدد"
+        };
+    }
+
+    private string GetWorkloadClass(int hours)
+    {
+        return hours switch
+        {
+            > 15 => "bg-danger",
+            > 12 => "bg-warning",
+            _ => "bg-success"
+        };
+    }
+
+    private string GetStatusClass(ProfessorStatus status)
+    {
+        return status switch
+        {
+            ProfessorStatus.Active => "bg-success",
+            ProfessorStatus.OnLeave => "bg-warning",
+            ProfessorStatus.Inactive => "bg-secondary",
+            _ => "bg-info"
+        };
+    }
+
+    private string GetStatusText(ProfessorStatus status)
+    {
+        return status switch
+        {
+            ProfessorStatus.Active => "نشط",
+            ProfessorStatus.OnLeave => "في إجازة",
+            ProfessorStatus.Inactive => "غير نشط",
+            ProfessorStatus.New => "جديد",
+            _ => "غير محدد"
+        };
+    }
+}

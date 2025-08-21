@@ -8,7 +8,7 @@
         public string DocType { get; set; }
         public string SponsorEndorsement { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string StudentId { get; set; }
+        public int StudentId { get; set; }
         public Student Student { get; set; }
     }
 }

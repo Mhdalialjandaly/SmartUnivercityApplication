@@ -1,0 +1,1095 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="university-chat-window">
+    <div class="chat-window-header university-theme">
+        <div class="header-content">
+            <div class="conversation-info">
+                <div class="avatar-container">
+                    @if (Conversation.IsGroup)
+                    {
+                        <div class="avatar-badge group-badge-header">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="avatar-badge user-badge-header">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    }
+                </div>
+                <div class="conversation-details">
+                    <div class="title-row">
+                        <h4 class="conversation-title">@Conversation.Title</h4>
+                        @if (Conversation.IsGroup)
+                        {
+                            <span class="group-indicator-small" title="محادثة جماعية">
+                                <i class="fas fa-users"></i>
+                            </span>
+                        }
+                    </div>
+                    <div class="conversation-meta">
+                        @if (Conversation.IsGroup)
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-users meta-icon"></i>
+                                <span class="participants-count">@Conversation.Participants.Count مشارك</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-user-friends meta-icon"></i>
+                                <span class="private-chat">محادثة خاصة</span>
+                            </div>
+                        }
+                        <div class="meta-item">
+                            <i class="fas fa-clock meta-icon"></i>
+                            <span class="last-active">نشط الآن</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-header-action" title="بحث في الرسائل">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="btn-header-action" title="معلومات المحادثة">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <button class="btn-header-action" title="المزيد من الخيارات">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-messages-container" @ref="messagesContainer">
+        <div class="messages-date-divider">
+            <span class="divider-text">اليوم</span>
+        </div>
+
+        <div class="messages-list">
+            @if (isLoadingMessages)
+            {
+                <div class="loading-messages">
+                    <div class="message-skeleton">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                    </div>
+                    <div class="message-skeleton received">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var message in messages)
+                {
+                    <div class="message-wrapper @(message.SenderId == UserId ? "sent" : "received")">
+                        <div class="message-content">
+                            @if (message.SenderId != UserId)
+                            {
+                                <div class="sender-info">
+                                    <div class="sender-avatar-badge">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="sender-name">@message.SenderName</div>
+                                </div>
+                            }
+                            <div class="message-bubble">
+                                <div class="message-text">@message.Content</div>
+                                <div class="message-meta">
+                                    <span class="message-time">@FormatMessageTime(message.SentAt)</span>
+                                    @if (message.SenderId == UserId)
+                                    {
+                                        <span class="message-status @(message.IsRead ? "read" : "sent")" title="@(message.IsRead ? "تم قراءتها" : "تم الإرسال")">
+                                            @if (message.IsRead)
+                                            {
+                                                <i class="fas fa-check-double"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-check"></i>
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (isTyping)
+        {
+            <div class="typing-indicator received">
+                <div class="typing-content">
+                    <div class="typing-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="typing-bubble">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="chat-input-area university-theme">
+        <div class="input-container">
+            <div class="input-actions">
+                <button class="btn-input-action" title="إضافة مرفق">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <button class="btn-input-action" title="إيموجي">
+                    <i class="fas fa-smile"></i>
+                </button>
+            </div>
+
+            <div class="text-input-wrapper">
+                <textarea @bind="newMessage"
+                          @bind:event="oninput"
+                          placeholder="اكتب رسالتك هنا..."
+                          @onkeypress="HandleKeyPress"
+                          @onkeydown="HandleKeyDown"
+                          @onfocus="OnInputFocus"
+                          @onblur="OnInputBlur"
+                          class="message-input"
+                          rows="1"
+                          maxlength="1000"></textarea>
+            </div>
+
+            <div class="send-actions">
+                @if (!string.IsNullOrWhiteSpace(newMessage))
+                {
+                    <button class="btn-send active" @onclick="SendMessage">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn-microphone" title="تسجيل صوتي">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="input-info">
+            <div class="character-count">
+                @newMessage.Length/1000
+            </div>
+            <div class="input-hints">
+                <span class="hint">Enter لإرسال</span>
+                <span class="hint">Shift+Enter سطر جديد</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* University Chat Window Theme - RTL */
+    .university-chat-window {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        direction: rtl;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Header Styles */
+    .chat-window-header {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 70px;
+    }
+
+    .conversation-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .avatar-container {
+        margin-left: 15px;
+    }
+
+    .avatar-badge {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+
+    .user-badge-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .group-badge-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+
+    .conversation-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .conversation-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f1724;
+        line-height: 1.2;
+    }
+
+    .group-indicator-small {
+        color: #8b5cf6;
+        font-size: 0.8rem;
+        background: rgba(139, 92, 246, 0.1);
+        padding: 4px;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .conversation-meta {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85rem;
+    }
+
+    .meta-icon {
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    .participants-count, .private-chat, .last-active {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-header-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        font-size: 16px;
+    }
+
+        .btn-header-action:hover {
+            background: #f1f5f9;
+            color: #0f1724;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+    /* Messages Container */
+    .chat-messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        position: relative;
+    }
+
+    .messages-date-divider {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .divider-text {
+        background: rgba(14, 163, 122, 0.1);
+        color: #0ea37a;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .messages-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Message Styles */
+    .message-wrapper {
+        display: flex;
+        margin-bottom: 15px;
+        max-width: 85%;
+        animation: messageAppear 0.3s ease-out;
+    }
+
+    @@keyframes messageAppear {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-wrapper.sent {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message-wrapper.received {
+        align-self: flex-start;
+    }
+
+    .message-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sender-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .sender-avatar-badge {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        margin-left: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sender-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #0f1724;
+    }
+
+    .message-bubble {
+        padding: 14px 18px;
+        border-radius: 20px;
+        max-width: 450px;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease;
+    }
+
+    .message-wrapper.sent .message-bubble {
+        background: linear-gradient(135deg, #0ea37a 0%, #087a5c 100%);
+        color: white;
+        border-bottom-left-radius: 6px;
+    }
+
+    .message-wrapper.received .message-bubble {
+        background: white;
+        color: #0f1724;
+        border: 1px solid #e2e8f0;
+        border-bottom-right-radius: 6px;
+    }
+
+    .message-wrapper:hover .message-bubble {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .message-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 8px;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+    }
+
+    .message-meta {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        font-size: 0.75rem;
+        gap: 6px;
+    }
+
+    .message-time {
+        color: inherit;
+        opacity: 0.8;
+    }
+
+    .message-status {
+        display: flex;
+        align-items: center;
+    }
+
+        .message-status.sent {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .message-status.read {
+            color: #3b82f6;
+        }
+
+    .message-wrapper.received .message-status.sent {
+        color: #94a3b8;
+    }
+
+    .message-wrapper.received .message-status.read {
+        color: #0ea37a;
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+        margin-bottom: 15px;
+        max-width: 85%;
+    }
+
+        .typing-indicator.received {
+            align-self: flex-start;
+        }
+
+    .typing-content {
+        display: flex;
+    }
+
+    .typing-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        margin-left: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .typing-bubble {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 12px 16px;
+        border-bottom-right-radius: 6px;
+    }
+
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+            .typing-dots span:nth-child(1) {
+                animation-delay: 0s;
+            }
+
+            .typing-dots span:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .typing-dots span:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+    @@keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+
+        30% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* Loading Messages Skeleton */
+    .loading-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .message-skeleton {
+        display: flex;
+        gap: 10px;
+        max-width: 85%;
+    }
+
+        .message-skeleton.received {
+            align-self: flex-start;
+        }
+
+        .message-skeleton.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+    .skeleton-avatar {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        border-radius: 50%;
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    .skeleton-content {
+        flex: 1;
+    }
+
+    .skeleton-line {
+        height: 16px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+    @@keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* Input Area */
+    .chat-input-area {
+        background: white;
+        border-top: 1px solid #e2e8f0;
+        padding: 15px 20px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .input-container {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .input-actions, .send-actions {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .btn-input-action, .btn-send, .btn-microphone {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .btn-input-action {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+        .btn-input-action:hover {
+            background: #f1f5f9;
+            color: #0f1724;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+    .text-input-wrapper {
+        flex: 1;
+    }
+
+    .message-input {
+        width: 100%;
+        min-height: 46px;
+        max-height: 150px;
+        padding: 14px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 23px;
+        font-size: 1rem;
+        resize: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #f8fafc;
+        color: #0f1724;
+        font-family: inherit;
+        line-height: 1.4;
+    }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #0ea37a;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(14, 163, 122, 0.15);
+        }
+
+    .btn-send {
+        background: linear-gradient(135deg, #0ea37a 0%, #087a5c 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(14, 163, 122, 0.25);
+    }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 16px rgba(14, 163, 122, 0.35);
+        }
+
+        .btn-send:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+    .btn-microphone {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+        .btn-microphone:hover {
+            background: #f1f5f9;
+            color: #0f1724;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+    .input-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .character-count {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+
+        .character-count.warning {
+            color: #f59e0b;
+        }
+
+    .input-hints {
+        display: flex;
+        gap: 12px;
+    }
+
+    .hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 12px;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .header-content {
+            height: 65px;
+            padding: 0 15px;
+        }
+
+        .conversation-title {
+            font-size: 1.1rem;
+        }
+
+        .conversation-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3px;
+        }
+
+        .meta-item {
+            font-size: 0.75rem;
+        }
+
+        .message-wrapper {
+            max-width: 90%;
+        }
+
+        .message-bubble {
+            max-width: 350px;
+            padding: 12px 16px;
+        }
+
+        .message-text {
+            font-size: 0.95rem;
+        }
+
+        .chat-messages-container {
+            padding: 15px;
+        }
+
+        .input-container {
+            gap: 8px;
+        }
+
+        .btn-input-action, .btn-send, .btn-microphone {
+            width: 42px;
+            height: 42px;
+            font-size: 16px;
+        }
+
+        .message-input {
+            min-height: 42px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .chat-window-header {
+            padding: 0 15px;
+        }
+
+        .header-content {
+            height: 60px;
+        }
+
+        .conversation-details {
+            min-width: 0;
+        }
+
+        .conversation-title {
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .conversation-meta {
+            gap: 8px;
+        }
+
+        .meta-item .meta-icon {
+            display: none;
+        }
+
+        .btn-header-action {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+
+        .message-wrapper {
+            max-width: 95%;
+        }
+
+        .message-bubble {
+            max-width: 300px;
+            padding: 10px 14px;
+        }
+
+        .message-text {
+            font-size: 0.9rem;
+        }
+
+        .input-info {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .input-hints {
+            gap: 8px;
+        }
+
+        .hint {
+            font-size: 0.7rem;
+            padding: 1px 6px;
+        }
+    }
+
+    /* Scrollbar Customization */
+    .chat-messages-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-messages-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+
+    .chat-messages-container::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+        .chat-messages-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+</style>
+
+@code {
+    [Parameter]
+    public ConversationDto Conversation { get; set; }
+
+    [Parameter]
+    public string UserId { get; set; }
+
+    [Parameter]
+    public IChatServices ChatService { get; set; }
+
+    private List<MessageDto> messages = new List<MessageDto>();
+    private string newMessage = "";
+    private ElementReference messagesContainer;
+    private HubConnection hubConnection;
+    private bool isLoadingMessages = true;
+    private bool isTyping = false;
+    private bool isInputFocused = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Conversation != null && ChatService != null)
+        {
+            await LoadMessages();
+            await InitializeSignalR();
+        }
+    }
+
+    private async Task LoadMessages()
+    {
+        try
+        {
+            isLoadingMessages = true;
+            messages = await ChatService.GetConversationMessagesAsync(Conversation.Id);
+            await ScrollToBottom();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading messages: {ex.Message}");
+        }
+        finally
+        {
+            isLoadingMessages = false;
+        }
+    }
+
+    private async Task InitializeSignalR()
+    {
+        try
+        {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+                .Build();
+
+            hubConnection.On<MessageDto>("ReceiveMessage", message =>
+            {
+                messages.Add(message);
+                StateHasChanged();
+                ScrollToBottom();
+            });
+
+            hubConnection.On<string>("UserTyping", userName =>
+            {
+                isTyping = true;
+                StateHasChanged();
+                // إيقاف مؤشر الكتابة بعد 3 ثواني
+                Task.Delay(3000).ContinueWith(_ =>
+                {
+                    isTyping = false;
+                    InvokeAsync(StateHasChanged);
+                });
+            });
+
+            await hubConnection.StartAsync();
+            await hubConnection.InvokeAsync("JoinConversation", Conversation.Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing SignalR: {ex.Message}");
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(newMessage)) return;
+
+        try
+        {
+            var messageDto = new MessageDto
+                {
+                    Content = newMessage.Trim(),
+                    ConversationId = Conversation.Id,
+                    SenderId = UserId,
+                    ReceiverId = Conversation.Participants.First(p => p.UserId != UserId).UserId,
+                    SentAt = DateTime.Now
+                };
+
+            var sentMessage = await ChatService.SendMessageAsync(messageDto);
+            messages.Add(sentMessage);
+            newMessage = "";
+            StateHasChanged();
+            await ScrollToBottom();
+
+            // إيقاف مؤشر الكتابة
+            if (hubConnection?.State == HubConnectionState.Connected)
+            {
+                await hubConnection.InvokeAsync("StopTyping", Conversation.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending message: {ex.Message}");
+        }
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+           
+        }
+
+        // إرسال مؤشر الكتابة
+        if (hubConnection?.State == HubConnectionState.Connected && !string.IsNullOrWhiteSpace(newMessage))
+        {
+            await hubConnection.InvokeAsync("UserTyping", Conversation.Id, "المستخدم الحالي");
+        }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        await Task.Delay(100); // انتظار قصير للتأكد من تحديث DOM
+        await JSRuntime.InvokeVoidAsync("scrollToBottom", messagesContainer);
+    }
+
+    private async Task OnInputFocus()
+    {
+        isInputFocused = true;
+        await Task.Delay(100);
+        await ScrollToBottom();
+    }
+
+    private void OnInputBlur()
+    {
+        isInputFocused = false;
+    }
+
+    private string FormatMessageTime(DateTime dateTime)
+    {
+        var now = DateTime.Now;
+        var timeDiff = now - dateTime;
+
+        if (timeDiff.TotalDays < 1)
+        {
+            return dateTime.ToString("HH:mm");
+        }
+        else if (timeDiff.TotalDays < 7)
+        {
+            return dateTime.ToString("ddd HH:mm", new System.Globalization.CultureInfo("ar-SA"));
+        }
+        else
+        {
+            return dateTime.ToString("dd/MM HH:mm");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            try
+            {
+                await hubConnection.StopAsync();
+                await hubConnection.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error disposing SignalR connection: {ex.Message}");
+            }
+        }
+    }
+}

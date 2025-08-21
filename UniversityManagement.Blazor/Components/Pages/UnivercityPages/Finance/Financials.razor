@@ -1,0 +1,797 @@
+﻿@page "/financial-management"
+@attribute [Authorize]
+@inject IStudentPaymentServices StudentPaymentService
+@inject IEmployeeSalaryServices EmployeeSalaryService
+@inject ICourseServices CourseService
+@inject IDepartmentServices DepartmentService
+@inject IFinanceServices FinanceService
+@rendermode InteractiveServer
+
+<PageTitle>الشؤون المالية - الجامعة الذكية</PageTitle>
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="content" data-background-color="dark">
+                <div class="page-inner">
+                    <!-- شريط العنوان والتنقل -->
+                    <div class="page-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="page-title text-white">
+                                <i class="fas fa-money-bill-wave me-2"></i> إدارة الشؤون المالية
+                            </h4>
+                            <div class="ml-md-auto">
+                                <ul class="breadcrumbs">
+                                    <li class="nav-home">
+                                        <a href="/">
+                                            <i class="fas fa-home text-white"></i>
+                                        </a>
+                                    </li>
+                                    <li class="separator">
+                                        <i class="fas fa-chevron-left text-white"></i>
+                                    </li>
+                                    <li class="nav-item">
+                                        <span class="text-white">الشؤون المالية</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بطاقات الإحصائيات -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-primary-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@totalRevenue.ToString("C")</h2>
+                                            <p class="mb-0">إجمالي الإيرادات</p>
+                                        </div>
+                                        <div class="icon-shape bg-primary-light rounded-circle">
+                                            <i class="fas fa-money-bill-wave text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-success-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@totalExpenses.ToString("C")</h2>
+                                            <p class="mb-0">إجمالي المصروفات</p>
+                                        </div>
+                                        <div class="icon-shape bg-success-light rounded-circle">
+                                            <i class="fas fa-money-check-alt text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-warning-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@currentBalance.ToString("C")</h2>
+                                            <p class="mb-0">الرصيد الحالي</p>
+                                        </div>
+                                        <div class="icon-shape bg-warning-light rounded-circle">
+                                            <i class="fas fa-balance-scale text-warning"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-info-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@totalTransactions</h2>
+                                            <p class="mb-0">إجمالي المعاملات</p>
+                                        </div>
+                                        <div class="icon-shape bg-info-light rounded-circle">
+                                            <i class="fas fa-exchange-alt text-info"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- لوحة التحكم الرئيسية -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex align-items-center">
+                                <h4 class="card-title">الإدارة المالية</h4>
+                                <div class="ml-auto">
+                                    <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#generateReportModal">
+                                        <i class="fas fa-file-pdf me-2"></i>تقرير مالي
+                                    </button>
+                                    <div class="dropdown d-inline">
+                                        <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <i class="fas fa-bolt me-2"></i>روابط سريعة
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="/finance/student-payments">
+                                                <i class="fas fa-receipt me-2"></i>مدفوعات الطلاب
+                                            </a>
+                                            <a class="dropdown-item" href="/finance/employee-salaries">
+                                                <i class="fas fa-file-invoice-dollar me-2"></i>رواتب الموظفين
+                                            </a>
+                                            <a class="dropdown-item" href="/finance/reports">
+                                                <i class="fas fa-chart-bar me-2"></i>التقارير المالية
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- علامات التبويب -->
+                            <ul class="nav nav-pills nav-secondary" id="financeTabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="overview-tab" data-toggle="pill" href="#overview" role="tab">
+                                        <i class="fas fa-chart-pie me-2"></i>نظرة عامة
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="payments-tab" data-toggle="pill" href="#payments" role="tab" @onclick="LoadPaymentsSummary">
+                                        <i class="fas fa-receipt me-2"></i>مدفوعات الطلاب
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="salaries-tab" data-toggle="pill" href="#salaries" role="tab" @onclick="LoadSalariesSummary">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i>رواتب الموظفين
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="courses-tab" data-toggle="pill" href="#courses" role="tab" @onclick="LoadCoursesRevenue">
+                                        <i class="fas fa-book me-2"></i>إيرادات المواد
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <!-- محتوى علامات التبويب -->
+                            <div class="tab-content mt-3" id="financeTabsContent">
+                                <!-- نظرة عامة -->
+                                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">الإيرادات والمصروفات الشهرية</h5>
+                                                    <div class="d-flex">
+                                                        <select class="form-control form-control-sm" style="width: 120px;" @bind="selectedYear">
+                                                            <option value="2024">2024</option>
+                                                            <option value="2025">2025</option>
+                                                            <option value="2026">2026</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">أهم المصروفات</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>البند</th>
+                                                                    <th>المبلغ</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>رواتب الموظفين</td>
+                                                                    <td><span class="text-danger">@employeeSalaries.ToString("C")</span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>صيانة المباني</td>
+                                                                    <td><span class="text-danger">@buildingMaintenance.ToString("C")</span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>معدات تعليمية</td>
+                                                                    <td><span class="text-danger">@educationalEquipment.ToString("C")</span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>خدمات الإنترنت</td>
+                                                                    <td><span class="text-danger">@internetServices.ToString("C")</span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>مرافق</td>
+                                                                    <td><span class="text-danger">@utilities.ToString("C")</span></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- مدفوعات الطلاب -->
+                                <div class="tab-pane fade" id="payments" role="tabpanel">
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <div class="card border-primary border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">إجمالي المدفوعات</h5>
+                                                            <h2 class="mb-0 fw-bold">@paymentSummary.TotalPayments</h2>
+                                                        </div>
+                                                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-receipt fa-2x text-primary"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-success border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">إجمالي المبالغ</h5>
+                                                            <h2 class="mb-0 fw-bold">@paymentSummary.TotalAmount.ToString("C")</h2>
+                                                        </div>
+                                                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-warning border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">المدفوعات المعلقة</h5>
+                                                            <h2 class="mb-0 fw-bold">@paymentSummary.PendingPayments</h2>
+                                                        </div>
+                                                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-clock fa-2x text-warning"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-info border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">المبالغ المعلقة</h5>
+                                                            <h2 class="mb-0 fw-bold">@paymentSummary.PendingAmount.ToString("C")</h2>
+                                                        </div>
+                                                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-exclamation-circle fa-2x text-info"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="card-title">أحدث المدفوعات</h5>
+                                                <a href="/finance/student-payments" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>الطالب</th>
+                                                            <th>المادة</th>
+                                                            <th>المبلغ</th>
+                                                            <th>تاريخ الدفع</th>
+                                                            <th>طريقة الدفع</th>
+                                                            <th>الحالة</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (recentPayments.Any())
+                                                        {
+                                                            @foreach (var payment in recentPayments.Take(5))
+                                                            {
+                                                                <tr>
+                                                                    <td>@payment.Id</td>
+                                                                    <td>@payment.StudentName</td>
+                                                                    <td>@payment.CourseName</td>
+                                                                    <td>@payment.Amount.ToString("C")</td>
+                                                                    <td>@payment.PaymentDate.ToString("yyyy-MM-dd")</td>
+                                                                    <td>@payment.PaymentMethod</td>
+                                                                    <td>
+                                                                        <span class="badge @(payment.Status == "مدفوع" ? "bg-success" :
+                                                                                            payment.Status == "معلق" ? "bg-warning" : "bg-danger")">
+                                                                            @payment.Status
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td colspan="7" class="text-center">لا توجد مدفوعات</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- رواتب الموظفين -->
+                                <div class="tab-pane fade" id="salaries" role="tabpanel">
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <div class="card border-primary border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">إجمالي الرواتب</h5>
+                                                            <h2 class="mb-0 fw-bold">@salarySummary.TotalSalaries</h2>
+                                                        </div>
+                                                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-file-invoice-dollar fa-2x text-primary"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-success border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">إجمالي المبالغ</h5>
+                                                            <h2 class="mb-0 fw-bold">@salarySummary.TotalAmount.ToString("C")</h2>
+                                                        </div>
+                                                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-money-check-alt fa-2x text-success"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-warning border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">الرواتب المعلقة</h5>
+                                                            <h2 class="mb-0 fw-bold">@salarySummary.PendingSalaries</h2>
+                                                        </div>
+                                                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-clock fa-2x text-warning"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-info border-start border-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="text-muted">المبالغ المعلقة</h5>
+                                                            <h2 class="mb-0 fw-bold">@salarySummary.PendingAmount.ToString("C")</h2>
+                                                        </div>
+                                                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                                                            <i class="fas fa-exclamation-circle fa-2x text-info"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="card-title">أحدث الرواتب</h5>
+                                                <a href="/finance/employee-salaries" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>الموظف</th>
+                                                            <th>الوظيفة</th>
+                                                            <th>الراتب الأساسي</th>
+                                                            <th>البدلات</th>
+                                                            <th>الخصومات</th>
+                                                            <th>الصافي</th>
+                                                            <th>الحالة</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (recentSalaries.Any())
+                                                        {
+                                                            @foreach (var salary in recentSalaries.Take(5))
+                                                            {
+                                                                <tr>
+                                                                    <td>@salary.Id</td>
+                                                                    <td>@salary.EmployeeName</td>
+                                                                    <td>@salary.EmployeePosition</td>
+                                                                    <td>@salary.BaseSalary.ToString("C")</td>
+                                                                    <td>@salary.Allowances.ToString("C")</td>
+                                                                    <td><span class="text-danger">@salary.Deductions.ToString("C")</span></td>
+                                                                    <td><strong>@salary.NetSalary.ToString("C")</strong></td>
+                                                                    <td>
+                                                                        <span class="badge @(salary.Status == "مدفوع" ? "bg-success" :
+                                                                                            salary.Status == "معلق" ? "bg-warning" : "bg-danger")">
+                                                                            @salary.Status
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td colspan="8" class="text-center">لا توجد رواتب</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- إيرادات المواد -->
+                                <div class="tab-pane fade" id="courses" role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="card-title">إيرادات المواد الدراسية</h5>
+                                                <select class="form-control form-control-sm" style="width: 150px;" @bind="selectedSemester">
+                                                    <option value="1">الفصل الأول</option>
+                                                    <option value="2">الفصل الثاني</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>رمز المادة</th>
+                                                            <th>اسم المادة</th>
+                                                            <th>القسم</th>
+                                                            <th>عدد الطلاب</th>
+                                                            <th>الكلفة</th>
+                                                            <th>إجمالي الإيرادات</th>
+                                                            <th>النسبة</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (courseRevenues.Any())
+                                                        {
+                                                            @foreach (var (course, index) in courseRevenues.Select((c, i) => (c, i)))
+                                                            {
+                                                                <tr>
+                                                                    <td>@(index + 1)</td>
+                                                                    <td><strong>@course.Code</strong></td>
+                                                                    <td>@course.Name</td>
+                                                                    <td>@course.DepartmentName</td>
+                                                                    <td class="text-center">@course.CurrentStudents</td>
+                                                                    <td>@course.Fee.ToString("C")</td>
+                                                                    <td><strong>@(course.CurrentStudents * course.Fee).ToString("C")</strong></td>
+                                                                    <td>
+                                                                        <div class="progress" style="height: 10px;">
+                                                                            <div class="progress-bar" role="progressbar"
+                                                                                 style="width: @((course.CurrentStudents * course.Fee / totalCourseRevenue) * 100)%"></div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td colspan="8" class="text-center">لا توجد مواد</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                    <tfoot class="table-light">
+                                                        <tr>
+                                                            <th colspan="6">الإجمالي</th>
+                                                            <th>@totalCourseRevenue.ToString("C")</th>
+                                                            <th>100%</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال تقرير مالي -->
+<div class="modal fade" id="generateReportModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-pdf mr-2"></i>توليد تقرير مالي
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">نوع التقرير *</label>
+                        <select class="form-control" @bind="reportType" required>
+                            <option value="">اختر نوع التقرير</option>
+                            <option value="monthly">تقرير شهري</option>
+                            <option value="quarterly">تقرير ربع سنوي</option>
+                            <option value="annual">تقرير سنوي</option>
+                            <option value="custom">فترة مخصصة</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">من تاريخ *</label>
+                            <input type="date" class="form-control" @bind="reportStartDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">إلى تاريخ *</label>
+                            <input type="date" class="form-control" @bind="reportEndDate" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">القسم</label>
+                        <select class="form-control" @bind="reportDepartmentId">
+                            <option value="">جميع الأقسام</option>
+                            @foreach (var dept in departments)
+                            {
+                                <option value="@dept.Id">@dept.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">نوع المعاملات</label>
+                        <select class="form-control" @bind="transactionType">
+                            <option value="all">جميع المعاملات</option>
+                            <option value="income">الإيرادات فقط</option>
+                            <option value="expense">المصروفات فقط</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="GenerateReport">
+                    <i class="fas fa-file-pdf mr-2"></i>توليد التقرير
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // الإحصائيات العامة
+    private decimal totalRevenue = 0;
+    private decimal totalExpenses = 0;
+    private decimal currentBalance = 0;
+    private int totalTransactions = 0;
+
+    // المصروفات
+    private decimal employeeSalaries = 0;
+    private decimal buildingMaintenance = 0;
+    private decimal educationalEquipment = 0;
+    private decimal internetServices = 0;
+    private decimal utilities = 0;
+
+    // ملخصات
+    private StudentPaymentSummaryDto paymentSummary = new();
+    private SalarySummaryDto salarySummary = new();
+
+    // البيانات
+    private List<StudentPaymentDto> recentPayments = new();
+    private List<EmployeeSalaryDto> recentSalaries = new();
+    private List<CourseDto> courseRevenues = new();
+    private List<DepartmentDto> departments = new();
+
+    // الفلاتر
+    private string selectedYear = DateTime.Now.Year.ToString();
+    private int selectedSemester = 1;
+    private string reportType = "";
+    private DateTime reportStartDate = DateTime.Now.AddMonths(-1);
+    private DateTime reportEndDate = DateTime.Now;
+    private int reportDepartmentId = 0;
+    private string transactionType = "all";
+
+    // الإحصائيات
+    private decimal totalCourseRevenue = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadFinancialOverview();
+        await LoadPaymentsSummary();
+        await LoadSalariesSummary();
+        await LoadCoursesRevenue();
+    }
+
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await DepartmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+
+    private async Task LoadFinancialOverview()
+    {
+        try
+        {
+            // تحميل الإحصائيات المالية العامة
+            totalRevenue = await FinanceService.GetTotalRevenueAsync();
+            totalExpenses = await FinanceService.GetTotalExpensesAsync();
+            currentBalance = totalRevenue - totalExpenses;
+            totalTransactions = await FinanceService.GetTotalTransactionsAsync();
+
+            // تحميل المصروفات
+            var esvalue = await FinanceService.GetEmployeeSalariesAsync();
+            employeeSalaries = esvalue.Sum(e => e.Amount);
+            var bmvalue = await FinanceService.GetBuildingMaintenanceAsync();
+            buildingMaintenance = bmvalue.Sum(e => e.Amount);
+            var eevalue = await FinanceService.GetEducationalEquipmentAsync();
+            educationalEquipment = eevalue.Sum(e => e.Amount);
+            var isvalue = await FinanceService.GetInternetServicesAsync();
+            internetServices = isvalue.Sum(e => e.Amount);
+            var uvalue = await FinanceService.GetUtilitiesAsync();
+            utilities = uvalue.Sum(e => e.Amount);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading financial overview: {ex.Message}");
+        }
+    }
+
+    private async Task LoadPaymentsSummary()
+    {
+        try
+        {
+            paymentSummary = await StudentPaymentService.GetPaymentSummaryAsync();
+            recentPayments = await FinanceService.GetRecentPaymentsAsync(10);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading payments summary: {ex.Message}");
+        }
+    }
+
+    private async Task LoadSalariesSummary()
+    {
+        try
+        {
+            salarySummary = await EmployeeSalaryService.GetSalarySummaryAsync();
+            recentSalaries = await EmployeeSalaryService.GetRecentSalariesAsync(10);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading salaries summary: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCoursesRevenue()
+    {
+        try
+        {
+            courseRevenues = await CourseService.GetCoursesBySemesterAsync(selectedSemester, int.Parse(selectedYear));
+            totalCourseRevenue = courseRevenues.Sum(c => c.CurrentStudents * c.Fee);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading courses revenue: {ex.Message}");
+        }
+    }
+
+    private async Task GenerateReport()
+    {
+        try
+        {
+            var report = await FinanceService.GenerateFinancialReportAsync(
+                reportType,
+                reportStartDate,
+                reportEndDate,
+                reportDepartmentId,
+                transactionType);
+
+            // تنزيل التقرير
+            // await JS.InvokeVoidAsync("downloadFile", $"Financial_Report_{DateTime.Now:yyyyMMdd}.pdf", "application/pdf", report);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating report: {ex.Message}");
+        }
+    }
+
+    private async Task FilterBySemester(ChangeEventArgs e)
+    {
+        selectedSemester = int.Parse(e.Value?.ToString() ?? "1");
+        await LoadCoursesRevenue();
+    }
+
+    private async Task FilterByYear(ChangeEventArgs e)
+    {
+        selectedYear = e.Value?.ToString() ?? DateTime.Now.Year.ToString();
+        await LoadCoursesRevenue();
+    }
+
+    private async Task FilterByDepartment(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        reportDepartmentId = string.IsNullOrEmpty(value) ? 0 : int.Parse(value);
+    }
+}

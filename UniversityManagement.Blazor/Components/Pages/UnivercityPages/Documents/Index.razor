@@ -1,0 +1,1221 @@
+﻿@page "/admin/documents"
+@attribute [Authorize(Roles = "Admin")]
+@inject IJSRuntime JS
+@inject IDocumentServices DocumentService
+@rendermode InteractiveServer
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="documents-management-container" dir="rtl">
+                <!-- شريط العنوان مع خلفية متدرجة -->
+                <div class="admin-header bg-gradient-primary">
+                    <div class="container-fluid">
+                        <div class="header-content">
+                            <div class="header-title">
+                                <h1>
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>إدارة الوثائق الرسمية</span>
+                                </h1>
+                                <nav class="breadcrumb">
+                                    <a href="/" class="breadcrumb-item"><i class="fas fa-home"></i></a>
+                                    <a href="/admin" class="breadcrumb-item">لوحة التحكم</a>
+                                    <span class="breadcrumb-item active">الوثائق الرسمية</span>
+                                </nav>
+                            </div>
+                            <div class="header-actions">
+                                <button class="btn btn-light btn-refresh" @onclick="RefreshDocuments">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>تحديث البيانات</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بطاقات الإحصاءات -->
+                <div class="stats-cards">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- بطاقة إجمالي الوثائق -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-primary-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@totalDocuments</h2>
+                                                <p class="mb-0">إجمالي الوثائق</p>
+                                            </div>
+                                            <div class="icon-shape bg-primary-light rounded-circle">
+                                                <i class="fas fa-file-alt text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => LoadDocuments(DocumentStatus.All)" class="text-white">
+                                                عرض الكل <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- بطاقة الوثائق الصادرة -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-success-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@issuedDocuments</h2>
+                                                <p class="mb-0">الصادرة</p>
+                                            </div>
+                                            <div class="icon-shape bg-success-light rounded-circle">
+                                                <i class="fas fa-file-export text-success"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => LoadDocuments(DocumentStatus.Issued)" class="text-white">
+                                                عرض الصادرة <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- بطاقة الوثائق المسودة -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-warning-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@draftDocuments</h2>
+                                                <p class="mb-0">المسودات</p>
+                                            </div>
+                                            <div class="icon-shape bg-warning-light rounded-circle">
+                                                <i class="fas fa-edit text-warning"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => LoadDocuments(DocumentStatus.Draft)" class="text-white">
+                                                عرض المسودات <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- بطاقة الوثائق الموقعة -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-info-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@signedDocuments</h2>
+                                                <p class="mb-0">الموقعة إلكترونياً</p>
+                                            </div>
+                                            <div class="icon-shape bg-info-light rounded-circle">
+                                                <i class="fas fa-signature text-info"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => LoadDocuments(DocumentStatus.Signed)" class="text-white">
+                                                عرض الموقعة <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- لوحة التحكم -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="card-title">قائمة الوثائق الرسمية</h4>
+                            <div class="ml-auto">
+                                <button class="btn btn-primary btn-round" @onclick="ShowCreateModal">
+                                    <i class="fas fa-plus me-2"></i> وثيقة جديدة
+                                </button>
+                                <div class="dropdown d-inline">
+                                    <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-bolt me-2"></i> روابط سريعة
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/admin/applications"><i class="fas fa-file-signature me-2"></i> طلبات التقديم</a>
+                                        <a class="dropdown-item" href="/students-managment"><i class="fas fa-users me-2"></i> إدارة الطلاب</a>
+                                        <a class="dropdown-item" href="/documents/templates"><i class="fas fa-file-code me-2"></i> قوالب الوثائق</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- علامات التبويب -->
+                        <ul class="nav nav-pills nav-secondary" id="documentTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == DocumentStatus.All ? "active" : "")"
+                                        @onclick="() => LoadDocuments(DocumentStatus.All)">
+                                    <i class="fas fa-list me-2"></i> جميع الوثائق
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == DocumentStatus.Issued ? "active" : "")"
+                                        @onclick="() => LoadDocuments(DocumentStatus.Issued)">
+                                    <i class="fas fa-file-export me-2"></i> الصادرة
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == DocumentStatus.Draft ? "active" : "")"
+                                        @onclick="() => LoadDocuments(DocumentStatus.Draft)">
+                                    <i class="fas fa-edit me-2"></i> المسودات
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == DocumentStatus.Signed ? "active" : "")"
+                                        @onclick="() => LoadDocuments(DocumentStatus.Signed)">
+                                    <i class="fas fa-signature me-2"></i> الموقعة
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- شريط البحث والتحكم -->
+                        <div class="row mt-3">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <div class="input-icon">
+                                        <input type="text" class="form-control" placeholder="ابحث عن وثيقة..." 
+                                               @bind="searchTerm" @oninput="SearchDocuments">
+                                        <span class="input-icon-addon">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <select class="form-control"  @onchange="FilterByType">
+                                        <option value="">كل الأنواع</option>
+                                        <option value="شهادة">الشهادات</option>
+                                        <option value="قرار">القرارات</option>
+                                        <option value="خطاب">الخطابات</option>
+                                        <option value="عقد">العقود</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- جدول الوثائق -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>الوثيقة</th>
+                                        <th>النوع</th>
+                                        <th>رقم الوثيقة</th>
+                                        <th>التاريخ</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (documents.Any())
+                                    {
+                                        @for (int i = 0; i < documents.Count; i++)
+                                        {
+                                            var doc = documents[i];
+                                            <tr>
+                                                <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="document-icon mr-3">
+                                                            <i class="fas fa-file-alt"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="d-block font-weight-bold">@doc.Title</span>
+                                                            <small class="text-muted">المستلم: @doc.IssuedTo</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-primary">
+                                                        @doc.DocumentType
+                                                    </span>
+                                                </td>
+                                                <td>@doc.DocumentNumber</td>
+                                                <td>@doc.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                                <td>
+                                                    <span class="badge @GetStatusClass(doc.Status)">
+                                                        @GetStatusText(doc.Status)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="#" @onclick="() => ViewDocument(doc)">
+                                                                <i class="fas fa-eye mr-2"></i> عرض
+                                                            </a>
+                                                            @if (doc.Status == "مسودة")
+                                                            {
+                                                                <a class="dropdown-item" href="#" @onclick="() => EditDocument(doc)">
+                                                                    <i class="fas fa-edit mr-2"></i> تعديل
+                                                                </a>
+                                                                <a class="dropdown-item text-success" href="#" @onclick="() => IssueDocument(doc)">
+                                                                    <i class="fas fa-paper-plane mr-2"></i> إصدار
+                                                                </a>
+                                                            }
+                                                            <a class="dropdown-item" href="#" @onclick="() => ShowSignModal(doc)">
+                                                                <i class="fas fa-signature mr-2"></i> توقيع إلكتروني
+                                                            </a>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteDocument(doc.Id)">
+                                                                <i class="fas fa-trash mr-2"></i> حذف
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="text-center py-5">
+                                                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted">لا توجد وثائق متاحة</p>
+                                                    <button class="btn btn-primary" @onclick="ShowCreateModal">
+                                                        <i class="fas fa-plus mr-2"></i> إنشاء وثيقة جديدة
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- الترقيم -->
+                        @if (totalPages > 1)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted">
+                                    عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalDocuments) من @totalDocuments
+                                </div>
+                                <ul class="pagination">
+                                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+
+                                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                    {
+                                        <li class="page-item @(i == currentPage ? "active" : "")">
+                                            <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                        </li>
+                                    }
+
+                                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إنشاء/تعديل وثيقة -->
+<div class="modal fade" id="documentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-alt"></i> @(isEditMode ? "تعديل الوثيقة" : "وثيقة جديدة")
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>عنوان الوثيقة <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="أدخل عنوان الوثيقة" @bind="newDocument.Title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نوع الوثيقة <span class="text-danger">*</span></label>
+                                <select class="form-control" @bind="newDocument.DocumentType">
+                                    <option value="">اختر نوع الوثيقة</option>
+                                    <option value="شهادة">شهادة</option>
+                                    <option value="قرار">قرار</option>
+                                    <option value="خطاب">خطاب</option>
+                                    <option value="عقد">عقد</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>قالب الوثيقة</label>
+                                <select class="form-control" @onchange="LoadTemplateContent">
+                                    <option value="0">بدون قالب</option>
+                                    @foreach (var template in templates)
+                                    {
+                                        <option value="@template.Id">@template.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>الجهة/الشخص المستلم</label>
+                                <input type="text" class="form-control" placeholder="أدخل اسم الجهة أو الشخص" @bind="newDocument.IssuedTo">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>محتوى الوثيقة <span class="text-danger">*</span></label>
+                                <textarea class="form-control" rows="10" @bind="newDocument.Content" placeholder="أدخل محتوى الوثيقة"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="SaveDocument">
+                    <i class="fas fa-save me-2"></i>حفظ الوثيقة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال عرض الوثيقة -->
+<div class="modal fade" id="viewDocumentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-alt"></i> عرض الوثيقة
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (selectedDocument != null)
+                {
+                    <div class="document-preview">
+                        <h4 class="preview-title">@selectedDocument.Title</h4>
+                        <div class="preview-meta mb-3">
+                            <span class="badge badge-primary">@selectedDocument.DocumentType</span>
+                            <span class="text-muted ml-2">رقم الوثيقة: @selectedDocument.DocumentNumber</span>
+                            <span class="text-muted ml-2">التاريخ: @selectedDocument.CreatedDate.ToString("yyyy-MM-dd")</span>
+                        </div>
+                        <div class="preview-content">
+                            @((MarkupString)selectedDocument.Content)
+                        </div>
+                        <div class="preview-footer mt-4 pt-3 border-top">
+                            <p class="mb-1"><strong>المستلم:</strong> @selectedDocument.IssuedTo</p>
+                            <p class="mb-1"><strong>الحالة:</strong> 
+                                <span class="badge @GetStatusClass(selectedDocument.Status)">
+                                    @GetStatusText(selectedDocument.Status)
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>إغلاق
+                </button>
+                <button type="button" class="btn btn-success" @onclick="PrintDocument">
+                    <i class="fas fa-print me-2"></i>طباعة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال التوقيع الإلكتروني -->
+<div class="modal fade" id="signDocumentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-signature"></i> توقيع الوثيقة إلكترونياً
+                </h5>
+                <button type="button" class="close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                    @if (documentToSign != null)
+                    {
+                    <div class="mb-3">
+                        <label class="form-label">الاسم <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="أدخل اسمك الكامل" @bind="signerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المنصب <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="أدخل منصبك" @bind="signerPosition" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">كلمة المرور <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" placeholder="أدخل كلمة المرور للتوقيع" @bind="signaturePassword" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        سيتم توقيع هذه الوثيقة إلكترونياً بشكل آمن باستخدام الشهادة الرقمية.
+                        <br>
+                        <small>الاسم: <strong>@signerName</strong></small>
+                        <br>
+                        <small>المنصب: <strong>@signerPosition</strong></small>
+                    </div>
+                    }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-info" @onclick="SignDocument" disabled="@(string.IsNullOrEmpty(signerName) || string.IsNullOrEmpty(signerPosition) || string.IsNullOrEmpty(signaturePassword))">
+                    <i class="fas fa-signature me-2"></i>توقيع الوثيقة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* أنماط CSS جديدة */
+    .documents-management-container {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f8fafc;
+        min-height: 100vh;
+    }
+    
+    .admin-header {
+        padding: 1.5rem 0;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .header-title h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .breadcrumb {
+        display: flex;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+    }
+    
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.8);
+    }
+    
+    .breadcrumb-item.active {
+        color: white;
+        font-weight: 500;
+    }
+    
+    .breadcrumb-item a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .breadcrumb-item a:hover {
+        color: white;
+    }
+    
+    .btn-refresh {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+    
+    /* بطاقات الإحصاءات */
+    .stats-cards {
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-dark {
+        color: white;
+    }
+    
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #1f6feb 0%, #1554c7 100%);
+    }
+    
+    .bg-warning-gradient {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .bg-info-gradient {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    }
+    
+    .icon-shape {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .bg-primary-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-warning-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-success-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-info-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* تبويبات التنقل */
+    .nav-pills .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .nav-pills .nav-link:hover {
+        color: #2c3e50;
+        background-color: #f8f9fa;
+    }
+    
+    .nav-pills .nav-link.active {
+        color: white;
+        background-color: #2c3e50;
+    }
+    
+    /* البحث والفلاتر */
+    .input-icon {
+        position: relative;
+    }
+    
+    .input-icon .form-control {
+        padding-right: 2.5rem;
+    }
+    
+    .input-icon-addon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    /* جدول الوثائق */
+    .table th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: right;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    
+    .document-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(52, 152, 219, 0.1);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #3498db;
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-draft {
+        background: rgba(241, 196, 15, 0.1);
+        color: #f1c40f;
+    }
+    
+    .status-issued {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+    
+    .status-signed {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+    
+    .btn-actions {
+        background: none;
+        border: none;
+        color: #6c757d;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .btn-actions:hover {
+        background: #f8f9fa;
+        color: #2c3e50;
+    }
+    
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .dropdown-item.text-success:hover {
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .dropdown-item.text-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    /* الترقيم */
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
+    
+    .page-item .page-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e9ecef;
+        color: #6c757d;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .page-item.active .page-link {
+        background: #2c3e50;
+        border-color: #2c3e50;
+        color: white;
+    }
+    
+    .page-item:not(.active) .page-link:hover {
+        background: #f8f9fa;
+        color: #2c3e50;
+    }
+    
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    /* المودالات */
+    .modal-content {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1.25rem;
+    }
+    
+    .modal-header.bg-info {
+        color: white;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .document-preview {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+    }
+    
+    .preview-title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .preview-meta .badge {
+        font-size: 0.8rem;
+    }
+    
+    .preview-content {
+        min-height: 300px;
+        line-height: 1.6;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+    
+    /* تصميم متجاوب */
+    @@media (max-width: 992px) {
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .input-icon {
+            width: 100%;
+        }
+        
+        .control-bar {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table {
+            min-width: 800px;
+        }
+        
+        .stat-card .card-body {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .icon-shape {
+            display: none;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .modal-dialog {
+            margin: 1rem;
+        }
+        
+        .pagination-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+
+@code {
+    private List<OfficialDocumentDto> documents = new();
+    private List<DocumentTemplateDto> templates = new();
+    private OfficialDocumentDto newDocument = new();
+    private OfficialDocumentDto selectedDocument;
+    private OfficialDocumentDto documentToSign;
+    
+    private string searchTerm = "";
+    private string signerName = "";
+    private string signerPosition = "";
+    private string selectedDocumentType = "";
+    private string signaturePassword = "";
+    private bool isEditMode = false;
+    private bool isEditorInitialized = false;
+    
+    // إحصائيات
+    private int totalDocuments = 0;
+    private int issuedDocuments = 0;
+    private int draftDocuments = 0;
+    private int signedDocuments = 0;
+    
+    // ترقيم الصفحات
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageSize = 10;
+    
+    // الفلاتر
+    private DocumentStatus currentStatus = DocumentStatus.All;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTemplates();
+        await LoadStatistics();
+        await LoadDocuments(DocumentStatus.All);
+    }
+        private async Task ShowSignModal(OfficialDocumentDto document)
+        {
+            documentToSign = document;
+            signaturePassword = "";
+            signerName = "";
+            signerPosition = "";
+            // فتح المودال
+            await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#signDocumentModal");
+        }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // تهيئة محرر النصوص
+            await InitializeEditor();
+        }
+    }
+    
+    private async Task InitializeEditor()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("initializeQuillEditor", "editor");
+            isEditorInitialized = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing editor: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadTemplates()
+    {
+        try
+        {
+            templates = await DocumentService.GetAllTemplatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading templates: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            totalDocuments = await DocumentService.GetTotalDocumentsCountAsync();
+            issuedDocuments = await DocumentService.GetIssuedDocumentsCountAsync();
+            draftDocuments = await DocumentService.GetDraftDocumentsCountAsync();
+            signedDocuments = await DocumentService.GetSignedDocumentsCountAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadDocuments(DocumentStatus status)
+    {
+        try
+        {
+            currentStatus = status;
+            var result = await DocumentService.GetDocumentsPagedAsync(
+                currentPage,
+                pageSize,
+                searchTerm,
+                selectedDocumentType,
+                status);
+            
+            documents = result.Data.ToList();
+            totalPages = result.TotalPages;
+            totalDocuments = result.TotalRecords;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading documents: {ex.Message}");
+        }
+    }
+    
+    private async Task RefreshDocuments()
+    {
+        await LoadStatistics();
+        await LoadDocuments(currentStatus);
+        StateHasChanged();
+    }
+    
+    private async Task SearchDocuments(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadDocuments(currentStatus);
+    }
+    
+    private async Task FilterByType(ChangeEventArgs e)
+    {
+        selectedDocumentType = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadDocuments(currentStatus);
+    }
+    
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadDocuments(currentStatus);
+        }
+    }
+    
+    private async Task ShowCreateModal()
+    {
+        isEditMode = false;
+        newDocument = new OfficialDocumentDto();
+        // فتح المودال
+        await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#documentModal");
+    }
+    
+    private async Task EditDocument(OfficialDocumentDto document)
+    {
+        isEditMode = true;
+        newDocument = document;
+        // فتح المودال
+        await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#documentModal");
+    }
+    
+    private async Task SaveDocument()
+    {
+        try
+        {
+            if (isEditMode)
+            {
+                await DocumentService.UpdateDocumentAsync(newDocument);
+            }
+            else
+            {
+                await DocumentService.CreateDocumentAsync(newDocument);
+            }
+            
+            await LoadStatistics();
+            await LoadDocuments(currentStatus);
+            
+            // إغلاق المودال
+            await JS.InvokeVoidAsync("bootstrap.Modal.hide", "#documentModal");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving document: {ex.Message}");
+        }
+    }
+    
+    private async Task ViewDocument(OfficialDocumentDto document)
+    {
+        selectedDocument = document;
+        // فتح المودال
+        await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#viewDocumentModal");
+    }
+    
+    private async Task PrintDocument()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("window.print");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error printing document: {ex.Message}");
+        }
+    }
+    
+   
+    
+        private async Task SignDocument()
+        {
+            if (documentToSign != null && !string.IsNullOrEmpty(signaturePassword) && !string.IsNullOrEmpty(signerName))
+            {
+                try
+                {
+                    var success = await DocumentService.SignDocumentAsync(documentToSign.Id, signaturePassword, signerName, signerPosition);
+                    if (success)
+                    {
+                        await JS.InvokeVoidAsync("bootstrap.Modal.hide", "#signDocumentModal");
+                        await RefreshDocuments();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error signing document: {ex.Message}");
+                }
+            }
+        }
+    
+    private async Task IssueDocument(OfficialDocumentDto document)
+    {
+        try
+        {
+            var success = await DocumentService.IssueDocumentAsync(document.Id);
+            if (success)
+            {
+                await RefreshDocuments();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error issuing document: {ex.Message}");
+        }
+    }
+    
+    private async Task DeleteDocument(int documentId)
+    {
+        try
+        {
+            await DocumentService.DeleteDocumentAsync(documentId);
+            await LoadStatistics();
+            await LoadDocuments(currentStatus);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting document: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadTemplateContent(ChangeEventArgs e)
+    {
+        var templateId = int.Parse(e.Value?.ToString() ?? "0");
+        if (templateId > 0)
+        {
+            try
+            {
+                var template = await DocumentService.GetTemplateByIdAsync(templateId);
+                newDocument.Content = template?.HtmlContent ?? "";
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading template content: {ex.Message}");
+            }
+        }
+    }
+    
+    // Helper functions
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "مسودة" => "status-draft",
+            "صادرة" => "status-issued",
+            "موقعة" => "status-signed",
+            _ => "status-draft"
+        };
+    }
+    
+    private string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "مسودة" => "مسودة",
+            "صادرة" => "صادرة",
+            "موقعة" => "موقعة",
+            _ => status
+        };
+    }   
+    
+}

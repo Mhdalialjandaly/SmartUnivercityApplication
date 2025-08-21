@@ -1,0 +1,664 @@
+﻿@inherits LayoutComponentBase
+
+<!DOCTYPE html>
+<html lang="ar"> <!-- تم تغيير اللغة إلى العربية والاتجاه إلى اليمين -->
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>الجامعة الذكية - لوحة التحكم</title>
+
+    <!-- الأيقونة -->
+    <link rel="icon" href="assets/img/icon.ico" type="image/x-icon" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- خطوط Google وخطوط مخصصة (WebFont) -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+            google: { "families": ["Lato:300,400,700,900"] },
+            custom: {
+                "families": [
+                    "Flaticon",
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons"
+                ],
+                urls: ['assets/css/fonts.min.css']
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            }
+        });
+    </script>
+
+    <!-- ملفات CSS الأساسية -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/atlantis.min.css" />
+    
+    <!-- ملف CSS للعرض التوضيحي فقط (يمكن إزالته في الإنتاج) -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+</head>
+
+<body data-background-color="dark">
+    <div class="wrapper">
+        <AuthorizeView>
+            <Authorized>
+                <!-- رأس الصفحة (Header) -->
+                <div class="main-header">                  
+                    <!-- شعار الصفحة (Logo Header) -->
+                    <div class="logo-header" data-background-color="dark2">
+                        <a href="index.html" class="logo">
+                            <img src="assets/img/logo.svg" alt="شعار الجامعة" class="navbar-brand" />
+                        </a>
+
+                        <!-- أزرار التحكم في الشريط الجانبي -->
+                        <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapse" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"><i class="icon-menu"></i></span>
+                        </button>
+                        <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+                        <div class="nav-toggle">
+                            <button class="btn btn-toggle toggle-sidebar">
+                                <i class="icon-menu"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- نهاية شعار الصفحة -->
+                  
+                    <!-- شريط التنقل العلوي (Navbar) -->
+                    <nav class="navbar navbar-header navbar-expand-lg" data-background-color="dark">
+                        <div class="container-fluid">
+                            <!-- حقل البحث -->
+                            <div class="collapse" id="search-nav">
+                                <form class="navbar-left navbar-form nav-search mr-md-3">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <button type="submit" class="btn btn-search pr-1">
+                                                <i class="fa fa-search search-icon"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text" placeholder="ابحث ..." class="form-control" />
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- قائمة الإشعارات والملف الشخصي -->
+                            <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+                                <!-- زر البحث -->
+                                <li class="nav-item toggle-nav-search hidden-caret">
+                                    <a class="nav-link" data-toggle="collapse" href="#search-nav" role="button" aria-expanded="false" aria-controls="search-nav">
+                                        <i class="fa fa-search"></i>
+                                    </a>
+                                </li>
+
+                                <!-- رسائل -->
+                                <li class="nav-item dropdown hidden-caret">
+                                    <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-envelope"></i>
+                                    </a>
+                                    <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                                        <li>
+                                            <div class="dropdown-title d-flex justify-content-between align-items-center">
+                                                الرسائل
+                                                <a href="#" class="small">تحديد الكل كمقروء</a>
+                                                <a href="/chat" class="small">الانتقال لواجهة المحادثة</a>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="message-notif-scroll scrollbar-outer">
+                                                <div class="notif-center">
+                                                    <a href="#">
+                                                        <div class="notif-img">
+                                                            <img src="assets/img/jm_denis.jpg" alt="صورة المستخدم" />
+                                                        </div>
+                                                        <div class="notif-content">
+                                                            <span class="subject">جيمي دينيس</span>
+                                                            <span class="block">كيف حالك؟</span>
+                                                            <span class="time">منذ 5 دقائق</span>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#">
+                                                        <div class="notif-img">
+                                                            <img src="assets/img/chadengle.jpg" alt="صورة المستخدم" />
+                                                        </div>
+                                                        <div class="notif-content">
+                                                            <span class="subject">تشارلز</span>
+                                                            <span class="block">حسناً، شكراً!</span>
+                                                            <span class="time">منذ 12 دقيقة</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="see-all" href="javascript:void(0);">عرض جميع الرسائل <i class="fa fa-angle-right"></i></a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- إشعارات -->
+                                <li class="nav-item dropdown hidden-caret">
+                                    <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-bell"></i>
+                                        <span class="notification">4</span>
+                                    </a>
+                                    <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                                        <li>
+                                            <div class="dropdown-title">لديك 4 إشعارات جديدة</div>
+                                        </li>
+                                        <li>
+                                            <div class="notif-scroll scrollbar-outer">
+                                                <div class="notif-center">
+                                                    <a href="#">
+                                                        <div class="notif-icon notif-primary"><i class="fa fa-user-plus"></i></div>
+                                                        <div class="notif-content">
+                                                            <span class="block">مستخدم جديد مسجل</span>
+                                                            <span class="time">منذ 5 دقائق</span>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#">
+                                                        <div class="notif-icon notif-success"><i class="fa fa-comment"></i></div>
+                                                        <div class="notif-content">
+                                                            <span class="block">علّق رحمة على لوحة التحكم</span>
+                                                            <span class="time">منذ 12 دقيقة</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="see-all" href="javascript:void(0);">عرض جميع الإشعارات <i class="fa fa-angle-right"></i></a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- اختصارات سريعة -->
+                                <li class="nav-item dropdown hidden-caret">
+                                    <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+                                        <i class="fas fa-layer-group"></i>
+                                    </a>
+                                    <div class="dropdown-menu quick-actions quick-actions-info animated fadeIn">
+                                        <div class="quick-actions-header">
+                                            <div class="header-content">
+                                                <h6 class="title">الإجراءات السريعة</h6>
+                                                <p class="subtitle">اختصارات سريعة للوصول الفوري</p>
+                                            </div>
+                                        </div>
+                                        <div class="quick-actions-scroll">
+                                            <div class="quick-actions-items">
+                                                <div class="row g-0">
+                                                    <a class="col-6 col-md-4 p-0" href="/students/add">
+                                                        <div class="quick-action-item">
+                                                            <div class="action-icon bg-primary-light">
+                                                                <i class="fas fa-user-plus"></i>
+                                                            </div>
+                                                            <span class="action-text">إضافة طالب</span>
+                                                        </div>
+                                                    </a>
+                                                    <a class="col-6 col-md-4 p-0" href="/academic/courses">
+                                                        <div class="quick-action-item">
+                                                            <div class="action-icon bg-success-light">
+                                                                <i class="fas fa-book"></i>
+                                                            </div>
+                                                            <span class="action-text">إدارة المواد</span>
+                                                        </div>
+                                                    </a>
+                                                    <a class="col-6 col-md-4 p-0" href="/schedule-management">
+                                                        <div class="quick-action-item">
+                                                            <div class="action-icon bg-info-light">
+                                                                <i class="fas fa-calendar-alt"></i>
+                                                            </div>
+                                                            <span class="action-text">جدول المحاضرات</span>
+                                                        </div>
+                                                    </a>
+                                                    <a class="col-6 col-md-4 p-0" href="/lecturers/list">
+                                                        <div class="quick-action-item">
+                                                            <div class="action-icon bg-warning-light">
+                                                                <i class="fas fa-chalkboard-teacher"></i>
+                                                            </div>
+                                                            <span class="action-text">قائمة الأساتذة</span>
+                                                        </div>
+                                                    </a>
+                                                    <a class="col-6 col-md-4 p-0" href="/analytics/grades">
+                                                        <div class="quick-action-item">
+                                                            <div class="action-icon bg-danger-light">
+                                                                <i class="fas fa-chart-line"></i>
+                                                            </div>
+                                                            <span class="action-text">تحليل الدرجات</span>
+                                                        </div>
+                                                    </a>
+                                                    <a class="col-6 col-md-4 p-0" href="/library/search">
+                                                        <div class="quick-action-item">
+                                                            <div class="action-icon bg-purple-light">
+                                                                <i class="fas fa-search"></i>
+                                                            </div>
+                                                            <span class="action-text">بحث في المكتبة</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <!-- الملف الشخصي -->
+                                <li class="nav-item dropdown hidden-caret">
+                                    <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+                                        <div class="avatar-sm">
+                                            <img src="profile.jpg" alt="الملف الشخصي" class="avatar-img rounded-circle" />
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                        <div class="dropdown-user-scroll scrollbar-outer">
+                                            <li>
+                                                <div class="user-box">
+                                                    <div class="avatar-lg">
+                                                        <img src="favicon.png" alt="الصورة الشخصية" class="avatar-img rounded" />
+                                                    </div>
+                                                    <div class="u-text">
+                                                    <h4>@context.User.Identity?.Name</h4>
+                                                    <p class="text-muted">@context.User.Identity?.Name</p>
+                                                    <a href="favicon.png" class="btn btn-xs btn-secondary btn-sm">عرض الملف</a>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="favicon.png">ملفي الشخصي</a>
+                                            <a class="dropdown-item" href="/Account/Register">تسجيل جديد</a>
+                                                <a class="dropdown-item" href="settings.html">إعدادات الحساب</a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="logout">تسجيل الخروج</a>
+                                            </li>
+                                        </div>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                    <!-- نهاية شريط التنقل -->
+
+                    <!-- القائمة الجانبية (تم تضمينها كمكوّن Blazor) -->
+                    <NavMenu />
+                </div>
+                <!-- نهاية Navbar -->
+            </Authorized>
+        </AuthorizeView>
+        <Toast/>
+        <!-- محتوى الصفحة -->
+        @Body
+
+        <!-- لوحة الإعدادات (لأغراض التصميم فقط - يمكن إزالتها في الإنتاج) -->
+       @*  <AuthorizeView>
+            <Authorized>
+                <div class="custom-template">
+                    <div class="title">الإعدادات</div>
+                    <div class="custom-content">
+                        <div class="switcher">
+                            <div class="switch-block">
+                                <h4>لون الشعار</h4>
+                                <div class="btnSwitch">
+                                    <button type="button" class="changeLogoHeaderColor" data-color="dark"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="blue"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="purple"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="light-blue"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="green"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="orange"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="red"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="white"></button>
+                                    <br />
+                                    <button type="button" class="selected changeLogoHeaderColor" data-color="dark2"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="blue2"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="purple2"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="light-blue2"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="green2"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="orange2"></button>
+                                    <button type="button" class="changeLogoHeaderColor" data-color="red2"></button>
+                                </div>
+                            </div>
+                            <div class="switch-block">
+                                <h4>شريط التنقل</h4>
+                                <div class="btnSwitch">
+                                    <button type="button" class="selected changeTopBarColor" data-color="dark"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="blue"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="purple"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="light-blue"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="green"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="orange"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="red"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="white"></button>
+                                    <br />
+                                    <button type="button" class="changeTopBarColor" data-color="dark2"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="blue2"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="purple2"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="light-blue2"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="green2"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="orange2"></button>
+                                    <button type="button" class="changeTopBarColor" data-color="red2"></button>
+                                </div>
+                            </div>
+                            <div class="switch-block">
+                                <h4>الشريط الجانبي</h4>
+                                <div class="btnSwitch">
+                                    <button type="button" class="changeSideBarColor" data-color="white"></button>
+                                    <button type="button" class="changeSideBarColor" data-color="dark"></button>
+                                    <button type="button" class="selected changeSideBarColor" data-color="dark2"></button>
+                                </div>
+                            </div>
+                            <div class="switch-block">
+                                <h4>الخلفية</h4>
+                                <div class="btnSwitch">
+                                    <button type="button" class="changeBackgroundColor" data-color="bg2"></button>
+                                    <button type="button" class="changeBackgroundColor selected" data-color="bg1"></button>
+                                    <button type="button" class="changeBackgroundColor" data-color="bg3"></button>
+                                    <button type="button" class="selected changeBackgroundColor" data-color="dark"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="custom-toggle">
+                        <i class="flaticon-settings"></i>
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView> *@
+    </div>
+
+    <!-- ملفات JavaScript الأساسية -->
+    <script src="assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery UI -->
+    <script src="assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- المخططات والرسوم البيانية -->
+    <script src="assets/js/plugin/chart.js/chart.min.js"></script>
+    <script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+    <script src="assets/js/plugin/chart-circle/circles.min.js"></script>
+
+    <!-- الجداول -->
+    <script src="assets/js/plugin/datatables/datatables.min.js"></script>
+
+    <!-- الإشعارات -->
+    <script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+
+    <!-- الخرائط -->
+    <script src="assets/js/plugin/jqvmap/jquery.vmap.min.js"></script>
+    <script src="assets/js/plugin/jqvmap/maps/jquery.vmap.world.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- نظام Atlantis -->
+    <script src="assets/js/atlantis.min.js"></script>
+
+    <!-- ملفات تجريبية (لأغراض العرض فقط) -->
+    <script src="assets/js/setting-demo.js"></script>
+    <script src="assets/js/demo.js"></script>
+    <style>
+    /* Quick Actions Dropdown - تصميم الجامعة الذكية */
+    .quick-actions-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0ea37a 0%, #087a5c 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+        .quick-actions-icon i {
+            color: white;
+            font-size: 16px;
+        }
+
+    .nav-link:hover .quick-actions-icon {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(14, 163, 122, 0.25);
+    }
+
+    .dropdown-menu.quick-actions {
+        width: 320px;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        padding: 0;
+        margin-top: 12px;
+        direction: rtl;
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    .quick-actions-header {
+        padding: 20px;
+        background: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
+        border-radius: 16px 16px 0 0;
+        color: white;
+    }
+
+        .quick-actions-header .title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: white;
+        }
+
+        .quick-actions-header .subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            margin: 0;
+            font-weight: 400;
+        }
+
+    .quick-actions-scroll {
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .quick-actions-items {
+        padding: 15px;
+    }
+
+        .quick-actions-items .row {
+            margin: 0 -5px;
+        }
+
+        .quick-actions-items [class*="col-"] {
+            padding: 5px;
+        }
+
+    .quick-action-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px 10px;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        height: 100%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+        .quick-action-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-color: #cbd5e1;
+        }
+
+    .action-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+
+    .action-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        line-height: 1.3;
+    }
+
+    /* ألوان الأيقونات */
+    .bg-primary-light {
+        background: rgba(14, 163, 122, 0.15);
+        color: #0ea37a;
+    }
+
+    .bg-success-light {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+
+    .bg-info-light {
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+    }
+
+    .bg-warning-light {
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+    }
+
+    .bg-danger-light {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .bg-purple-light {
+        background: rgba(147, 51, 234, 0.15);
+        color: #9333ea;
+    }
+
+    /* Scrollbar Customization */
+    .quick-actions-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .quick-actions-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+
+    .quick-actions-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+
+        .quick-actions-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+    /* Responsive Design */
+   @@media (max-width: 768px) {
+        .dropdown-menu.quick-actions {
+            width: 280px;
+            left: -100px !important;
+        }
+
+        .quick-action-item {
+            padding: 12px 8px;
+        }
+
+        .action-text {
+            font-size: 12px;
+        }
+    }
+
+   @@media (max-width: 576px) {
+        .dropdown-menu.quick-actions {
+            width: 260px;
+            left: -120px !important;
+        }
+
+        .quick-actions-header {
+            padding: 15px;
+        }
+
+            .quick-actions-header .title {
+                font-size: 16px;
+            }
+
+            .quick-actions-header .subtitle {
+                font-size: 12px;
+            }
+    }
+
+    /* Animation for dropdown */
+    .animated.fadeIn {
+        animation-duration: 0.3s;
+        animation-fill-mode: both;
+        animation-name: fadeIn;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+    <!-- تهيئة Sparkline -->
+    <script>
+        $('#lineChart').sparkline([102, 109, 120, 99, 110, 105, 115], {
+            type: 'line',
+            height: '70',
+            width: '100%',
+            lineWidth: '2',
+            lineColor: 'rgba(255, 255, 255, .5)',
+            fillColor: 'rgba(255, 255, 255, .15)'
+        });
+
+        $('#lineChart2').sparkline([99, 125, 122, 105, 110, 124, 115], {
+            type: 'line',
+            height: '70',
+            width: '100%',
+            lineWidth: '2',
+            lineColor: 'rgba(255, 255, 255, .5)',
+            fillColor: 'rgba(255, 255, 255, .15)'
+        });
+
+        $('#lineChart3').sparkline([105, 103, 123, 100, 95, 105, 115], {
+            type: 'line',
+            height: '70',
+            width: '100%',
+            lineWidth: '2',
+            lineColor: 'rgba(255, 255, 255, .5)',
+            fillColor: 'rgba(255, 255, 255, .15)'
+        });
+    </script>
+</body>
+</html>
+
+@code {
+    private bool darkMode = false;
+
+    private void ToggleDarkMode()
+    {
+        darkMode = !darkMode;
+        // يمكنك إضافة منطق لتغيير السمة هنا
+    }
+}

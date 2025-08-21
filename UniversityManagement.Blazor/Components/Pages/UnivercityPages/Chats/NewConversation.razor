@@ -1,0 +1,923 @@
+﻿@page "/chat/new"
+@inject IChatServices ChatService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="new-conversation-container university-theme">
+                <div class="new-conversation-card">
+                    <div class="card-header university-header">
+                        <div class="header-content">
+                            <div class="header-main">
+                                <div class="header-icon">
+                                    <i class="fas fa-comment-medical"></i>
+                                </div>
+                                <div class="header-text">
+                                    <h2 class="card-title">محادثة جديدة</h2>
+                                    <p class="card-subtitle">ابدأ محادثة جديدة مع زملائك أو أساتذتك</p>
+                                </div>
+                            </div>
+                            <button class="btn-close-university" @onclick="Cancel" title="إغلاق">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="progress-indicator">
+                            <div class="progress-step @(currentStep >= 1 ? "active" : "")">
+                                <div class="step-number">1</div>
+                                <div class="step-label">النوع</div>
+                            </div>
+                            <div class="progress-step @(currentStep >= 2 ? "active" : "")">
+                                <div class="step-number">2</div>
+                                <div class="step-label">العنوان</div>
+                            </div>
+                            <div class="progress-step @(currentStep >= 3 ? "active" : "")">
+                                <div class="step-number">3</div>
+                                <div class="step-label">المشاركون</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-section">
+                            @switch (currentStep)
+                            {
+                                case 1:
+                                    <div class="step-content">
+                                        <h3 class="step-title">اختر نوع المحادثة</h3>
+                                        <p class="step-description">حدد ما إذا كنت تريد محادثة خاصة أو مجموعة</p>
+
+                                        <div class="conversation-type-selector">
+                                            <div class="type-option @(newConversation.IsGroup == false ? "selected" : "")"
+                                                 @onclick="() => newConversation.IsGroup = false">
+                                                <div class="type-icon private-icon">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <div class="type-content">
+                                                    <h4 class="type-title">محادثة خاصة</h4>
+                                                    <p class="type-description">محادثة بين شخصين فقط</p>
+                                                </div>
+                                                <div class="type-check">
+                                                    @if (newConversation.IsGroup == false)
+                                                    {
+                                                        <i class="fas fa-check-circle"></i>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="type-option @(newConversation.IsGroup == true ? "selected" : "")"
+                                                 @onclick="() => newConversation.IsGroup = true">
+                                                <div class="type-icon group-icon">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <div class="type-content">
+                                                    <h4 class="type-title">مجموعة</h4>
+                                                    <p class="type-description">محادثة جماعية مع عدة مشاركين</p>
+                                                </div>
+                                                <div class="type-check">
+                                                    @if (newConversation.IsGroup == true)
+                                                    {
+                                                        <i class="fas fa-check-circle"></i>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case 2:
+                                    <div class="step-content">
+                                        <h3 class="step-title">عنوان المحادثة</h3>
+                                        <p class="step-description">أدخل عنوانًا وصفيًا للمحادثة</p>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-heading me-2"></i>
+                                                عنوان المحادثة
+                                            </label>
+                                            <input type="text"
+                                                   class="form-input university-input"
+                                                   @bind="newConversation.Title"
+                                                   placeholder="مثال: مشروع التخرج - فريق العمل"
+                                                   maxlength="100" />
+                                            <div class="input-info">
+                                                <small class="form-help">
+                                                    @newConversation.Title.Length/100 حرف
+                                                </small>
+                                                @if (newConversation.IsGroup && string.IsNullOrWhiteSpace(newConversation.Title))
+                                                {
+                                                    <small class="form-error">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        العنوان مطلوب للمحادثات الجماعية
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="preview-card">
+                                            <div class="preview-header">
+                                                <div class="preview-avatar">
+                                                    @if (newConversation.IsGroup)
+                                                    {
+                                                        <i class="fas fa-users"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-user"></i>
+                                                    }
+                                                </div>
+                                                <div class="preview-info">
+                                                    <h5 class="preview-title">
+                                                        @(string.IsNullOrWhiteSpace(newConversation.Title) ? "عنوان المحادثة" : newConversation.Title)
+                                                    </h5>
+                                                    <p class="preview-type">
+                                                        @(newConversation.IsGroup ? "مجموعة" : "محادثة خاصة")
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case 3:
+                                    <div class="step-content">
+                                        <h3 class="step-title">اختر المشاركون</h3>
+                                        <p class="step-description">حدد المستخدمين الذين تريد إضافتهم إلى المحادثة</p>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-user-friends me-2"></i>
+                                                المشاركون
+                                            </label>
+                                            <div class="user-selector-container">
+                                                <UserSelector SelectedUsers="selectedUsers" />
+                                            </div>
+                                        </div>
+
+                                        @if (selectedUsers.Any())
+                                        {
+                                            <div class="selected-users-preview">
+                                                <h4 class="preview-title">المشاركون المحددون (@selectedUsers.Count)</h4>
+                                                <div class="selected-users-grid">
+                                                    @foreach (var user in selectedUsers.Take(6))
+                                                    {
+                                                        <div class="selected-user-item">
+                                                            <div class="user-avatar-small">
+                                                                <i class="fas fa-user"></i>
+                                                            </div>
+                                                            <span class="user-name">@user.FullName</span>
+                                                        </div>
+                                                    }
+                                                    @if (selectedUsers.Count > 6)
+                                                    {
+                                                        <div class="selected-user-item more-users">
+                                                            <span class="more-count"> + @(selectedUsers.Count - 6)</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    break;
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card-footer university-footer">
+                        <div class="footer-actions">
+                            @if (currentStep > 1)
+                            {
+                                <button class="btn-secondary-university" @onclick="PreviousStep">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    السابق
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-secondary-university" @onclick="Cancel">
+                                    <i class="fas fa-times me-2"></i>
+                                    إلغاء
+                                </button>
+                            }
+
+                            @if (currentStep < 3)
+                            {
+                                <button class="btn-primary-university" @onclick="NextStep"
+                                        disabled="@(!CanProceedToNextStep())">
+                                    <span>التالي</span>
+                                    <i class="fas fa-arrow-left ms-2"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-create-conversation" @onclick="CreateConversation"
+                                        disabled="@(!CanCreateConversation() || isCreating)">
+                                    @if (isCreating)
+                                    {
+                                        <span class="spinner-small me-2"></span>
+                                        <span>جاري الإنشاء...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        <span>إنشاء المحادثة</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* University New Conversation Theme - RTL */
+    .new-conversation-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 120px);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        direction: rtl;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+    }
+
+    .new-conversation-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 650px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Header Styles */
+    .card-header.university-header {
+        background: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
+        color: white;
+        padding: 25px 30px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .header-main {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header-icon {
+        width: 56px;
+        height: 56px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .header-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-title {
+        margin: 0 0 5px 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .card-subtitle {
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 1rem;
+        font-weight: 400;
+    }
+
+    .btn-close-university {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        font-size: 18px;
+    }
+
+        .btn-close-university:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+    /* Progress Indicator */
+    .progress-indicator {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin-top: 25px;
+    }
+
+        .progress-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 1;
+        }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+        flex: 1;
+    }
+
+        .progress-step.active .step-number {
+            background: #0ea37a;
+            border-color: #0ea37a;
+            color: white;
+        }
+
+        .progress-step.active .step-label {
+            color: #0ea37a;
+            font-weight: 600;
+        }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .step-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* Card Body */
+    .card-body {
+        padding: 30px;
+    }
+
+    .step-content {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .step-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0f1724;
+        margin: 0 0 8px 0;
+    }
+
+    .step-description {
+        color: #64748b;
+        font-size: 1.05rem;
+        margin: 0 0 20px 0;
+        line-height: 1.5;
+    }
+
+    /* Conversation Type Selector */
+    .conversation-type-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .type-option {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #f8fafc;
+    }
+
+        .type-option:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .type-option.selected {
+            border-color: #0ea37a;
+            background: #f0fdf4;
+            box-shadow: 0 4px 12px rgba(14, 163, 122, 0.15);
+        }
+
+    .type-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-left: 20px;
+        flex-shrink: 0;
+    }
+
+    .private-icon {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .group-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+
+    .type-content {
+        flex: 1;
+    }
+
+    .type-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #0f1724;
+        margin: 0 0 5px 0;
+    }
+
+    .type-description {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .type-check {
+        color: #0ea37a;
+        font-size: 24px;
+        margin-right: 15px;
+    }
+
+    /* Form Styles */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #0f1724;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .university-input {
+        padding: 14px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #f8fafc;
+        color: #0f1724;
+        font-family: inherit;
+    }
+
+        .university-input:focus {
+            outline: none;
+            border-color: #0ea37a;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(14, 163, 122, 0.15);
+        }
+
+    .input-info {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+    }
+
+    .form-help {
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+
+    .form-error {
+        font-size: 0.85rem;
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Preview Card */
+    .preview-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+    }
+
+    .preview-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0ea37a 0%, #087a5c 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-left: 15px;
+        flex-shrink: 0;
+    }
+
+    .preview-info {
+        flex: 1;
+    }
+
+    .preview-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f1724;
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .preview-type {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    /* User Selector */
+    .user-selector-container {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+    }
+
+    .selected-users-preview {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .preview-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f1724;
+        margin: 0 0 15px 0;
+    }
+
+    .selected-users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+    }
+
+    .selected-user-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .user-avatar-small {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .user-name {
+        font-size: 0.85rem;
+        color: #0f1724;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .more-users {
+        background: #0ea37a;
+        color: white;
+        border-color: #0ea37a;
+    }
+
+    .more-count {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Footer */
+    .card-footer.university-footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 20px 30px;
+    }
+
+    .footer-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .btn-secondary-university, .btn-primary-university, .btn-create-conversation {
+        padding: 14px 24px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        min-width: 120px;
+    }
+
+    .btn-secondary-university {
+        background: #f1f5f9;
+        color: #0f1724;
+        border: 1px solid #e2e8f0;
+    }
+
+        .btn-secondary-university:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+    .btn-primary-university {
+        background: linear-gradient(135deg, #0ea37a 0%, #087a5c 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(14, 163, 122, 0.25);
+    }
+
+        .btn-primary-university:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(14, 163, 122, 0.35);
+        }
+
+        .btn-primary-university:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+    .btn-create-conversation {
+        background: linear-gradient(135deg, #0ea37a 0%, #087a5c 100%);
+        color: white;
+        flex: 1;
+        box-shadow: 0 4px 12px rgba(14, 163, 122, 0.25);
+    }
+
+        .btn-create-conversation:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(14, 163, 122, 0.35);
+        }
+
+        .btn-create-conversation:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+    /* Loading Spinner */
+    .spinner-small {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f4f6;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .new-conversation-container {
+            padding: 15px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .new-conversation-card {
+            max-width: 100%;
+        }
+
+        .card-header.university-header, .card-body, .card-footer.university-footer {
+            padding: 20px;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+        }
+
+        .step-description {
+            font-size: 0.95rem;
+        }
+
+        .type-option {
+            padding: 15px;
+        }
+
+        .type-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+            margin-left: 15px;
+        }
+
+        .type-title {
+            font-size: 1rem;
+        }
+
+        .footer-actions {
+            flex-direction: column;
+        }
+
+        .btn-secondary-university, .btn-primary-university, .btn-create-conversation {
+            width: 100%;
+        }
+
+        .selected-users-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .new-conversation-container {
+            padding: 10px;
+        }
+
+        .card-header.university-header, .card-body, .card-footer.university-footer {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .step-title {
+            font-size: 1.1rem;
+        }
+
+        .university-input {
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+
+        .preview-card {
+            padding: 15px;
+        }
+
+        .selected-users-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+
+@code {
+    private ConversationDto newConversation = new ConversationDto { IsGroup = false, Title = "" };
+    private List<UserDto> selectedUsers = new List<UserDto>();
+    private bool isCreating = false;
+    private int currentStep = 1;
+    private List<UserConversationDto> UserConversations = new  List<UserConversationDto>();
+    private async Task CreateConversation()
+    {
+        if (isCreating || !CanCreateConversation()) return;
+
+        try
+        {
+            isCreating = true;
+
+            foreach (var item in selectedUsers)
+            {
+                UserConversations.Add(new UserConversationDto {User = item});
+            }    
+
+            newConversation.Participants = UserConversations;
+            var createdConversation = await ChatService.CreateConversationAsync(newConversation);
+            Navigation.NavigateTo("/chat");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating conversation: {ex.Message}");
+            // يمكنك إضافة رسالة خطأ للمستخدم هنا
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/chat");
+    }
+
+    private void NextStep()
+    {
+        if (CanProceedToNextStep() && currentStep < 3)
+        {
+            currentStep++;
+        }
+    }
+
+    private void PreviousStep()
+    {
+        if (currentStep > 1)
+        {
+            currentStep--;
+        }
+    }
+
+    private bool CanProceedToNextStep()
+    {
+        switch (currentStep)
+        {
+            case 1:
+                return true; // يمكن الانتقال من الخطوة 1 في أي وقت
+            case 2:
+                // للخطوة 3: إذا كانت محادثة خاصة أو كانت مجموعة مع عنوان
+                return newConversation.IsGroup == false || !string.IsNullOrWhiteSpace(newConversation.Title);
+            default:
+                return false;
+        }
+    }
+
+    private bool CanCreateConversation()
+    {
+        return selectedUsers.Count > 0 &&
+               (newConversation.IsGroup == false || !string.IsNullOrWhiteSpace(newConversation.Title));
+    }
+}

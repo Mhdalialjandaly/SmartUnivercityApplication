@@ -15,7 +15,12 @@ namespace UniversityManagementSystem.Infrastructure.Data.Repositories
             _context = context;
             _dbSet = context.Set<T>();
         }
-
+        public IQueryable<T> GetAllIncluding(params Expression<Func<T, object>>[] includeProperties)
+        {
+            var query = _dbSet.AsQueryable();
+            return includeProperties.Aggregate(query,
+                (current, includeProperty) => current.Include(includeProperty));
+        }
         public async Task<T> GetByIdAsync(object id, params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = _dbSet;

@@ -24,7 +24,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public string Reason { get; set; } 
 
         [StringLength(20)]
-        public string Status { get; set; } // معلق, مقبول, مرفوض
+        public string Status { get; set; } 
 
         [StringLength(200)]
         public string Notes { get; set; } 

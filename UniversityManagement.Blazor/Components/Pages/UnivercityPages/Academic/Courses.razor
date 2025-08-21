@@ -1,0 +1,849 @@
+﻿@page "/academic/courses"
+@attribute [Authorize]
+@inject ICourseServices CourseService
+@inject IDepartmentServices DepartmentService
+@inject IProfessorServices ProfessorServices
+@rendermode InteractiveServer
+
+<PageTitle>إدارة المواد الدراسية - الجامعة الذكية</PageTitle>
+
+<div class="main-panel" data-background-color="dark">
+    <div class="content">
+        <div class="page-inner">
+            <!-- شريط العنوان والتنقل -->
+            <div class="page-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="page-title text-white">
+                        <i class="fas fa-book-open me-2"></i> إدارة المواد الدراسية
+                    </h4>
+                    <div class="ml-md-auto">
+                        <ul class="breadcrumbs">
+                            <li class="nav-home">
+                                <a href="/">
+                                    <i class="fas fa-home text-white"></i>
+                                </a>
+                            </li>
+                            <li class="separator">
+                                <i class="fas fa-chevron-left text-white"></i>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/academic" class="text-white">الشؤون الأكاديمية</a>
+                            </li>
+                            <li class="separator">
+                                <i class="fas fa-chevron-left text-white"></i>
+                            </li>
+                            <li class="nav-item">
+                                <span class="text-white">المواد الدراسية</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقات الإحصائيات -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card card-dark bg-primary-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@courseStatistics.TotalCourses</h2>
+                                    <p class="mb-0">إجمالي المواد</p>
+                                </div>
+                                <div class="icon-shape bg-primary-light rounded-circle">
+                                    <i class="fas fa-book text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" @onclick="() => LoadCourses(CourseStatus.All)" class="text-white">
+                                    عرض الكل <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card card-dark bg-success-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@courseStatistics.ActiveCourses</h2>
+                                    <p class="mb-0">مواد نشطة</p>
+                                </div>
+                                <div class="icon-shape bg-success-light rounded-circle">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" @onclick="() => LoadCourses(CourseStatus.Active)" class="text-white">
+                                    عرض النشطة <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card card-dark bg-warning-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@courseStatistics.TotalStudents</h2>
+                                    <p class="mb-0">طلاب مسجلون</p>
+                                </div>
+                                <div class="icon-shape bg-warning-light rounded-circle">
+                                    <i class="fas fa-users text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" class="text-white">
+                                    عرض التسجيلات <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card card-dark bg-info-gradient">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h2 class="mb-0">@courseStatistics.TotalRevenue.ToString("C0")</h2>
+                                    <p class="mb-0">إجمالي الإيرادات</p>
+                                </div>
+                                <div class="icon-shape bg-info-light rounded-circle">
+                                    <i class="fas fa-dollar-sign text-info"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="#" class="text-white">
+                                    تحليل الإيرادات <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة التحكم الرئيسية -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">قائمة المواد الدراسية</h4>
+                        <div class="ml-auto">
+                            <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#addCourseModal">
+                                <i class="fas fa-plus-circle me-2"></i>مادة جديدة
+                            </button>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                    <i class="fas fa-bolt me-2"></i>روابط سريعة
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="/academic/lectures"><i class="fas fa-chalkboard-teacher me-2"></i>المحاضرات</a>
+                                    <a class="dropdown-item" href="/academic/exams"><i class="fas fa-clipboard-list me-2"></i>الامتحانات</a>
+                                    <a class="dropdown-item" href="/academic/schedules"><i class="fas fa-calendar-alt me-2"></i>الجدول الدراسي</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- علامات التبويب -->
+                    <ul class="nav nav-pills nav-secondary" id="courseTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="all-tab" data-toggle="pill" href="#all" role="tab" @onclick="() => LoadCourses(CourseStatus.All)">
+                                <i class="fas fa-list me-2"></i>الكل
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="active-tab" data-toggle="pill" href="#active" role="tab" @onclick="() => LoadCourses(CourseStatus.Active)">
+                                <i class="fas fa-check-circle me-2"></i>نشطة
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="elective-tab" data-toggle="pill" href="#elective" role="tab" @onclick="() => LoadCourses(CourseStatus.Elective)">
+                                <i class="fas fa-star me-2"></i>اختيارية
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="required-tab" data-toggle="pill" href="#required" role="tab" @onclick="() => LoadCourses(CourseStatus.Required)">
+                                <i class="fas fa-bookmark me-2"></i>إجبارية
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- شريط البحث والتصفية -->
+                    <div class="row mt-3">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <div class="input-icon">
+                                    <input type="text" class="form-control" placeholder="ابحث عن مادة..." @bind="searchTerm" @oninput="SearchCourses">
+                                    <span class="input-icon-addon">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <select class="form-control" @onchange="FilterByDepartment">
+                                    <option value="">كل الأقسام</option>
+                                    @foreach (var dept in departments)
+                                    {
+                                        <option value="@dept.Id">@dept.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- جدول المواد الدراسية -->
+                    <div class="table-responsive" dir="rtl">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="50px">#</th>
+                                    <th>اسم المادة</th>
+                                    <th width="120px">رمز المادة</th>
+                                    <th width="150px">القسم</th>
+                                    <th width="120px">المحاضر</th>
+                                    <th width="100px">الساعات</th>
+                                    <th width="100px">الحالة</th>
+                                    <th width="80px">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (courses.Any())
+                                {
+                                    @for (int i = 0; i < courses.Count; i++)
+                                    {
+                                        var course = courses[i];
+                                        <tr>
+                                            <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="course-icon bg-primary-light rounded-circle mr-3">
+                                                        <i class="fas fa-book text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="d-block font-weight-bold">@course.Name</span>
+                                                        <small class="text-muted">
+                                                            <i class="fas @(course.IsActive ? "fa-check text-success" : "fa-times text-danger") mr-1"></i>
+                                                            @(course.IsActive ? "نشطة" : "غير نشطة")
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-primary">@course.Code</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">
+                                                    @GetDepartmentName(course.DepartmentId)
+                                                </span>
+                                            </td>
+                                            <td>@course.Instructor</td>
+                                            <td>
+                                                <span class="badge @GetCreditsClass(course.Credits)">
+                                                    @course.Credits ساعات
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetStatusClass(course.IsActive)">
+                                                    @(course.IsActive ? "نشطة" : "غير نشطة")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="/academic/courses/@course.Id">
+                                                            <i class="fas fa-eye mr-2"></i>عرض
+                                                        </a>
+                                                        <a class="dropdown-item" href="/academic/courses/@course.Id/edit">
+                                                            <i class="fas fa-edit mr-2"></i>تعديل
+                                                        </a>
+                                                        <a class="dropdown-item" href="/academic/courses/@course.Id/students">
+                                                            <i class="fas fa-users mr-2"></i>الطلاب
+                                                        </a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteCourse(course.Id)">
+                                                            <i class="fas fa-trash mr-2"></i>حذف
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="text-center py-5">
+                                                <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">لا توجد مواد دراسية</p>
+                                                <button class="btn btn-primary" data-toggle="modal" data-target="#addCourseModal">
+                                                    <i class="fas fa-plus mr-2"></i>إضافة مادة جديدة
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ترقيم الصفحات -->
+                    @if (totalPages > 1)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted">
+                                عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, courseStatistics.TotalCourses) من @courseStatistics.TotalCourses
+                            </div>
+                            <ul class="pagination">
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+
+                                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إضافة مادة جديدة -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle mr-2"></i>إضافة مادة جديدة
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- شريط التقدم -->
+                <div class="form-progress mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        @for (int i = 1; i <= totalSteps; i++)
+                        {
+                            <div class="text-center">
+                                <div class="step-circle @(i <= currentStep ? "active" : "") @(i < currentStep ? "completed" : "")">
+                                    @i
+                                </div>
+                                <div class="step-label">المرحلة @i</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- محتوى النموذج -->
+                <form class="course-form">
+                    <!-- المرحلة 1: المعلومات الأساسية -->
+                    @if (currentStep == 1)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-info-circle mr-2"></i>المعلومات الأساسية
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رمز المادة <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="أدخل رمز المادة" @bind="newCourse.Code" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>اسم المادة <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="أدخل اسم المادة" @bind="newCourse.Name" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>القسم <span class="text-danger">*</span></label>
+                                        <select class="form-control" @bind="newCourse.DepartmentId" required>
+                                            <option value="">اختر القسم</option>
+                                            @foreach (var dept in departments)
+                                            {
+                                                <option value="@dept.Id">@dept.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+@* 
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المحاضر <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="أدخل اسم المحاضر" @bind="newCourse.Instructor" required>
+                                    </div>
+                                </div> *@
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المحاضر</label>
+                                        <select class="form-control" @bind="newCourse.ProfessorId" required>
+                                            <option value="">اختر القسم</option>
+                                            @foreach (var dept in ProfessorsList)
+                                            {
+                                                <option value="@dept.Id">@dept.FullName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>الساعات المعتمدة <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="عدد الساعات" @bind="newCourse.Credits" min="1" max="6" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>الكلفة <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" placeholder="أدخل الكلفة" @bind="newCourse.Fee" min="0" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>الحالة</label>
+                                        <select class="form-control" @bind="newCourse.IsActive">
+                                            <option value="true">نشطة</option>
+                                            <option value="false">غير نشطة</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- المرحلة 2: معلومات إضافية -->
+                    @if (currentStep == 2)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-info-circle mr-2"></i>معلومات إضافية
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>نوع المادة</label>
+                                        <select class="form-control" @bind="newCourse.CourseType">
+                                            <option value="نظري">نظري</option>
+                                            <option value="عملي">عملي</option>
+                                            <option value="نظري وعملي">نظري وعملي</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>الفصل الدراسي</label>
+                                        <select class="form-control" @bind="newCourse.Semester">
+                                            <option value="1">الفصل الأول</option>
+                                            <option value="2">الفصل الثاني</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>الحد الأقصى للطلاب</label>
+                                        <input type="number" class="form-control" placeholder="أدخل الحد الأقصى" @bind="newCourse.MaxStudents" min="1" max="200">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المتطلبات السابقة</label>
+                                        <input type="text" class="form-control" placeholder="رموز المواد مفصولة بفواصل" @bind="newCourse.Prerequisites">
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>الوصف</label>
+                                        <textarea class="form-control" rows="3" placeholder="أدخل وصف المادة" @bind="newCourse.Description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
+                </button>
+
+                @if (currentStep > 1)
+                {
+                    <button type="button" class="btn btn-outline-primary" @onclick="PreviousStep">
+                        <i class="fas fa-arrow-right mr-2"></i>السابق
+                    </button>
+                }
+
+                @if (currentStep < totalSteps)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="NextStep">
+                        التالي <i class="fas fa-arrow-left ml-2"></i>
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-success" @onclick="CreateCourse">
+                        <i class="fas fa-save mr-2"></i>حفظ المادة
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* أنماط مخصصة */
+    .course-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .step-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+        .step-circle.active {
+            background-color: #4e73df;
+            color: white;
+        }
+
+        .step-circle.completed {
+            background-color: #1cc88a;
+            color: white;
+        }
+
+    .step-label {
+        margin-top: 5px;
+        font-size: 12px;
+        color: #999;
+    }
+
+    .form-step {
+        display: none;
+    }
+
+        .form-step.active {
+            display: block;
+        }
+
+    .form-progress {
+        padding: 0 20px;
+    }
+
+    /* أنماط البادجات */
+    .badge-credits-1 {
+        background-color: #f6c23e;
+        color: #fff;
+    }
+
+    .badge-credits-2 {
+        background-color: #36b9cc;
+        color: #fff;
+    }
+
+    .badge-credits-3 {
+        background-color: #1cc88a;
+        color: #fff;
+    }
+
+    .badge-credits-4 {
+        background-color: #4e73df;
+        color: #fff;
+    }
+</style>
+
+@code {
+    private List<CourseDto> courses = new();
+    private List<DepartmentDto> departments = new();
+    private List<ProfessorDto> ProfessorsList = new();
+    private CourseDto newCourse = new();
+    private CourseDto editingCourse;
+    private CourseStatisticsDto courseStatistics = new();
+    private string searchTerm = "";
+    private int selectedDepartmentId = 0;
+    private CourseStatus currentStatus = CourseStatus.All;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageSize = 10;
+    private int currentStep = 1;
+    private const int totalSteps = 2;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadProfessors();
+        await LoadCourseStatistics();
+        await LoadCourses(CourseStatus.All);
+    }
+
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await DepartmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+    private async Task LoadProfessors()
+    {
+        try
+        {
+            ProfessorsList = await ProfessorServices.GetAllProfessorsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCourses(CourseStatus status)
+    {
+        try
+        {
+            currentStatus = status;
+            var result = await CourseService.GetCoursesAsync(
+                currentPage,
+                pageSize,
+                searchTerm,
+                selectedDepartmentId,
+                status == CourseStatus.Active ? true : status == CourseStatus.Inactive ? false : (bool?)null);
+
+            courses = result.Courses;
+            totalPages = result.TotalPages;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading courses: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCourseStatistics()
+    {
+        try
+        {
+            courseStatistics = await CourseService.GetCourseStatisticsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading course statistics: {ex.Message}");
+        }
+    }
+
+    private async Task SearchCourses(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadCourses(currentStatus);
+    }
+
+    private async Task FilterByDepartment(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        selectedDepartmentId = string.IsNullOrEmpty(value) ? 0 : int.Parse(value);
+        currentPage = 1;
+        await LoadCourses(currentStatus);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadCourses(currentStatus);
+        }
+    }
+
+    private void NextStep()
+    {
+        if (currentStep < totalSteps)
+        {
+            currentStep++;
+        }
+    }
+
+    private void PreviousStep()
+    {
+        if (currentStep > 1)
+        {
+            currentStep--;
+        }
+    }
+
+    private async Task CreateCourse()
+    {
+        try
+        {
+            newCourse.CreatedDate = DateTime.Now;
+            newCourse.AcademicYear = DateTime.Now.Year;
+
+            var createdCourse = await CourseService.CreateCourseAsync(newCourse);
+
+            // إعادة تعيين النموذج
+            newCourse = new CourseDto();
+            currentStep = 1;
+
+            // تحديث القائمة والإحصائيات
+            await LoadCourseStatistics();
+            await LoadCourses(currentStatus);
+
+            // إغلاق المودال
+            // JS.InvokeVoidAsync("$", "#addCourseModal").modal("hide");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating course: {ex.Message}");
+        }
+    }
+
+    private void EditCourse(CourseDto course)
+    {
+        editingCourse = new CourseDto
+            {
+                Id = course.Id,
+                Code = course.Code,
+                Name = course.Name,
+                DepartmentId = course.DepartmentId,
+                Instructor = course.Instructor,
+                Credits = course.Credits,
+                Fee = course.Fee,
+                MaxStudents = course.MaxStudents,
+                CurrentStudents = course.CurrentStudents,
+                IsActive = course.IsActive,
+                Description = course.Description,
+                Semester = course.Semester,
+                AcademicYear = course.AcademicYear,
+                Prerequisites = course.Prerequisites,
+                CourseType = course.CourseType
+            };
+
+        // فتح مودال التعديل
+        // JS.InvokeVoidAsync("$", "#editCourseModal").modal("show");
+    }
+
+    private async Task UpdateCourse()
+    {
+        if (editingCourse != null)
+        {
+            try
+            {
+                await CourseService.UpdateCourseAsync(editingCourse.Id, editingCourse);
+
+                // تحديث القائمة والإحصائيات
+                await LoadCourseStatistics();
+                await LoadCourses(currentStatus);
+
+                // إغلاق المودال
+                // JS.InvokeVoidAsync("$", "#editCourseModal").modal("hide");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating course: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task DeleteCourse(int courseId)
+    {
+        try
+        {
+            await CourseService.DeleteCourseAsync(courseId);
+
+            // تحديث القائمة والإحصائيات
+            await LoadCourseStatistics();
+            await LoadCourses(currentStatus);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting course: {ex.Message}");
+        }
+    }
+
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }
+
+    private string GetCreditsClass(int credits)
+    {
+        return $"badge-credits-{credits}";
+    }
+
+    private string GetStatusClass(bool isActive)
+    {
+        return isActive ? "badge-success" : "badge-secondary";
+    }
+
+    private enum CourseStatus
+    {
+        All,
+        Active,
+        Inactive,
+        Elective,
+        Required
+    }
+}

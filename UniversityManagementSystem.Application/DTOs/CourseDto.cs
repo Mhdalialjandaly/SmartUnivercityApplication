@@ -24,9 +24,14 @@ namespace UniversityManagementSystem.Application.DTOs
         public DateTime CreatedDate { get; set; }
         public string Prerequisites { get; set; }
         public string CourseType { get; set; }      
-        public int GPA { get; set; }     
+        public int GPA { get; set; }
+        public int CreditHours { get; set; }
+        public string SemesterName { get; set; }
+        public int Capacity { get; set; }
 
-        public virtual Department Department { get; set; }
+        public int ProfessorId { get; set; }
+        public ProfessorDto Professor { get; set; }
+        public  Department Department { get; set; }
     }
     public class CourseSearchResult
     {

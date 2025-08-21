@@ -1,0 +1,1254 @@
+﻿@page "/admin/applications"
+@attribute [Authorize(Roles = "Admin")]
+@inject UniversityDbContext _context
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IStudentServices _studentService
+@inject IDepartmentServices _departmentService
+@inject IStudentApplicationsServices _applicationService
+@rendermode InteractiveServer
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="admin-applications-container" dir="rtl">
+                <!-- شريط العنوان مع خلفية متدرجة -->
+                <div class="admin-header bg-gradient-primary">
+                    <div class="container-fluid">
+                        <div class="header-content">
+                            <div class="header-title">
+                                <h1>
+                                    <i class="fas fa-file-signature"></i>
+                                    <span>إدارة طلبات التقديم</span>
+                                </h1>
+                                <nav class="breadcrumb">
+                                    <a href="/" class="breadcrumb-item"><i class="fas fa-home"></i></a>
+                                    <a href="/admin" class="breadcrumb-item">لوحة التحكم</a>
+                                    <span class="breadcrumb-item active">طلبات التقديم</span>
+                                </nav>
+                            </div>
+                            <div class="header-actions">
+                                <button class="btn btn-light btn-refresh" @onclick="RefreshApplications">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>تحديث البيانات</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بطاقات الإحصاءات -->
+                <div class="stats-cards">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- بطاقة إجمالي الطلبات -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-primary-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@totalApplications</h2>
+                                                <p class="mb-0">إجمالي الطلبات</p>
+                                            </div>
+                                            <div class="icon-shape bg-primary-light rounded-circle">
+                                                <i class="fas fa-file-alt text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => FilterApplications(ApplicationStatus.All)" class="text-white">
+                                                عرض الكل <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- بطاقة الطلبات المعلقة -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-warning-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@pendingApplications</h2>
+                                                <p class="mb-0">قيد المراجعة</p>
+                                            </div>
+                                            <div class="icon-shape bg-warning-light rounded-circle">
+                                                <i class="fas fa-clock text-warning"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => FilterApplications(ApplicationStatus.Pending)" class="text-white">
+                                                عرض الطلبات <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- بطاقة الطلبات المقبولة -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-success-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@acceptedApplications</h2>
+                                                <p class="mb-0">المقبولة</p>
+                                            </div>
+                                            <div class="icon-shape bg-success-light rounded-circle">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => FilterApplications(ApplicationStatus.Accepted)" class="text-white">
+                                                عرض المقبولة <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- بطاقة الطلبات المرفوضة -->
+                            <div class="col-md-3">
+                                <div class="stat-card card-dark bg-danger-gradient">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h2 class="mb-0">@rejectedApplications</h2>
+                                                <p class="mb-0">المرفوضة</p>
+                                            </div>
+                                            <div class="icon-shape bg-danger-light rounded-circle">
+                                                <i class="fas fa-times-circle text-danger"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="#" @onclick="() => FilterApplications(ApplicationStatus.Rejected)" class="text-white">
+                                                عرض المرفوضة <i class="fas fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- لوحة التحكم -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="card-title">قائمة الطلبات</h4>
+                            <div class="ml-auto">
+                                <div class="dropdown d-inline">
+                                    <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-bolt me-2"></i>روابط سريعة
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/students-managment"><i class="fas fa-users me-2"></i>إدارة الطلاب</a>
+                                        <a class="dropdown-item" href="/apply"><i class="fas fa-file-alt me-2"></i>طلبات التقديم</a>
+                                        <a class="dropdown-item" href="/student/registrations"><i class="fas fa-book me-2"></i>تسجيل المواد</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- علامات التبويب -->
+                        <ul class="nav nav-pills nav-secondary" id="applicationTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == ApplicationStatus.All ? "active" : "")"
+                                        @onclick="() => FilterApplications(ApplicationStatus.All)">
+                                    <i class="fas fa-list me-2"></i> جميع الطلبات
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == ApplicationStatus.Pending ? "active" : "")"
+                                        @onclick="() => FilterApplications(ApplicationStatus.Pending)">
+                                    <i class="fas fa-clock me-2"></i> قيد المراجعة
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == ApplicationStatus.Accepted ? "active" : "")"
+                                        @onclick="() => FilterApplications(ApplicationStatus.Accepted)">
+                                    <i class="fas fa-check-circle me-2"></i> المقبولة
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(currentStatus == ApplicationStatus.Rejected ? "active" : "")"
+                                        @onclick="() => FilterApplications(ApplicationStatus.Rejected)">
+                                    <i class="fas fa-times-circle me-2"></i> المرفوضة
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- شريط البحث والتحكم -->
+                        <div class="row mt-3">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <div class="input-icon">
+                                        <input type="text" class="form-control" placeholder="ابحث عن طلب..." 
+                                               @bind="searchTerm" @oninput="SearchApplications">
+                                        <span class="input-icon-addon">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <select class="form-control" @onchange="FilterByDepartment">
+                                        <option value="">كل الأقسام</option>
+                                        @foreach (var dept in departments)
+                                        {
+                                            <option value="@dept.Id">@dept.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- جدول الطلبات -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>الطالب</th>
+                                        <th>القسم</th>
+                                        <th>المعدل</th>
+                                        <th>الحالة</th>
+                                        <th>التاريخ</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (applications.Any())
+                                    {
+                                        @for (int i = 0; i < applications.Count; i++)
+                                        {
+                                            var app = applications[i];
+                                            <tr>
+                                                <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(app.FirstName + " " + app.LastName)&background=2c3e50&color=fff"
+                                                             class="rounded-circle mr-3"
+                                                             width="40" height="40"
+                                                             alt="صورة الطالب" />
+                                                        <div>
+                                                            <span class="d-block font-weight-bold">@app.FirstName @app.LastName</span>
+                                                            <small class="text-muted">@app.Email</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-primary">
+                                                        @GetDepartmentName(app.DepartmentId)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge @GetGpaClass(app.GPA)">
+                                                        @app.GPA.ToString("F2")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge @GetStatusClass(app.Status)">
+                                                        @GetStatusText(app.Status)
+                                                    </span>
+                                                </td>
+                                                <td>@app.SubmitDate.ToString("yyyy-MM-dd")</td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="#" @onclick="() => ViewApplicationDetails(app)">
+                                                                <i class="fas fa-eye mr-2"></i> عرض التفاصيل
+                                                            </a>
+                                                            @if (app.Status == "قيد المراجعة")
+                                                            {
+                                                                <a class="dropdown-item text-success" href="#" @onclick="() => AcceptApplication(app)">
+                                                                    <i class="fas fa-check-circle mr-2"></i> قبول الطلب
+                                                                </a>
+                                                                <a class="dropdown-item text-danger" href="#" @onclick="() => ShowRejectModal(app)">
+                                                                    <i class="fas fa-times-circle mr-2"></i> رفض الطلب
+                                                                </a>
+                                                            }
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteApplication(app.Id)">
+                                                                <i class="fas fa-trash mr-2"></i> حذف الطلب
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="text-center py-5">
+                                                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted">لا توجد طلبات متاحة</p>
+                                                    <p class="text-muted">قم بتغيير عوامل التصفية أو تحقق لاحقًا</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- الترقيم -->
+                        @if (totalPages > 1)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted">
+                                    عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalApplications) من @totalApplications
+                                </div>
+                                <ul class="pagination">
+                                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+
+                                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                    {
+                                        <li class="page-item @(i == currentPage ? "active" : "")">
+                                            <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                        </li>
+                                    }
+
+                                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال عرض التفاصيل -->
+<div class="modal fade" id="applicationDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-alt"></i> تفاصيل الطلب #@selectedApplication?.Id
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (selectedApplication != null)
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="details-section">
+                                <h6><i class="fas fa-user"></i> المعلومات الشخصية</h6>
+                                <div class="detail-item">
+                                    <span>الاسم الكامل:</span>
+                                    <strong>@selectedApplication.FirstName @selectedApplication.LastName</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>البريد الإلكتروني:</span>
+                                    <strong>@selectedApplication.Email</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>رقم الهاتف:</span>
+                                    <strong>@selectedApplication.Phone</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>تاريخ الميلاد:</span>
+                                    <strong>@selectedApplication.BirthDate.ToString("yyyy-MM-dd")</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>الجنس:</span>
+                                    <strong>@selectedApplication.Gender</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>العنوان:</span>
+                                    <strong>@selectedApplication.Address</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="details-section">
+                                <h6><i class="fas fa-graduation-cap"></i> المعلومات الأكاديمية</h6>
+                                <div class="detail-item">
+                                    <span>القسم المطلوب:</span>
+                                    <strong>@GetDepartmentName(selectedApplication.DepartmentId)</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>المؤهل الدراسي:</span>
+                                    <strong>@selectedApplication.EducationLevel</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>المعدل التراكمي:</span>
+                                    <strong>@selectedApplication.GPA.ToString("F2")</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>تاريخ التقديم:</span>
+                                    <strong>@selectedApplication.SubmitDate.ToString("yyyy-MM-dd HH:mm")</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span>الحالة:</span>
+                                    <strong>
+                                        <span class="badge @GetStatusClass(selectedApplication.Status)">
+                                            @GetStatusText(selectedApplication.Status)
+                                        </span>
+                                    </strong>
+                                </div>
+                                @if (!string.IsNullOrEmpty(selectedApplication.RejectionReason))
+                                {
+                                    <div class="detail-item">
+                                        <span>سبب الرفض:</span>
+                                        <strong class="text-danger">@selectedApplication.RejectionReason</strong>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(selectedApplication.CertificatePath))
+                    {
+                        <div class="documents-section">
+                            <h6><i class="fas fa-paperclip"></i> المستندات المرفقة</h6>
+                            <a href="@selectedApplication.CertificatePath" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-download"></i> تحميل الشهادة
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال رفض الطلب -->
+<div class="modal fade" id="rejectApplicationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle"></i> رفض الطلب #@applicationToReject?.Id
+                </h5>
+                <button type="button" class="close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (applicationToReject != null)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">سبب الرفض <span class="text-danger">*</span></label>
+                        <textarea class="form-control" rows="4" placeholder="أدخل سبب الرفض..."
+                                  @bind="rejectionReason" required></textarea>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        سيتم إعلام الطالب برفض طلبه. لا يمكن التراجع عن هذا الإجراء.
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button type="button" class="btn btn-danger" @onclick="RejectApplication"
+                        disabled="@string.IsNullOrEmpty(rejectionReason)">
+                    <i class="fas fa-times-circle"></i> تأكيد الرفض
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* أنماط CSS جديدة */
+    .admin-applications-container {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f8fafc;
+        min-height: 100vh;
+    }
+    
+    .admin-header {
+        padding: 1.5rem 0;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .header-title h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .breadcrumb {
+        display: flex;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+    }
+    
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.8);
+    }
+    
+    .breadcrumb-item.active {
+        color: white;
+        font-weight: 500;
+    }
+    
+    .breadcrumb-item a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .breadcrumb-item a:hover {
+        color: white;
+    }
+    
+    .btn-refresh {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+    
+    /* بطاقات الإحصاءات */
+    .stats-cards {
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-dark {
+        color: white;
+    }
+    
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #1f6feb 0%, #1554c7 100%);
+    }
+    
+    .bg-warning-gradient {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .bg-danger-gradient {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    .icon-shape {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .bg-primary-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-warning-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-success-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-danger-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* تبويبات التنقل */
+    .nav-pills .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .nav-pills .nav-link:hover {
+        color: #2c3e50;
+        background-color: #f8f9fa;
+    }
+    
+    .nav-pills .nav-link.active {
+        color: white;
+        background-color: #2c3e50;
+    }
+    
+    /* البحث والفلاتر */
+    .input-icon {
+        position: relative;
+    }
+    
+    .input-icon .form-control {
+        padding-right: 2.5rem;
+    }
+    
+    .input-icon-addon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    /* جدول الطلبات */
+    .table th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: right;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+    
+    .status-accepted {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+    
+    .gpa-excellent {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .gpa-good {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+    
+    .gpa-weak {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+    
+    .btn-actions {
+        background: none;
+        border: none;
+        color: #6c757d;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .btn-actions:hover {
+        background: #f8f9fa;
+        color: #2c3e50;
+    }
+    
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .dropdown-item.text-success:hover {
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .dropdown-item.text-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    /* الترقيم */
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
+    
+    .page-item .page-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e9ecef;
+        color: #6c757d;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .page-item.active .page-link {
+        background: #2c3e50;
+        border-color: #2c3e50;
+        color: white;
+    }
+    
+    .page-item:not(.active) .page-link:hover {
+        background: #f8f9fa;
+        color: #2c3e50;
+    }
+    
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    /* المودالات */
+    .modal-content {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1.25rem;
+    }
+    
+    .modal-header.bg-danger {
+        color: white;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .details-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .details-section h6 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    
+    .detail-item span:first-child {
+        color: #6c757d;
+    }
+    
+    .detail-item strong {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .documents-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .documents-section h6 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+    
+    /* تصميم متجاوب */
+    @@media (max-width: 992px) {
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .input-icon {
+            width: 100%;
+        }
+        
+        .control-bar {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table {
+            min-width: 800px;
+        }
+        
+        .stat-card .card-body {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .icon-shape {
+            display: none;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .modal-dialog {
+            margin: 1rem;
+        }
+        
+        .pagination-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+
+@code {
+    private List<StudentApplicationDto> applications = new();
+    private StudentApplicationDto selectedApplication;
+    private StudentApplicationDto applicationToReject;
+    private string searchTerm = "";
+    private string rejectionReason = "";
+    private int? selectedDepartmentId = null;
+    
+    // إحصائيات
+    private int totalApplications = 0;
+    private int pendingApplications = 0;
+    private int acceptedApplications = 0;
+    private int rejectedApplications = 0;
+    
+    // ترقيم الصفحات
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageSize = 10;
+    
+    // الفلاتر
+    private ApplicationStatus currentStatus = ApplicationStatus.All;
+    
+    // الأقسام
+    private List<DepartmentDto> departments = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadStatistics();
+        await LoadApplications();
+    }
+    
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await _departmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            totalApplications = await _applicationService.GetApplicationsCountAsync();
+            pendingApplications = await _applicationService.GetPendingCountAsync();
+            acceptedApplications = await _applicationService.GetApprovedCountAsync();
+            rejectedApplications = await _applicationService.GetRejectedCountAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadApplications()
+    {
+        try
+        {
+            List<StudentApplicationDto> allApps = currentStatus switch
+            {
+                ApplicationStatus.Pending => await _applicationService.GetPendingApplicationsAsync(),
+                ApplicationStatus.Accepted => (await _applicationService.GetAllApplicationsAsync()).Where(a => a.Status == "مقبول").ToList(),
+                ApplicationStatus.Rejected => (await _applicationService.GetAllApplicationsAsync()).Where(a => a.Status == "مرفوض").ToList(),
+                _ => await _applicationService.GetAllApplicationsAsync()
+            };
+            
+            // بحث
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                allApps = allApps.Where(a =>
+                    a.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    a.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    a.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            
+            // تصفية حسب القسم
+            if (selectedDepartmentId.HasValue)
+            {
+                allApps = allApps.Where(a => a.DepartmentId == selectedDepartmentId.Value).ToList();
+            }
+            
+            // ترقيم الصفحات
+            totalApplications = allApps.Count;
+            totalPages = (int)Math.Ceiling((double)totalApplications / pageSize);
+            applications = allApps.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading applications: {ex.Message}");
+        }
+    }
+    
+    private async Task RefreshApplications()
+    {
+        await LoadStatistics();
+        await LoadApplications();
+        StateHasChanged();
+    }
+    
+    private async Task FilterApplications(ApplicationStatus status)
+    {
+        currentStatus = status;
+        currentPage = 1;
+        await LoadApplications();
+    }
+    
+    private async Task SearchApplications(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadApplications();
+    }
+    
+    private async Task FilterByDepartment(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        selectedDepartmentId = string.IsNullOrEmpty(value) ? null : (int?)int.Parse(value);
+        currentPage = 1;
+        await LoadApplications();
+    }
+    
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadApplications();
+        }
+    }
+    
+    private async Task ViewApplicationDetails(StudentApplicationDto application)
+    {
+        selectedApplication = application;
+        // فتح الـ Modal
+        await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#applicationDetailsModal");
+    }
+    
+    private async Task AcceptApplication(StudentApplicationDto application)
+    {
+        try
+        {
+
+            application.TemporaryPassword = GenerateTemporaryPassword();
+            var success = await _applicationService.ApproveApplicationAsync(application.Id);
+
+            if (success)
+            {
+                await CreateStudentAccount(application);
+                await LoadStatistics();
+                await LoadApplications();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error accepting application: {ex.Message}");
+        }
+    }
+    
+    private async Task ShowRejectModal(StudentApplicationDto application)
+    {
+        applicationToReject = application;
+        rejectionReason = "";
+        // فتح الـ Modal
+        await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#rejectApplicationModal");
+    }
+    
+    // Helper functions
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "قيد المراجعة" => "status-pending",
+            "مقبول" => "status-accepted",
+            "مرفوض" => "status-rejected",
+            _ => "status-pending"
+        };
+    }
+    
+    private string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "قيد المراجعة" => "قيد المراجعة",
+            "مقبول" => "مقبول",
+            "مرفوض" => "مرفوض",
+            _ => status
+        };
+    }
+    
+    private string GetGpaClass(decimal gpa)
+    {
+        if ((double)gpa >= 3.5) return "gpa-excellent";
+        if ((double)gpa >= 2.5) return "gpa-good";
+        return "gpa-weak";
+    }
+    
+    private async Task RejectApplication()
+    {
+        if (applicationToReject != null && !string.IsNullOrEmpty(rejectionReason))
+        {
+            try
+            {
+                var success = await _applicationService.RejectApplicationAsync(applicationToReject.Id, rejectionReason);
+                if (success)
+                {                  
+                    await RefreshApplications();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error rejecting application: {ex.Message}");
+            }
+        }
+    }
+    
+    private async Task<StudentDto> CreateStudentAccount(StudentApplicationDto application)
+    {
+        try
+        {
+            var student = new StudentDto
+                {                  
+                    StudentId = GenerateStudentId(),                    
+                    FullName = application.FirstName + "-" + application.LastName,
+                    Phone = application.Phone,
+                    BirthOfDate = application.BirthDate,
+                    Sexual = application.Gender == "ذكر",
+                    HomeAddress = application.Address,
+                    DepartmentId = application.DepartmentId,
+                    Status = StudentStatus.New,
+                    StatusOnSite = "نشط",
+                    RegistrationDate = DateTime.Now,
+                    UserNameOnSite = application.Email,
+                    PasswordOnSite = application.TemporaryPassword,
+                    NationalityId = application.NationalityId, 
+                    // باقي الحقول تبقى فارغة أو بالقيم الافتراضية
+                    Religion = application.Religion,
+                    SecoundPhone = "",
+                    TrueIsEmployee = false,
+                    WorkAddress = "",
+                    PoliticalNationalism = "",
+                    NationalityName = "",
+                    HomeNumber = 0,
+                    CivilstatusIDNumberAndNationalCard = "",
+                    CivilstatusIDNumberAndNationalCardFrom = "",
+                    CivilstatusIDNumberAndNationalCardDate = DateTime.MinValue,
+                    NationalityCertificateNumber = 0,
+                    NationalityCertificateNumberFrom = "",
+                    NationalityCertificateNumberDate = DateTime.MinValue,
+                    ExamNumber = 0,
+                    SecretNumber = 0,
+                    ApplyTunnel = false,
+                    TunnelId = 1,
+                    ERegistrationCompleted = false,
+                    RegistraionCompleted = false,
+                    SubmissionIsCompleted = false,
+                    SubmissionDepartment = "",
+                    TunnelDepartment = "",
+                    AccountsReceiptNumber = 0,
+                    SchoolName = "",
+                    Branch = "",
+                    DateOfSchoolGraduate = DateTime.MinValue,
+                    StudentTotalWithoutAdditions = 0,
+                    StudentTotalWithAdditions = 0,
+                    StudentGPAWithoutAdditions = 0,
+                    StudentGPAWithAdditions = 0,
+                    FullAddress = application.Address,
+                    AccountBalance = 0
+                };
+            try
+            {
+                student.Id = student.Id;
+                var savedUser = await _studentService.CreateStudentAsync(student);
+                return savedUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating student account: {ex.Message}");
+            return new StudentDto();
+        }
+    }
+    
+    private async Task DeleteApplication(int applicationId)
+    { 
+        try
+        {
+            await _applicationService.DeleteApplicationAsync(applicationId);
+            await LoadStatistics();
+            await LoadApplications();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting application: {ex.Message}");
+        }
+    }
+    
+    private string GenerateStudentId()
+    {
+        return $"STU-{DateTime.Now:yyyy}-{new Random().Next(1000, 9999)}";
+    }
+    
+    private string GenerateTemporaryPassword()
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+    
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }
+    
+    public enum ApplicationStatus
+    {
+        All,
+        Pending,
+        Accepted,
+        Rejected
+    }
+}

@@ -1,0 +1,236 @@
+﻿@page "/studentsattendance/reports"
+@attribute [Authorize]
+@inject IStudentAttendanceServices StudentAttendanceService
+@inject ICourseServices CourseService
+
+<PageTitle>تقارير الحضور - الجامعة الذكية</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 fw-bold text-primary">تقارير الحضور والغياب</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                            <li class="breadcrumb-item"><a href="/academic">الشؤون الأكاديمية</a></li>
+                            <li class="breadcrumb-item"><a href="/attendance">سجل الحضور</a></li>
+                            <li class="breadcrumb-item active">التقارير</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <button class="btn btn-primary" @onclick="GenerateReport">
+                        <i class="fas fa-file-pdf me-2"></i>توليد التقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- معايير التقرير -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">معايير التقرير</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">المادة</label>
+                                <select class="form-select" @bind="reportCriteria.CourseId">
+                                    <option value="">جميع المواد</option>
+                                    @foreach (var course in courses)
+                                    {
+                                        <option value="@course.Id">@course.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">من تاريخ</label>
+                                <input type="date" class="form-control" @bind="reportCriteria.StartDate">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">إلى تاريخ</label>
+                                <input type="date" class="form-control" @bind="reportCriteria.EndDate">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">الحد الأدنى للحضور (%)</label>
+                                <input type="number" class="form-control" min="0" max="100" @bind="reportCriteria.MinAttendancePercentage">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">الحالة</label>
+                                <select class="form-select" @bind="reportCriteria.Status">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="Present">حاضر</option>
+                                    <option value="Absent">غائب</option>
+                                    <option value="Excused">معذور</option>
+                                    <option value="Late">متأخر</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">نوع التقرير</label>
+                                <select class="form-select" @bind="reportCriteria.ReportType">
+                                    <option value="summary">ملخص</option>
+                                    <option value="detailed">تفصيلي</option>
+                                    <option value="by_student">حسب الطالب</option>
+                                    <option value="by_course">حسب المادة</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نتائج التقرير -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">نتائج التقرير</h5>
+                        <div>
+                            <span class="badge bg-primary">@reportResults.Count تقرير</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>الطالب</th>
+                                    <th>المادة</th>
+                                    <th>إجمالي الجلسات</th>
+                                    <th>الحضور</th>
+                                    <th>الغياب</th>
+                                    <th>المعذورون</th>
+                                    <th>النسبة (%)</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (reportResults.Any())
+                                {
+                                    @for (int i = 0; i < reportResults.Count; i++)
+                                    {
+                                        var result = reportResults[i];
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>@result.StudentName</td>
+                                            <td>@result.CourseName</td>
+                                            <td class="text-center">@result.TotalSessions</td>
+                                            <td class="text-center text-success">@result.PresentCount</td>
+                                            <td class="text-center text-danger">@result.AbsentCount</td>
+                                            <td class="text-center text-warning">@result.ExcusedCount</td>
+                                            <td class="text-center">
+                                                <span class="badge @(result.AttendancePercentage >= 75 ? "bg-success" :
+                                                                    result.AttendancePercentage >= 50 ? "bg-warning" : "bg-danger")">
+                                                    @result.AttendancePercentage.ToString("F1")%
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(result.Status == "Good" ? "bg-success" :
+                                                                    result.Status == "Warning" ? "bg-warning" : "bg-danger")">
+                                                    @(result.Status == "Good" ? "جيد" :
+                                                        result.Status == "Warning" ? "تحذير" : "سيء")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="9" class="text-center">لا توجد نتائج للتقرير</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .table th {
+        font-weight: 600;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+</style>
+
+@code {
+    private List<CourseDto> courses = new();
+    private ReportCriteria reportCriteria = new();
+    private List<StudentsAttendanceReportDto> reportResults = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCourses();
+        reportCriteria.StartDate = DateTime.Now.AddDays(-30);
+        reportCriteria.EndDate = DateTime.Now;
+    }
+
+    private async Task LoadCourses()
+    {
+        try
+        {
+            courses = await CourseService.GetAllCoursesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading courses: {ex.Message}");
+        }
+    }
+
+    private async Task GenerateReport()
+    {
+        try
+        {
+            reportResults = await StudentAttendanceService.GenerateAttendanceReportAsync(
+                reportCriteria.CourseId ?? 0,
+                reportCriteria.StartDate,
+                reportCriteria.EndDate);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating report: {ex.Message}");
+        }
+    }
+
+    public class ReportCriteria
+    {
+        public int? CourseId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public double? MinAttendancePercentage { get; set; }
+        public string Status { get; set; } = "";
+        public string ReportType { get; set; } = "summary";
+    }
+
+ 
+}

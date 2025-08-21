@@ -8,6 +8,10 @@ namespace UniversityManagementSystem.Domain.Entities
         public Course()
         {
             CourseRegistrations = new HashSet<CourseRegistration>();
+            Schedules = new HashSet<Schedule>();
+            Lectures = new HashSet<Lecture>();
+            StudentPayments = new HashSet<StudentPayment>();
+            StudentAttendances = new HashSet<StudentAttendance>();
         }
         public int Id { get; set; }
 
@@ -24,8 +28,6 @@ namespace UniversityManagementSystem.Domain.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal Fee { get; set; }
 
-        public int DepartmentId { get; set; }
-
         [StringLength(100)]
         public string Instructor { get; set; }
         public string Description { get; set; }
@@ -41,18 +43,30 @@ namespace UniversityManagementSystem.Domain.Entities
 
         public int AcademicYear { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; }
 
         [StringLength(100)]
-        public string Prerequisites { get; set; } = "";
+        public string Prerequisites { get; set; } 
 
         [StringLength(50)]
-        public string CourseType { get; set; } = "نظري"; // نظري, عملي, نظري وعملي
+        public string CourseType { get; set; } 
 
-      
-        public virtual Department Department { get; set; }
+
+        public int CreditHours { get; set; }
+        public int DepartmentId { get; set; }
+        public Department Department { get; set; }
+        public int EnrolledStudentsCount { get; set; }
+        public double EnrollmentPercentage { get; set; }
+        public int ProfessorId { get; set; }
+        public Professor Professor { get; set; }
+
+        public string SemesterName { get; set; }
+        public int Capacity { get; set; }
+        public ICollection<Schedule> Schedules { get; set; }
         public virtual ICollection<CourseRegistration> CourseRegistrations { get; set; }
         public virtual ICollection<Lecture> Lectures { get; set; }
+        public virtual ICollection<StudentPayment>StudentPayments { get; set; }
+        public virtual ICollection<StudentAttendance> StudentAttendances { get; set; }
         public DateTime CreatedAt { get ; set ; }
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }

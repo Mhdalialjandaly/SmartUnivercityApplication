@@ -1,0 +1,881 @@
+﻿@inject IUserServices UserServices
+@inject UserManager<User> UserManager
+@inject IHttpContextAccessor HttpContextAccessor
+@rendermode InteractiveServer
+
+<div class="university-user-selector">
+    <div class="user-selector-header">
+        <h3 class="selector-title">
+            <i class="fas fa-user-friends me-2"></i>
+            اختيار المشاركون
+        </h3>
+        <div class="selector-stats">
+            <span class="selected-count">@SelectedUsers.Count محدد</span>
+            <span class="total-count">@users?.Count() مستخدم</span>
+        </div>
+    </div>
+
+    <div class="search-section university-search">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text"
+                   placeholder="ابحث عن مستخدم بالاسم أو البريد الإلكتروني..."
+                   @bind="searchTerm"
+                   @bind:event="oninput"
+                   class="search-input" />
+            @if (!string.IsNullOrEmpty(searchTerm))
+            {
+                <button class="clear-search" @onclick="() => searchTerm = string.Empty">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="selected-users-section">
+        @if (SelectedUsers.Any())
+        {
+            <div class="section-label">
+                <i class="fas fa-check-circle me-2"></i>
+                المشاركون المحددون
+            </div>
+            <div class="selected-users-list">
+                @foreach (var user in SelectedUsers)
+                {
+                    <div class="selected-user-tag @(user.Id == CurrentUserId ? "current-user" : "")">
+                        <div class="user-avatar-small">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-tag-info">
+                            <span class="user-name">@user.FullName</span>
+                            @if (user.Id == CurrentUserId)
+                            {
+                                <span class="user-badge current-badge">أنت</span>
+                            }
+                            else if (IsUserOnline(user))
+                            {
+                                <span class="user-badge online-badge">متصل</span>
+                            }
+                        </div>
+                        @if (user.Id != CurrentUserId) // لا يمكن إزالة المستخدم الحالي
+                        {
+                            <button @onclick="() => RemoveUser(user)" class="remove-user">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="users-list-section">
+        <div class="section-header">
+            <div class="header-content">
+                <h4 class="section-title">
+                    <i class="fas fa-users me-2"></i>
+                    المستخدمون المتاحون
+                </h4>
+                <div class="filter-tabs">
+                    <button class="filter-tab @(activeFilter == "all" ? "active" : "")"
+                            @onclick="() => activeFilter = AllString">
+                        الكل
+                    </button>
+                    <button class="filter-tab @(activeFilter == "online" ? "active" : "")"
+                            @onclick="() => activeFilter = OnlineString">
+                        <i class="fas fa-circle online-indicator me-1"></i>
+                        متصل
+                    </button>
+                    <button class="filter-tab @(activeFilter == "registered" ? "active" : "")"
+                            @onclick="() => activeFilter = RegisteredString">
+                        <i class="fas fa-user-check me-1"></i>
+                        مسجل
+                    </button>
+                </div>
+            </div>
+            <span class="user-count">@filteredAndFilteredUsers.Count() مستخدم</span>
+        </div>
+
+        <div class="users-list">
+            @if (isLoading)
+            {
+                <div class="loading-state university-loading">
+                    <div class="university-spinner">
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <div class="loading-text">
+                        <p>جارٍ تحميل المستخدمين...</p>
+                        <small>يرجى الانتظار قليلاً</small>
+                    </div>
+                </div>
+            }
+            else if (!filteredAndFilteredUsers.Any())
+            {
+                <div class="empty-state university-empty">
+                    <div class="empty-icon-container">
+                        <i class="fas fa-user-friends empty-icon"></i>
+                    </div>
+                    <h4>لا توجد نتائج</h4>
+                    <p>@GetEmptyStateMessage()</p>
+                </div>
+            }
+            else
+            {
+                <div class="users-grid">
+                    @foreach (var user in filteredAndFilteredUsers)
+                    {
+                        <div class="user-card @(SelectedUsers.Any(u => u.Id == user.Id) ? "selected" : "") @(user.Id == CurrentUserId ? "current-user-card" : "") @(IsUserOnline(user) ? "online" : "")"
+                             @onclick="() => ToggleUser(user)">
+                            <div class="user-card-header">
+                                <div class="user-avatar-large">
+                                    <i class="fas fa-user"></i>
+                                    @if (IsUserOnline(user))
+                                    {
+                                        <div class="online-badge-card"></div>
+                                    }
+                                </div>
+                                <div class="user-status-indicators">
+                                    @if (user.Id == CurrentUserId)
+                                    {
+                                        <span class="status-badge you-badge" title="أنت">
+                                            <i class="fas fa-user-check"></i>
+                                        </span>
+                                    }
+                                    else if (IsUserRegistered(user))
+                                    {
+                                        <span class="status-badge registered-badge" title="مستخدم مسجل">
+                                            <i class="fas fa-user-check"></i>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="user-card-body">
+                                <div class="user-name-card">@user.FullName</div>
+                                <div class="user-email-card">@user.Email</div>
+                                <div class="user-role-card">
+                                    <i class="fas fa-briefcase me-1"></i>
+                                    @user.Role
+                                </div>
+                            </div>
+                            <div class="user-card-footer">
+                                @if (SelectedUsers.Any(u => u.Id == user.Id))
+                                {
+                                    <div class="selection-indicator selected-indicator">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>محدد</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="selection-indicator add-indicator">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span>إضافة</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="selector-footer">
+        <div class="footer-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <small>يمكنك اختيار عدة مستخدمين لبدء محادثة جماعية</small>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* University User Selector Theme - RTL */
+    .university-user-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        direction: rtl;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Header Styles */
+    .user-selector-header {
+        background: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
+        color: white;
+        padding: 20px;
+    }
+
+    .selector-title {
+        margin: 0 0 10px 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+    }
+
+    .selector-stats {
+        display: flex;
+        gap: 15px;
+    }
+
+    .selected-count, .total-count {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* Search Section */
+    .university-search {
+        padding: 0 20px;
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 10px;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 14px 45px 14px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 28px;
+        font-size: 0.95rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #f8fafc;
+        color: #0f1724;
+        font-weight: 500;
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0ea37a;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(14, 163, 122, 0.15);
+        }
+
+    .clear-search {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #f1f5f9;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .clear-search:hover {
+            background: #e2e8f0;
+            color: #0f1724;
+        }
+
+    /* Selected Users Section */
+    .selected-users-section {
+        padding: 0 20px;
+    }
+
+    .section-label {
+        font-weight: 600;
+        color: #0f1724;
+        margin-bottom: 12px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .selected-users-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .selected-user-tag {
+        display: flex;
+        align-items: center;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 20px;
+        padding: 6px 12px 6px 6px;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+
+        .selected-user-tag:hover {
+            background: #dcfce7;
+            transform: translateY(-1px);
+        }
+
+        .selected-user-tag.current-user {
+            background: #dbeafe;
+            border-color: #bfdbfe;
+        }
+
+    .user-avatar-small {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .user-tag-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #0f1724;
+    }
+
+    .user-badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .current-badge {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .online-badge {
+        background: #22c55e;
+        color: white;
+    }
+
+    .remove-user {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #dcfce7;
+        border: none;
+        color: #0ea37a;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        transition: all 0.2s ease;
+    }
+
+        .remove-user:hover {
+            background: #bbf7d0;
+        }
+
+    /* Users List Section */
+    .users-list-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0 20px 20px 20px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .section-title {
+        margin: 0;
+        color: #0f1724;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-tab {
+        padding: 6px 12px;
+        border-radius: 15px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+
+        .filter-tab:hover {
+            background: #f1f5f9;
+            color: #0f1724;
+        }
+
+        .filter-tab.active {
+            background: #0ea37a;
+            color: white;
+            border-color: #0ea37a;
+        }
+
+    .online-indicator {
+        color: #22c55e;
+        font-size: 8px;
+    }
+
+    .user-count {
+        font-size: 0.875rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    /* Users Grid */
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .user-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .user-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-card.selected {
+            border-color: #0ea37a;
+            background: #f0fdf4;
+            box-shadow: 0 4px 12px rgba(14, 163, 122, 0.15);
+        }
+
+        .user-card.current-user-card {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+
+        .user-card.online {
+            border-color: #22c55e;
+        }
+
+    .user-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .user-avatar-large {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        position: relative;
+    }
+
+    .online-badge-card {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: #22c55e;
+        border: 2px solid white;
+        border-radius: 50%;
+        bottom: 0;
+        left: 0;
+    }
+
+    .user-status-indicators {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .status-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: white;
+    }
+
+    .you-badge {
+        background: #3b82f6;
+    }
+
+    .registered-badge {
+        background: #0ea37a;
+    }
+
+    .user-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 15px;
+    }
+
+    .user-name-card {
+        font-weight: 700;
+        color: #0f1724;
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-email-card {
+        font-size: 0.85rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-role-card {
+        font-size: 0.8rem;
+        color: #0ea37a;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+
+    .user-card-footer {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 12px;
+    }
+
+    .selection-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .selected-indicator {
+        color: #0ea37a;
+    }
+
+    .add-indicator {
+        color: #94a3b8;
+    }
+
+    /* Loading State */
+    .university-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .university-spinner {
+        margin-bottom: 20px;
+    }
+
+    .spinner-ring {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f4f6;
+        border-top: 4px solid #0ea37a;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text p {
+        margin: 0 0 5px 0;
+        color: #0f1724;
+        font-weight: 600;
+    }
+
+    .loading-text small {
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Empty State */
+    .university-empty {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .empty-icon-container {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 20px;
+    }
+
+    .university-empty h4 {
+        color: #0f1724;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .university-empty p {
+        color: #64748b;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Footer */
+    .selector-footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 15px 20px;
+    }
+
+    .footer-info {
+        display: flex;
+        align-items: center;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    /* Animations */
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .users-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        }
+
+        .user-card {
+            padding: 12px;
+        }
+
+        .user-avatar-large {
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+        }
+
+        .filter-tabs {
+            flex-wrap: wrap;
+        }
+
+        .selector-stats {
+            flex-wrap: wrap;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .university-user-selector {
+            gap: 15px;
+        }
+
+        .user-selector-header {
+            padding: 15px;
+        }
+
+        .selector-title {
+            font-size: 1.1rem;
+        }
+
+        .users-list-section {
+            padding: 0 15px 15px 15px;
+        }
+
+        .users-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .selected-users-list {
+            gap: 8px;
+        }
+
+        .selected-user-tag {
+            padding: 4px 10px 4px 4px;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public List<UserDto> SelectedUsers { get; set; } = new List<UserDto>();
+
+    [Parameter]
+    public EventCallback<List<UserDto>> SelectedUsersChanged { get; set; }
+
+    [Parameter]
+    public string CurrentUserId { get; set; }
+
+    private List<UserDto> users = new List<UserDto>();
+    private string searchTerm = "";
+    private string AllString = "all";
+    private string OnlineString = "online";
+    private string RegisteredString = "registered";
+    private bool isLoading = true;
+    private string activeFilter = "all";
+    private List<string> onlineUsers = new List<string> { "1", "2" }; // مثال على المستخدمين المتصلين
+    private List<string> registeredUsers = new List<string> { "1", "2","3" }; // مثال على المستخدمين المسجلين
+
+    private IEnumerable<UserDto> filteredUsers =>
+        users?.Where(u => string.IsNullOrEmpty(searchTerm) ||
+              u.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+              u.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+              ?? Enumerable.Empty<UserDto>();
+
+    private IEnumerable<UserDto> filteredAndFilteredUsers =>
+        activeFilter switch
+        {
+            "online" => filteredUsers.Where(u => IsUserOnline(u)),
+            "registered" => filteredUsers.Where(u => IsUserRegistered(u)),
+            _ => filteredUsers
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            isLoading = true;
+            users = await UserServices.GetAllUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading users: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ToggleUser(UserDto user)
+    {
+        // لا يمكن إزالة المستخدم الحالي
+        if (user.Id == CurrentUserId && SelectedUsers.Any(u => u.Id == user.Id))
+        {
+            return;
+        }
+
+        if (SelectedUsers.Any(u => u.Id == user.Id))
+        {
+            SelectedUsers.RemoveAll(u => u.Id == user.Id);
+        }
+        else
+        {
+            SelectedUsers.Add(user);
+        }
+
+        await SelectedUsersChanged.InvokeAsync(SelectedUsers);
+        StateHasChanged();
+    }
+
+    private async Task RemoveUser(UserDto user)
+    {
+        // لا يمكن إزالة المستخدم الحالي
+        if (user.Id == CurrentUserId)
+        {
+            return;
+        }
+
+        SelectedUsers.RemoveAll(u => u.Id == user.Id);
+        await SelectedUsersChanged.InvokeAsync(SelectedUsers);
+    }
+
+    private bool IsUserOnline(UserDto user)
+    {
+        // منطق لتحديد ما إذا كان المستخدم متصلًا
+        return onlineUsers.Contains(user.Id);
+    }
+
+    private bool IsUserRegistered(UserDto user)
+    {
+        // منطق لتحديد ما إذا كان المستخدم مسجلًا
+        return registeredUsers.Contains(user.Id);
+    }
+
+    private string GetEmptyStateMessage()
+    {
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            return "لم يتم العثور على مستخدمين يطابقون بحثك";
+        }
+
+        switch (activeFilter)
+        {
+            case "online":
+                return "لا يوجد مستخدمون متصلون حالياً";
+            case "registered":
+                return "لا يوجد مستخدمون مسجلون";
+            default:
+                return "لا توجد مستخدمون متاحون";
+        }
+    }
+}

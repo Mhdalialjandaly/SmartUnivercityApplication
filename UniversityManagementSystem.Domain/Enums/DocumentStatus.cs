@@ -6,6 +6,7 @@ namespace UniversityManagementSystem.Domain.Enums
         All,
         Draft,
         Signed,
-        Printed
+        Printed,
+        Issued
     }
 }

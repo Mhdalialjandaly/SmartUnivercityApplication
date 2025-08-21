@@ -9,7 +9,7 @@ namespace UniversityManagementSystem.Application.Interfaces
         Task<StudentApplicationDto> CreateApplicationAsync(StudentApplicationDto dto);
         Task UpdateApplicationAsync(int id, StudentApplicationDto dto);
         Task DeleteApplicationAsync(int id);
-        Task<bool> ApproveApplicationAsync(int id, string studentId);
+        Task<bool> ApproveApplicationAsync(int id);
         Task<bool> RejectApplicationAsync(int id, string reason);
         Task<List<StudentApplicationDto>> GetPendingApplicationsAsync();
         Task<int> GetApplicationsCountAsync();

@@ -1,0 +1,847 @@
+﻿@page "/student/registrations"
+@attribute [Authorize]
+@inject UniversityDbContext _context
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IStudentServices _studentService
+@inject ICourseRegistrationServices _registrationService
+@inject IDepartmentServices _departmentService
+@inject ICourseServices _courseService
+@rendermode InteractiveServer
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="student-registrations-container" dir="rtl">
+                <!-- شريط العنوان -->
+                <div class="page-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="page-title text-white">
+                            <i class="fas fa-book me-2"></i> تسجيل المواد الدراسية
+                        </h4>
+                        <div class="ml-md-auto">
+                            <ul class="breadcrumbs">
+                                <li class="nav-home">
+                                    <a href="/">
+                                        <i class="fas fa-home text-white"></i>
+                                    </a>
+                                </li>
+                                <li class="separator">
+                                    <i class="fas fa-chevron-left text-white"></i>
+                                </li>
+                                <li class="nav-item">
+                                    <span class="text-white">تسجيل المواد</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بطاقات الإحصائيات -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card card-dark bg-primary-gradient">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h2 class="mb-0">@registeredCourses.Count</h2>
+                                        <p class="mb-0">المواد المسجلة</p>
+                                    </div>
+                                    <div class="icon-shape bg-primary-light rounded-circle">
+                                        <i class="fas fa-book-open text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card card-dark bg-success-gradient">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h2 class="mb-0">@totalCredits</h2>
+                                        <p class="mb-0">الساعات المعتمدة</p>
+                                    </div>
+                                    <div class="icon-shape bg-success-light rounded-circle">
+                                        <i class="fas fa-clock text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card card-dark bg-info-gradient">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h2 class="mb-0">@totalAmount.ToString("C")</h2>
+                                        <p class="mb-0">المبلغ المدفوع</p>
+                                    </div>
+                                    <div class="icon-shape bg-info-light rounded-circle">
+                                        <i class="fas fa-money-bill-wave text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card card-dark bg-warning-gradient">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h2 class="mb-0">@availableCredits</h2>
+                                        <p class="mb-0">الساعات المتبقية</p>
+                                    </div>
+                                    <div class="icon-shape bg-warning-light rounded-circle">
+                                        <i class="fas fa-plus-circle text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- لوحة التحكم -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="card-title">تسجيل المواد الدراسية</h4>
+                            <div class="ml-auto">
+                                <button class="btn btn-primary btn-round" @onclick="ShowRegistrationModal">
+                                    <i class="fas fa-plus me-2"></i> تسجيل مادة جديدة
+                                </button>
+                                <button class="btn btn-success btn-round" @onclick="SaveAllRegistrations" disabled="@(!hasChanges || isSaving)">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    }
+                                    <i class="fas fa-save me-2"></i> حفظ التسجيلات
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- شريط البحث والتصفية -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="input-icon">
+                                        <input type="text" class="form-control" placeholder="ابحث عن مادة..." 
+                                               @bind="searchTerm" @oninput="SearchCourses">
+                                        <span class="input-icon-addon">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <select class="form-control" @bind="selectedSemester">
+                                        <option value="">جميع الفصول</option>
+                                        <option value="الأول">الفصل الأول</option>
+                                        <option value="الثاني">الفصل الثاني</option>
+                                        <option value="الصيف">الفصل الصيفي</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <select class="form-control" @bind="selectedDepartmentId">
+                                        <option value="0">جميع الأقسام</option>
+                                        @foreach (var dept in departments)
+                                        {
+                                            <option value="@dept.Id">@dept.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- جدول المواد المتاحة -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th width="50px">
+                                            <InputCheckbox @bind-Value="selectAll" @onchange="SelectAllChanged" />
+                                        </th>
+                                        <th>المادة</th>
+                                        <th width="150px">القسم</th>
+                                        <th width="100px">الساعات</th>
+                                        <th width="120px">الرسوم</th>
+                                        <th width="120px">الفصل</th>
+                                        <th width="150px">الإجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (availableCourses.Any())
+                                    {
+                                        @for (int i = 0; i < availableCourses.Count; i++)
+                                        {
+                                            var course = availableCourses[i];
+                                            var isSelected = selectedCourses.Contains(course.Id);
+                                            <tr>
+                                                <td>
+                                                    <InputCheckbox @bind-Value="isSelected" @onchange="@(e => CourseSelectionChanged(course.Id, (bool)e.Value))" />
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <strong>@course.Name</strong>
+                                                        <br />
+                                                        <small class="text-muted">الكود: @course.Code</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-primary">
+                                                        @GetDepartmentName(course.DepartmentId)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-info">@course.Credits ساعة</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-success">@course.Fee.ToString("C")</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-secondary">@course.Semester</span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary" @onclick="() => AddCourseToRegistration(course)">
+                                                        <i class="fas fa-plus"></i> إضافة
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="text-center py-5">
+                                                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted">لا توجد مواد متاحة للتسجيل</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- جدول المواد المسجلة -->
+                        @if (registeredCourses.Any())
+                        {
+                            <div class="mt-4">
+                                <h5><i class="fas fa-list-check me-2"></i> المواد المسجلة</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>المادة</th>
+                                                <th width="150px">القسم</th>
+                                                <th width="100px">الساعات</th>
+                                                <th width="120px">الرسوم</th>
+                                                <th width="150px">تاريخ التسجيل</th>
+                                                <th width="120px">الحالة</th>
+                                                <th width="100px">الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < registeredCourses.Count; i++)
+                                            {
+                                                var reg = registeredCourses[i];
+                                                <tr>
+                                                    <td>
+                                                        <div>
+                                                            <strong>@reg.Course.Name</strong>
+                                                            <br />
+                                                            <small class="text-muted">الكود: @(reg.Course?.Code ?? "غير متوفر")</small>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge badge-primary">
+                                                            @reg.DepartmentName
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge badge-info">@reg.Course?.Credits ساعة</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-success">@reg.AmountPaid.ToString("C")</span>
+                                                    </td>
+                                                    <td>@reg.RegistrationDate.ToString("yyyy-MM-dd")</td>
+                                                    <td>
+                                                        <span class="badge @GetStatusClass(reg.Status)">
+                                                            @GetStatusText(reg.Status)
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        @if (reg.Status != "مكتمل")
+                                                        {
+                                                            <button class="btn btn-sm btn-danger" @onclick="() => RemoveCourseFromRegistration(reg.Id)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="2">الإجمالي:</th>
+                                                <th>@totalCredits ساعة</th>
+                                                <th>@totalAmount.ToString("C")</th>
+                                                <th colspan="3"></th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال تسجيل مادة جديدة -->
+<div class="modal fade" id="registrationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i> تسجيل مادة دراسية
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (courseToRegister != null)
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>اسم المادة</label>
+                                <input type="text" class="form-control" value="@courseToRegister.Name" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>القسم</label>
+                                <input type="text" class="form-control" value="@GetDepartmentName(courseToRegister.DepartmentId)" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>الساعات المعتمدة</label>
+                                <input type="text" class="form-control" value="@courseToRegister.Credits ساعة" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>الرسوم الدراسية</label>
+                                <input type="text" class="form-control" value="@courseToRegister.Fee.ToString("C")" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>الفصل الدراسي</label>
+                                <input type="text" class="form-control" value="@courseToRegister.Semester" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>تاريخ التسجيل</label>
+                                <InputDate class="form-control" @bind-Value="newRegistration.RegistrationDate" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>المبلغ المدفوع</label>
+                                <InputNumber class="form-control" @bind-Value="newRegistration.AmountPaid" step="0.01" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>تاريخ الدفع</label>
+                                <InputDate class="form-control" @bind-Value="newRegistration.PaymentDate" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>الحالة</label>
+                                <select class="form-control" @bind="newRegistration.Status">
+                                    <option value="مسجل">مسجل</option>
+                                    <option value="ملغي">ملغي</option>
+                                    <option value="مكتمل">مكتمل</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="ConfirmCourseRegistration">
+                    <i class="fas fa-check me-2"></i> تأكيد التسجيل
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .student-registrations-container {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f8fafc;
+        min-height: 100vh;
+    }
+    
+    .page-header {
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 0.5rem;
+    }
+    
+    .card-dark {
+        color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.2s;
+    }
+    
+    .card-dark:hover {
+        transform: translateY(-5px);
+    }
+    
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #1f6feb 0%, #1554c7 100%);
+    }
+    
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .bg-info-gradient {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    }
+    
+    .bg-warning-gradient {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .icon-shape {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .bg-primary-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-success-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-info-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .bg-warning-light {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .input-icon {
+        position: relative;
+    }
+    
+    .input-icon .form-control {
+        padding-right: 2.5rem;
+    }
+    
+    .input-icon-addon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: right;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-registered {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+    
+    .status-cancelled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+    
+    .status-completed {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .modal-content {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1.25rem;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+    
+    .btn-round {
+        border-radius: 1.5rem;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+    }
+    
+    @@media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table {
+            min-width: 800px;
+        }
+    }
+</style>
+
+@code {
+    private List<CourseRegistrationDto> registeredCourses = new();
+    private List<CourseDto> availableCourses = new();
+    private List<CourseDto> allCourses = new();
+    private List<DepartmentDto> departments = new();
+    
+    private CourseDto courseToRegister;
+    private CourseRegistrationDto newRegistration = new();
+    
+    private string searchTerm = "";
+    private string selectedSemester = "";
+    private int selectedDepartmentId = 0;
+    private List<int> selectedCourses = new();
+    private bool selectAll = false;
+    private bool hasChanges = false;
+    private bool isSaving = false;
+    
+    // إحصائيات
+    private int totalCredits = 0;
+    private decimal totalAmount = 0;
+    private int availableCredits = 18; // يمكن جلب هذا من إعدادات الطالب
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudentData();
+        await LoadDepartments();
+        await LoadCourses();
+        await LoadRegistrations();
+    }
+    
+    private async Task LoadStudentData()
+    {
+        try
+        {
+            // جلب بيانات الطالب الحالي
+            // var student = await _studentService.GetCurrentStudentAsync();
+            // يمكن استخدام معرف الطالب من الجلسة أو التوثيق
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading student data: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await _departmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadCourses()
+    {
+        try
+        {
+            allCourses = await _courseService.GetAllCoursesAsync();
+            availableCourses = new List<CourseDto>(allCourses); // نسخة للتصفية
+            await FilterCourses();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading courses: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadRegistrations()
+    {
+        try
+        {
+            // جلب التسجيلات الحالية للطالب
+            // registeredCourses = await _registrationService.GetStudentRegistrationsAsync(studentId);
+            // حساب الإحصائيات
+            CalculateStatistics();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading registrations: {ex.Message}");
+        }
+    }
+    
+    private async Task FilterCourses()
+    {
+        var filtered = allCourses.AsEnumerable();
+        
+        // بحث
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filtered = filtered.Where(c =>
+                c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                c.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        // تصفية حسب الفصل
+        if (!string.IsNullOrEmpty(selectedSemester))
+        {
+            filtered = filtered.Where(c => c.Semester.ToString() == selectedSemester);
+        }
+        
+        // تصفية حسب القسم
+        if (selectedDepartmentId > 0)
+        {
+            filtered = filtered.Where(c => c.DepartmentId == selectedDepartmentId);
+        }
+        
+        availableCourses = filtered.ToList();
+    }
+    
+    private async Task SearchCourses(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        await FilterCourses();
+    }
+    
+    private void CourseSelectionChanged(int courseId, bool isSelected)
+    {
+        if (isSelected)
+        {
+            if (!selectedCourses.Contains(courseId))
+                selectedCourses.Add(courseId);
+        }
+        else
+        {
+            selectedCourses.Remove(courseId);
+        }
+        selectAll = selectedCourses.Count == availableCourses.Count;
+        hasChanges = true;
+    }
+    
+    private void SelectAllChanged(ChangeEventArgs e)
+    {
+        selectAll = (bool)e.Value;
+        selectedCourses.Clear();
+        
+        if (selectAll)
+        {
+            selectedCourses.AddRange(availableCourses.Select(c => c.Id));
+        }
+        
+        hasChanges = true;
+        StateHasChanged();
+    }
+    
+    private async Task AddCourseToRegistration(CourseDto course)
+    {
+        courseToRegister = course;
+        newRegistration = new CourseRegistrationDto
+        {
+            CourseId = course.Id,
+            StudentId = GetCurrentStudentId(), // يجب استبدال هذا بالمعرف الفعلي
+            RegistrationDate = DateTime.Now,
+            PaymentDate = DateTime.Now,
+            AmountPaid = course.Fee,
+            Status = "مسجل",
+            Course = course,
+            CourseFee = course.Fee,
+            DepartmentName = GetDepartmentName(course.DepartmentId)
+        };        
+      
+    }
+    
+    private async Task ConfirmCourseRegistration()
+    {
+        if (courseToRegister != null)
+        {
+            try
+            {
+                // إضافة التسجيل الجديد
+                registeredCourses.Add(newRegistration);
+                CalculateStatistics();
+                hasChanges = true;
+                
+                // إغلاق المودال
+                await JS.InvokeVoidAsync("bootstrap.Modal.hide", "#registrationModal");
+                
+                // إعادة تعيين المتغيرات
+                courseToRegister = null;
+                newRegistration = new CourseRegistrationDto();
+                
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error registering course: {ex.Message}");
+            }
+        }
+    }
+    
+    private void RemoveCourseFromRegistration(int registrationId)
+    {
+        var registration = registeredCourses.FirstOrDefault(r => r.Id == registrationId);
+        if (registration != null)
+        {
+            registeredCourses.Remove(registration);
+            CalculateStatistics();
+            hasChanges = true;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task SaveAllRegistrations()
+    {
+        if (!hasChanges) return;
+        
+        isSaving = true;
+        StateHasChanged();
+        
+        try
+        {
+            // حفظ جميع التسجيلات
+            foreach (var registration in registeredCourses.Where(r => r.Id == 0)) // التسجيلات الجديدة
+            {
+                // await _registrationService.CreateRegistrationAsync(registration);
+            }
+            
+            hasChanges = false;
+            // عرض رسالة نجاح
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving registrations: {ex.Message}");
+            // عرض رسالة خطأ
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+    
+    private void CalculateStatistics()
+    {
+        totalCredits = registeredCourses.Sum(r => r.Course?.Credits ?? 0);
+        totalAmount = registeredCourses.Sum(r => r.AmountPaid);
+    }
+    
+    private async Task ShowRegistrationModal()
+    {
+        // فتح المودال لتسجيل مادة جديدة
+        await JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#registrationModal");
+    }
+    
+    // Helper functions
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }
+    
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "مسجل" => "status-registered",
+            "ملغي" => "status-cancelled",
+            "مكتمل" => "status-completed",
+            _ => "status-registered"
+        };
+    }
+    
+    private string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "مسجل" => "مسجل",
+            "ملغي" => "ملغي",
+            "مكتمل" => "مكتمل",
+            _ => status
+        };
+    }
+    
+    private int GetCurrentStudentId()
+    {
+        // يجب استبدال هذا بجلب معرف الطالب الفعلي من الجلسة أو التوثيق
+        return 1; // قيمة مؤقتة
+    }
+}

@@ -8,6 +8,10 @@ namespace UniversityManagementSystem.Domain.Enums
         New,
         Graduated,
         Inactive,
-        Suspended
+        Suspended,
+        Cancelled,
+        Registred,
+        None,
+        Deleted
     }
 }

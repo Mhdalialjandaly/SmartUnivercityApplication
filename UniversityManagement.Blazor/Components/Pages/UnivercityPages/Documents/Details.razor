@@ -1,0 +1,392 @@
+﻿@page "/documents/{id:int}"
+@attribute [Authorize]
+@inject IDocumentServices DocumentService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>تفاصيل الوثيقة - الجامعة الذكية</PageTitle>
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 fw-bold text-primary">تفاصيل الوثيقة</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                            <li class="breadcrumb-item"><a href="/documents">الوثائق الرسمية</a></li>
+                            <li class="breadcrumb-item active">تفاصيل الوثيقة</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="/documents" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>العودة للقائمة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (document != null)
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">@document.Title</h5>
+                            <span class="badge @(document.Status == "مسودة" ? "bg-warning" :
+                                                document.Status == "موقعة" ? "bg-success" :
+                                                document.Status == "مطبوعة" ? "bg-info" : "bg-secondary")">
+                                @document.Status
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-muted">رقم الوثيقة: <strong>@document.DocumentNumber</strong></h6>
+                            <h6 class="text-muted">نوع الوثيقة: <strong>@document.DocumentType</strong></h6>
+                            <h6 class="text-muted">تاريخ الإنشاء: <strong>@document.CreatedDate.ToString("yyyy-MM-dd HH:mm")</strong></h6>
+                            @if (document.IssuedDate.HasValue)
+                            {
+                                <h6 class="text-muted">تاريخ الإصدار: <strong>@document.IssuedDate.Value.ToString("yyyy-MM-dd HH:mm")</strong></h6>
+                            }
+                            @if (!string.IsNullOrEmpty(document.IssuedTo))
+                            {
+                                <h6 class="text-muted">الجهة/الشخص المستلم: <strong>@document.IssuedTo</strong></h6>
+                            }
+                        </div>
+
+                        <div class="border p-4 bg-light">
+                            <button class="btn btn-primary w-100 mb-2" @onclick="PrintToPdf">
+                                <i class="fas fa-file-pdf me-2"></i>طباعة إلى PDF
+                            </button>
+                            <h6 class="mb-3">محتوى الوثيقة:</h6>
+                            <div>
+                                @((MarkupString)document.Content)
+                            </div>
+                        </div>
+
+                        @if (document.DocumentFields.Any())
+                        {
+                            <div class="mt-4">
+                                <h6 class="mb-3">المعلومات الإضافية:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>الحقل</th>
+                                                <th>القيمة</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var field in document.DocumentFields)
+                                            {
+                                                <tr>
+                                                    <td>@field.FieldName</td>
+                                                    <td>@field.FieldValue</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">الإجراءات</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (document.Status == "مسودة")
+                        {
+                            <a href="/documents/@document.Id/edit" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-edit me-2"></i>تعديل الوثيقة
+                            </a>
+                            <button class="btn btn-success w-100 mb-2" @onclick="ShowSignModal" data-bs-toggle="modal" data-bs-target="#signDocumentModal">
+                                <i class="fas fa-signature me-2"></i>توقيع الوثيقة
+                            </button>
+                        }                      
+                        @if (document.Status == "موقعة")
+                        {
+                            @if (!string.IsNullOrEmpty(document.FilePath))
+                            {
+                                <a href="@document.FilePath" target="_blank" class="btn btn-info w-100 mb-2">
+                                    <i class="fas fa-file-pdf me-2"></i>فتح ملف PDF
+                                </a>
+                                <button class="btn btn-warning w-100 mb-2" @onclick="PrintDocument">
+                                    <i class="fas fa-redo me-2"></i>إعادة إنشاء PDF
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-warning w-100 mb-2" @onclick="PrintDocument">
+                                    <i class="fas fa-print me-2"></i>إنشاء ملف PDF
+                                </button>
+                            }
+                        }
+                        else if (document.Status == "مطبوعة")
+                        {
+                            @if (!string.IsNullOrEmpty(document.FilePath))
+                            {
+                                <a href="@document.FilePath" target="_blank" class="btn btn-info w-100 mb-2">
+                                    <i class="fas fa-file-pdf me-2"></i>فتح ملف PDF
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-warning w-100 mb-2" @onclick="PrintDocument">
+                                    <i class="fas fa-print me-2"></i>إنشاء ملف PDF
+                                </button>
+                            }
+                        }
+
+                        <button class="btn btn-danger w-100" @onclick="DeleteDocument">
+                            <i class="fas fa-trash me-2"></i>حذف الوثيقة
+                        </button>
+                    </div>
+                </div>
+
+                @if (document.DocumentSignatures.Any())
+                {
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">التوقيعات</h5>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var signature in document.DocumentSignatures)
+                            {
+                                <div class="border-bottom pb-3 mb-3">
+                                    <h6 class="mb-1">@signature.SignerName</h6>
+                                    <p class="text-muted mb-1">@signature.SignerPosition</p>
+                                    <small class="text-muted">@signature.SignatureDate.ToString("yyyy-MM-dd HH:mm")</small>
+                                    @if (!string.IsNullOrEmpty(signature.SignatureData))
+                                    {
+                                        <div class="mt-2">
+                                            <img src="@signature.SignatureData" alt="التوقيع" style="max-width: 200px; height: 50px;" />
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+            <h4>الوثيقة غير موجودة</h4>
+            <p>الوثيقة المطلوبة غير موجودة أو قد تم حذفها.</p>
+            <a href="/documents" class="btn btn-primary">العودة للقائمة</a>
+        </div>
+    }
+</div>
+
+<!-- Modal التوقيع الإلكتروني -->
+<div class="modal fade" id="signDocumentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">توقيع الوثيقة رقم #@document?.Id</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (document != null)
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>معلومات الوثيقة</h6>
+                            <hr>
+                            <p><strong>العنوان:</strong> @document.Title</p>
+                            <p><strong>النوع:</strong> @document.DocumentType</p>
+                            <p><strong>رقم الوثيقة:</strong> @document.DocumentNumber</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>التوقيع الإلكتروني</h6>
+                            <hr>
+                            <div class="mb-3">
+                                <label class="form-label">اسم الموقع *</label>
+                                <input type="text" class="form-control" placeholder="أدخل اسمك" @bind="signerName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">المنصب *</label>
+                                <input type="text" class="form-control" placeholder="أدخل منصبك" @bind="signerPosition" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">التوقيع الرقمي</label>
+                                <div class="border p-3 text-center bg-light">
+                                    <div class="signature-display" style="font-family: 'Arial', cursive; font-size: 2rem; color: #000; min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                                        @if (!string.IsNullOrEmpty(signerName))
+                                        {
+                                            <div>
+                                                <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px;">@signerName</div>
+                                                <div style="font-size: 1rem;">@DateTime.Now.ToString("yyyy-MM-dd HH:mm")</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">سيتم عرض التوقيع هنا</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">سيتم إنشاء توقيع رقمي فريد بناءً على اسمك وتاريخ التوقيع</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" @onclick="SignDocument" disabled="@string.IsNullOrEmpty(signerName)">توقيع الوثيقة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private OfficialDocumentDto? document;
+    private string signerName = "";
+    private string signerPosition = "";
+    private string signatureData = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadDocument();
+    }
+
+    private async Task LoadDocument()
+    {
+        try
+        {
+            document = await DocumentService.GetDocumentByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading document: {ex.Message}");
+        }
+    }
+
+    private void ShowSignModal()
+    {
+        signerName = "";
+        signerPosition = "";
+        signatureData = "";
+        // فتح الـ Modal
+        JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#signDocumentModal");
+    }
+
+    private async Task SignDocument()
+    {
+        if (document != null && !string.IsNullOrEmpty(signerName))
+        {
+            try
+            {
+                // إنشاء توقيع رقمي فريد
+                var signatureText = $"{signerName}\n{DateTime.Now:yyyy-MM-dd HH:mm}";
+                // يمكنك تحويل هذا النص إلى صورة أو حفظه كما هو حسب الحاجة
+
+                // إذا كنت تريد تحويله إلى صورة Base64 (اختياري)
+                var signatureData = $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(signatureText)}";
+
+                await DocumentService.SignDocumentAsync(document.Id, signatureData, signerName, signerPosition);
+
+                // إغلاق الـ Modal
+                // JS.InvokeVoidAsync("bootstrap.Modal.getInstance", "#signDocumentModal")?.hide();
+
+                // إعادة تحميل الوثيقة
+                await LoadDocument();
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error signing document: {ex.Message}");
+            }
+        }
+    }
+    private async Task PrintDocument()
+    {
+        if (document != null)
+        {
+            try
+            {
+
+                // إعادة تحميل الوثيقة للحصول على مسار الملف المحدث
+                await LoadDocument();
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error generating PDF: {ex.Message}");
+                // يمكنك عرض رسالة خطأ للمستخدم هنا
+            }
+        }
+    }
+    // private async Task PrintDocument()
+    // {
+    //     if (document != null)
+    //     {
+    //         try
+    //         {
+    //             var filePath = await DocumentService.GenerateDocumentPdfAsync(document.Id);
+
+    //             // إعادة تحميل الوثيقة
+    //             await LoadDocument();
+
+    //             StateHasChanged();
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             Console.WriteLine($"Error printing document: {ex.Message}");
+    //         }
+    //     }
+    // }
+
+    private async Task DeleteDocument()
+    {
+        if (document != null)
+        {
+            try
+            {
+                await DocumentService.DeleteDocumentAsync(document.Id);
+                Navigation.NavigateTo("/documents");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting document: {ex.Message}");
+            }
+        }
+    }
+
+    private void ClearSignature()
+    {
+        signatureData = "";
+        // مسح الـ Canvas
+        // JS.InvokeVoidAsync("clearSignatureCanvas");
+    }
+
+    private async Task PrintToPdf()
+    {
+        // استدعاء دالة JavaScript لإنشاء PDF
+        await JS.InvokeVoidAsync("generatePdf",
+            document.Title,
+            document.DocumentNumber,
+            document.CreatedDate.ToString("yyyy-MM-dd HH:mm"));
+    }
+}
+<script src="/js/site.js"></script>

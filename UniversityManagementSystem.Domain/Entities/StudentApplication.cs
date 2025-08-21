@@ -50,14 +50,13 @@ namespace UniversityManagementSystem.Domain.Entities
         public string Status { get; set; } // قيد المراجعة, مقبول, مرفوض, مكتمل
 
         public string RejectionReason { get; set; }
-
         public string StudentId { get; set; }
 
         public string TemporaryPassword { get; set; }
-
+        public int NationalityId { get; set; }
+        public string Religion { get; set; }
         // العلاقات
         public Department Department { get; set; }
-        public Student Student { get; set; }
         public DateTime CreatedAt { get ; set ; }
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }

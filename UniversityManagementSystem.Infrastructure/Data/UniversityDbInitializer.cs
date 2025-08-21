@@ -15,9 +15,9 @@ namespace UniversityManagementSystem.Infrastructure.Data
 
         public static void SeedData(this ModelBuilder modelBuilder)
         {
+            SeedUniversityData(modelBuilder);
             SeedRoles(modelBuilder);
             SeedAdminUser(modelBuilder);
-            SeedUniversityData(modelBuilder);
         }
 
         private static void SeedRoles(ModelBuilder modelBuilder)
@@ -28,7 +28,7 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     Id = AdminRoleId,
                     Name = "Admin",
                     NormalizedName = "ADMIN",
-                    ConcurrencyStamp = AdminRoleId
+                    ConcurrencyStamp = AdminRoleId                    
                 },
                 new IdentityRole
                 {
@@ -99,6 +99,19 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     CreatedAt = SeedDate
                 }
             );
+            modelBuilder.Entity<Professor>().HasData(
+               new Professor
+               {
+                   Id = 1,
+                   FirstName = "mahammad ali",
+                   LastName = "aljandaly",
+                   Email = "mahammad@gmail.com",
+                   HireDate = new DateTime(2025, 1, 1),
+                   EmployeeId = UserAdminId,
+                   Status = Domain.Enums.ProfessorStatus.Active,
+                   DepartmentId = 1,
+                   Specialization = "مهندس برمجيات" 
+               });
 
             modelBuilder.Entity<Course>().HasData(
                 new Course
@@ -107,7 +120,8 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     Code = "CS101",
                     Name = "Introduction to Programming",
                     DepartmentId = 1,
-                    CreatedAt = SeedDate
+                    CreatedAt = SeedDate,
+                    ProfessorId = 1
                 },
                 new Course
                 {
@@ -115,7 +129,8 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     Code = "CS201",
                     Name = "Data Structures",
                     DepartmentId = 1,
-                    CreatedAt = SeedDate
+                    CreatedAt = SeedDate,
+                    ProfessorId = 1
                 },
                 new Course
                 {
@@ -123,7 +138,8 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     Code = "CS301",
                     Name = "Algorithms",
                     DepartmentId = 1,
-                    CreatedAt = SeedDate
+                    CreatedAt = SeedDate,
+                    ProfessorId = 1
                 }
             );
 
@@ -134,7 +150,8 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     Name = "NoTunnel",
                     TypeOfkinship = "-",
                     FirstPart = "-",
-                    SecoundPart = "-"
+                    SecoundPart = "-",
+                    CreatedAt = SeedDate,
                 },
                 new Tunnel
                 {
@@ -142,9 +159,27 @@ namespace UniversityManagementSystem.Infrastructure.Data
                     Name = "ابن شهيد",
                     TypeOfkinship = "اب",
                     FirstPart = "-",
-                    SecoundPart = "-"
+                    SecoundPart = "-",
+                    CreatedAt = SeedDate,
                 }
             );
+
+            modelBuilder.Entity<Nationality>().HasData(
+              new Nationality
+              {
+                  Id = 1,
+                  CountryCode = "1",
+                  CountryName = "Syria",
+                  CreatedAt = SeedDate
+              },
+              new Nationality
+              {
+                  Id = 2,
+                  CountryCode = "2",
+                  CountryName = "Iraq",
+                  CreatedAt = SeedDate
+              }
+          );
         }
 
         private static User GenerateUser(string id, string userName, string email, string firstName, string password)
@@ -165,6 +200,7 @@ namespace UniversityManagementSystem.Infrastructure.Data
                 AccessFailedCount = 0,
                 PhoneNumberConfirmed = false,
                 TwoFactorEnabled = false,
+                NationalityId = 1,
                 CreatedAt = SeedDate // إضافة تاريخ الإنشاء
             };
 

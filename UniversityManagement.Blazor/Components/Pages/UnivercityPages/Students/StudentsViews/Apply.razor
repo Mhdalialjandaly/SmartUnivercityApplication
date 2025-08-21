@@ -1,0 +1,939 @@
+﻿@page "/apply"
+@inject NavigationManager Navigation
+@inject UniversityDbContext _context
+@inject INationalityServices NationalityService
+
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>تقديم طلب الالتحاق - الجامعة الذكية</PageTitle>
+	<div class="main-panel">
+		<div class="content">
+			<div class="page-inner" dir="rtl">
+<div class="application-container" >
+    <!-- شريط التقدم -->
+    <div class="progress-steps">
+        <div class="step @(currentStep >= 1 ? "active" : "")">
+            <div class="step-number">1</div>
+            <div class="step-label">المعلومات الشخصية</div>
+        </div>
+        <div class="step-connector @(currentStep >= 2 ? "active" : "")"></div>
+        <div class="step @(currentStep >= 2 ? "active" : "")">
+            <div class="step-number">2</div>
+            <div class="step-label">معلومات الاتصال</div>
+        </div>
+        <div class="step-connector @(currentStep >= 3 ? "active" : "")"></div>
+        <div class="step @(currentStep >= 3 ? "active" : "")">
+            <div class="step-number">3</div>
+            <div class="step-label">المعلومات الأكاديمية</div>
+        </div>
+        <div class="step-connector @(currentStep >= 4 ? "active" : "")"></div>
+        <div class="step @(currentStep >= 4 ? "active" : "")">
+            <div class="step-number">4</div>
+            <div class="step-label">التأكيد</div>
+        </div>
+    </div>
+
+    <div class="application-card">
+        @if (applicationSubmitted)
+        {
+            <!-- حالة نجاح التقديم -->
+            <div class="submission-success">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>تم تقديم طلبك بنجاح!</h2>
+                <div class="success-details">
+                    <p><span>رقم الطلب:</span> <strong>@submittedApplication.Id</strong></p>
+                    <p>سيتم مراجعة طلبك من قبل الإدارة خلال 3-5 أيام عمل</p>
+                    <p>سيتم إرسال تحديثات حالة الطلب إلى بريدك الإلكتروني</p>
+                </div>
+                <div class="success-actions">
+                    <a href="/apply/status" class="btn btn-primary">
+                        <i class="fas fa-search"></i> متابعة حالة الطلب
+                    </a>
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-home"></i> العودة للرئيسية
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="application" OnValidSubmit="SubmitApplication">
+                <!-- الخطوة 1: المعلومات الشخصية -->
+                @if (currentStep == 1)
+                {
+                    <div class="form-step active">
+                        <h3 class="step-title">
+                            <i class="fas fa-user"></i> المعلومات الشخصية
+                        </h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">الاسم الأول</label>
+                                <InputText @bind-Value="application.FirstName" class="form-control" required />
+                                <div class="form-hint">الاسم كما يظهر في الوثائق الرسمية</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="required">اسم العائلة</label>
+                                <InputText @bind-Value="application.LastName" class="form-control" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="required">تاريخ الميلاد</label>
+                                <InputDate @bind-Value="application.BirthDate" class="form-control" required
+                                           max="@DateTime.Now.AddYears(-16).ToString("yyyy-MM-dd")" />
+                                <div class="form-hint">يجب أن يكون عمرك 16 سنة على الأقل</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="required">الجنس</label>
+                                <InputSelect @bind-Value="application.Gender" class="form-control" required>
+                                    <option value="">اختر الجنس</option>
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="أنثى">أنثى</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                         <div class="form-group">
+                                        <label class="required">الجنسية</label>
+                                        @if (nationalities == null)
+                                        {
+                                            <div class="form-control">جاري تحميل الجنسيات...</div>
+                                        }
+                                        else
+                                        {
+                                            <InputSelect @bind-Value="application.NationalityId" class="form-control" required>
+                                                <option value="">اختر الجنسية</option>
+                                                @foreach (var nationality in nationalities)
+                                                {
+                                                    <option value="@nationality.Id">@nationality.CountryName</option>
+                                                }
+                                            </InputSelect>
+                                        }
+                                    </div>                                  
+
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-next" @onclick="() => NextStep(1)">
+                                التالي <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- الخطوة 2: معلومات الاتصال -->
+                @if (currentStep == 2)
+                {
+                    <div class="form-step active">
+                        <h3 class="step-title">
+                            <i class="fas fa-phone-alt"></i> معلومات الاتصال
+                        </h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">رقم الهاتف</label>
+                                <InputText @bind-Value="application.Phone" class="form-control" required />
+                                <div class="form-hint">سيتم استخدامه للتواصل معك</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="required">البريد الإلكتروني</label>
+                                <InputText @bind-Value="application.Email" class="form-control" required />
+                                <div class="form-hint">سيتم إرسال التحديثات إلى هذا البريد</div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="required">العنوان الكامل</label>
+                                <InputTextArea @bind-Value="application.Address" class="form-control" rows="3" required />
+                                <div class="form-hint">المحافظة، المدينة، الحي، الشارع</div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-prev" @onclick="PrevStep">
+                                <i class="fas fa-arrow-right"></i> السابق
+                            </button>
+                            <button type="button" class="btn btn-next" @onclick="() => NextStep(2)">
+                                التالي <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- الخطوة 3: المعلومات الأكاديمية -->
+                @if (currentStep == 3)
+                {
+                    <div class="form-step active">
+                        <h3 class="step-title">
+                            <i class="fas fa-graduation-cap"></i> المعلومات الأكاديمية
+                        </h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">القسم المطلوب</label>
+                                <InputSelect @bind-Value="application.DepartmentId" class="form-control" required>
+                                    <option value="">اختر القسم</option>
+                                    @foreach (var dept in departments)
+                                    {
+                                        <option value="@dept.Id">@dept.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="required">المؤهل الدراسي</label>
+                                <InputSelect @bind-Value="application.EducationLevel" class="form-control" required>
+                                    <option value="">اختر المؤهل</option>
+                                    <option value="ثانوية عامة">ثانوية عامة</option>
+                                    <option value="دبلوم">دبلوم</option>
+                                    <option value="بكالوريوس">بكالوريوس</option>
+                                    <option value="ماجستير">ماجستير</option>
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="required">المعدل التراكمي</label>
+                                <InputNumber @bind-Value="application.GPA" class="form-control"
+                                             step="0.01" min="50" max="100" required />
+                                <div class="form-hint">يجب أن يكون بين 50% و 100%</div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>شهادة المؤهل الدراسي</label>
+                                <div class="file-upload">
+                                    <InputFile id="certificateUpload"
+                                               OnChange="HandleFileUpload"
+                                               accept=".pdf,.jpg,.jpeg,.png"
+                                               class="form-control" />
+                                    <div class="file-requirements">
+                                        <i class="fas fa-info-circle"></i>
+                                        صيغ الملفات المسموحة: PDF, JPG, PNG (الحجم الأقصى 5MB)
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(fileName))
+                                    {
+                                        <div class="file-info">@fileName</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-prev" @onclick="PrevStep">
+                                <i class="fas fa-arrow-right"></i> السابق
+                            </button>
+                            <button type="button" class="btn btn-next" @onclick="() => NextStep(3)">
+                                التالي <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- الخطوة 4: التأكيد -->
+                @if (currentStep == 4)
+                {
+                    <div class="form-step active">
+                        <h3 class="step-title">
+                            <i class="fas fa-check-circle"></i> تأكيد المعلومات
+                        </h3>
+
+                        <div class="review-section">
+                            <h4><i class="fas fa-user"></i> المعلومات الشخصية</h4>
+                            <div class="review-grid">
+                                <div class="review-item">
+                                    <span>الاسم الكامل:</span>
+                                    <strong>@application.FirstName @application.LastName</strong>
+                                </div>
+                                <div class="review-item">
+                                    <span>تاريخ الميلاد:</span>
+                                    <strong>@application.BirthDate.ToString("yyyy-MM-dd")</strong>
+                                </div>
+                                <div class="review-item">
+                                    <span>الجنس:</span>
+                                    <strong>@application.Gender</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review-section">
+                            <h4><i class="fas fa-phone-alt"></i> معلومات الاتصال</h4>
+                            <div class="review-grid">
+                                <div class="review-item">
+                                    <span>رقم الهاتف:</span>
+                                    <strong>@application.Phone</strong>
+                                </div>
+                                <div class="review-item">
+                                    <span>البريد الإلكتروني:</span>
+                                    <strong>@application.Email</strong>
+                                </div>
+                                <div class="review-item">
+                                    <span>العنوان:</span>
+                                    <strong>@application.Address</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review-section">
+                            <h4><i class="fas fa-graduation-cap"></i> المعلومات الأكاديمية</h4>
+                            <div class="review-grid">
+                                <div class="review-item">
+                                    <span>القسم المطلوب:</span>
+                                    <strong>@GetDepartmentName(application.DepartmentId)</strong>
+                                </div>
+                                <div class="review-item">
+                                    <span>المؤهل الدراسي:</span>
+                                    <strong>@application.EducationLevel</strong>
+                                </div>
+                                <div class="review-item">
+                                    <span>المعدل التراكمي:</span>
+                                    <strong>@application.GPA.ToString("F2")%</strong>
+                                </div>
+                                @if (!string.IsNullOrEmpty(fileName))
+                                {
+                                    <div class="review-item">
+                                        <span>المرفقات:</span>
+                                        <strong>@fileName</strong>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="terms-section">
+                            <div class="form-check">
+                                <InputCheckbox @bind-Value="acceptTerms" id="acceptTerms" class="form-check-input" />
+                                <label class="form-check-label" for="acceptTerms">
+                                    أوافق على <a href="/terms" target="_blank">الشروط والأحكام</a>
+                                    وأن جميع المعلومات المقدمة صحيحة وكاملة
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-prev" @onclick="PrevStep">
+                                <i class="fas fa-arrow-right"></i> السابق
+                            </button>
+                            <button type="submit" class="btn btn-submit" disabled="@(!acceptTerms || isSubmitting)">
+                                @if (isSubmitting)
+                                {
+                                    <span><i class="fas fa-spinner fa-spin"></i> جاري التقديم...</span>
+                                }
+                                else
+                                {
+                                    <span><i class="fas fa-paper-plane"></i> تقديم الطلب</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                }
+            </EditForm>
+        }
+    </div>
+</div>
+</div></div></div>
+<style>
+    :root {
+        --primary-color: #3498db; /* أزرق رئيسي */
+        --primary-dark: #2980b9; /* أزرق غامق */
+        --secondary-color: #2c3e50; /* أزرق داكن */
+        --accent-color: #e74c3c; /* أحمر */
+        --success-color: #27ae60; /* أخضر */
+        --warning-color: #f39c12; /* برتقالي */
+        --light-color: #ecf0f1; /* فاتح جداً */
+        --dark-color: #2c3e50; /* داكن */
+        --text-color: #fff; /* لون النص الأساسي */
+        --text-muted: #fffd; /* نص ثانوي */
+        --border-color: #bdc3c7; /* لون الحدود */
+        --card-bg: #ffffff; /* خلفية البطاقات */
+        --body-bg: #333; /* خلفية الصفحة */
+    }
+
+    /* أنماط عامة */
+    body {
+        background-color: var(--body-bg);
+        font-family: 'Tajawal', sans-serif;
+        color: var(--text-color);
+        line-height: 1.6;
+    }
+    
+    .application-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .application-card {
+        background-color: #322;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    /* شريط التقدم */
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--light-color);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        border: 2px solid var(--border-color);
+    }
+
+    .step.active .step-number {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .step-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-label {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .step-connector {
+        flex: 1;
+        height: 2px;
+        background-color: var(--border-color);
+        margin: 0 10px;
+        position: relative;
+        top: -10px;
+    }
+
+        .step-connector.active {
+            background-color: var(--primary-color);
+        }
+
+    /* الخطوات */
+    .form-step {
+        display: none;
+    }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+    .step-title {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    /* شبكة النموذج */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+
+    /* حقول الإدخال */
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+    }
+
+        .form-group label.required::after {
+            content: " *";
+            color: var(--accent-color);
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: all 0.3s;
+        background-color: #fff;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+    .form-hint {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.4rem;
+    }
+
+    /* رفع الملفات */
+    .file-upload {
+        margin-top: 0.5rem;
+    }
+
+    .file-requirements {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .file-info {
+        margin-top: 0.5rem;
+        font-weight: 500;
+        color: var(--primary-color);
+        padding: 0.5rem;
+        background-color: var(--light-color);
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    /* قسم المراجعة */
+    .review-section {
+        margin-bottom: 1.5rem;
+        background-color: rgba(236, 240, 241, 0.3);
+        padding: 1.25rem;
+        border-radius: 10px;
+    }
+
+        .review-section h4 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+    .review-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .review-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed var(--border-color);
+    }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-item span {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .review-item strong {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+    /* الشروط والأحكام */
+    .terms-section {
+        margin: 2rem 0;
+        padding: 1.25rem;
+        background-color: rgba(236, 240, 241, 0.5);
+        border-radius: 10px;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-top: 0;
+    }
+
+    .form-check-label {
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+
+    .form-check a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .form-check a:hover {
+            text-decoration: underline;
+        }
+
+    /* أزرار التنقل */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .btn-prev {
+        background-color: #323;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+    }
+
+        .btn-prev:hover {
+            background-color: var(--light-color);
+            color: var(--secondary-color);
+        }
+
+    .btn-next,
+    .btn-submit {
+        background-color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        color: white;
+    }
+
+        .btn-next:hover,
+        .btn-submit:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background-color: var(--primary-color);
+        }
+
+    .btn-outline-primary {
+        background-color: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+    }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+    /* حالة النجاح */
+    .submission-success {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: var(--success-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .submission-success h2 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.75rem;
+    }
+
+    .success-details {
+        background-color: rgba(236, 240, 241, 0.5);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .success-details p {
+            margin-bottom: 0.75rem;
+            color:antiquewhite;
+        }
+
+        .success-details span {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+    .success-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* تأثيرات الحركة */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* تصميم متجاوب */
+    @@media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full-width {
+            grid-column: span 1;
+        }
+
+        .review-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .progress-steps {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .step-connector {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .application-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .success-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+            .success-actions .btn {
+                width: auto;
+                min-width: 200px;
+            }
+    }
+</style>
+
+@code {
+    private int currentStep = 1;
+    private StudentApplication application = new();
+    private List<Department> departments = new();
+    private bool applicationSubmitted = false;
+    private bool isSubmitting = false;
+    private bool acceptTerms = false;
+    private string fileName = string.Empty;
+    private StudentApplication submittedApplication = new();
+    private IBrowserFile? certificateFile;
+    private List<NationalityDto> nationalities;
+
+    protected override async Task OnInitializedAsync()
+    {
+        departments = await _context.Departments.ToListAsync();
+        await LoadNationalities();
+    }
+    private async Task LoadNationalities()
+    {
+        try
+        {
+            nationalities = await NationalityService.GetAllNationalitiesAsync();
+        }
+        catch (Exception ex)
+        {
+            // يمكنك إضافة معالجة الأخطاء هنا
+            Console.WriteLine($"حدث خطأ أثناء تحميل الجنسيات: {ex.Message}");
+        }
+    }
+    private void NextStep(int step)
+    {
+        bool isValid = true;
+
+        if (step == 1)
+        {
+            isValid = !string.IsNullOrEmpty(application.FirstName) &&
+                     !string.IsNullOrEmpty(application.LastName) &&
+                     application.BirthDate != default &&
+                     !string.IsNullOrEmpty(application.Gender);
+        }
+        else if (step == 2)
+        {
+            isValid = !string.IsNullOrEmpty(application.Phone) &&
+                     !string.IsNullOrEmpty(application.Email) &&
+                     !string.IsNullOrEmpty(application.Address);
+        }
+        else if (step == 3)
+        {
+            isValid = application.DepartmentId > 0 &&
+                     !string.IsNullOrEmpty(application.EducationLevel) &&
+                     application.GPA > 0;
+        }
+
+        if (isValid && currentStep < 4)
+        {
+            currentStep++;
+        }
+        else if (!isValid)
+        {
+            // يمكن إضافة رسالة خطأ للمستخدم هنا
+            Console.WriteLine("الرجاء إكمال جميع الحقول المطلوبة");
+        }
+    }
+
+    private void PrevStep()
+    {
+        if (currentStep > 1) currentStep--;
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            // التحقق من صحة الملف
+            if (e.File == null || e.File.Size == 0)
+            {
+                throw new ArgumentException("الرجاء اختيار ملف صالح");
+            }
+
+            // تحديد مسار الحفظ
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsFolder); // إنشاء المجلد إذا لم يكن موجوداً
+
+            // حفظ الملف مباشرة بدون MemoryStream
+            var filePath = Path.Combine(uploadsFolder, e.File.Name);
+
+            await using var stream = new FileStream(filePath, FileMode.Create);
+            await e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(stream);
+
+            // تخزين المرجع
+            certificateFile = e.File;
+            fileName = e.File.Name;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"خطأ في تحميل الملف: {ex.Message}");
+            // يمكنك إضافة عرض رسالة للمستخدم هنا
+        }
+    }
+
+    private async Task SubmitApplication()
+    {
+        if (!acceptTerms) return;
+
+        isSubmitting = true;
+
+        try
+        {
+            // التحقق مرة أخرى من وجود الملف
+            if (certificateFile != null && !string.IsNullOrEmpty(fileName))
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                var filePath = Path.Combine(folderPath, fileName);
+
+                // تأكيد وجود الملف فعلياً
+                if (!File.Exists(filePath))
+                {
+                    throw new FileNotFoundException("الملف المرفوع غير موجود على الخادم");
+                }
+            }
+
+            var newApplication = new StudentApplication
+                {
+                    FirstName = application.FirstName,
+                    LastName = application.LastName,
+                    BirthDate = application.BirthDate,
+                    Gender = application.Gender,
+                    Phone = application.Phone,
+                    Email = application.Email,
+                    Address = application.Address,
+                    DepartmentId = application.DepartmentId,
+                    EducationLevel = application.EducationLevel,
+                    GPA = application.GPA,
+                    CertificatePath = fileName,
+                    SubmitDate = DateTime.Now,
+                    Status = "قيد المراجعة",
+                    NationalityId = application.NationalityId
+                };
+
+            _context.StudentApplications.Add(newApplication);
+            await _context.SaveChangesAsync();
+
+            submittedApplication = newApplication;
+            applicationSubmitted = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"خطأ في حفظ الطلب: {ex.Message}");
+            // يمكنك إضافة عرض رسالة للمستخدم هنا
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }
+}

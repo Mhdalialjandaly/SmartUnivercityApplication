@@ -1,30 +1,37 @@
 ﻿using UniversityManagementSystem.Application.DTOs;
 using UniversityManagementSystem.Application.Models;
+using UniversityManagementSystem.Domain.Entities;
 using UniversityManagementSystem.Domain.Enums;
 
 namespace UniversityManagementSystem.Application.Interfaces
 {
     public interface IStudentServices
     {
-        Task<PaginatedResult<StudentDto>> GetStudentsPagedAsync(int pageNumber, int pageSize,string term,int? departmentId,StudentStatus status);
-        Task<StudentDto> GetStudentByIdAsync(string studentId);
+        Task<PaginatedResult<Student>> GetStudentsPagedAsync(int pageNumber, int pageSize,string term,int? departmentId,StudentStatus status);
+        Task<StudentDto> GetStudentByIdAsync(int studentId);
         Task<List<StudentDto>> GetAllStudentsAsync();
         Task<StudentDto> CreateStudentAsync(StudentDto studentDto);
-        Task UpdateStudentAsync(string studentId, StudentDto studentDto);
-        Task DeleteStudentAsync(string studentId);
-        Task<bool> StudentExistsAsync(string studentId);
+        Task UpdateStudentAsync(int studentId, StudentDto studentDto);
+        Task DeleteStudentAsync(int studentId);
+        Task<bool> StudentExistsAsync(int studentId);
 
         // Additional business logic methods
-        Task<decimal> GetStudentAccountBalanceAsync(string studentId);
-        Task<bool> UpdateStudentAccountBalanceAsync(string studentId, decimal amount);
-        Task<bool> ChangeStudentStatusAsync(string studentId, StudentStatus status);
-        Task<List<CourseRegistrationDto>> GetStudentCoursesAsync(string studentId);
-        Task<List<StudentDocumentDto>> GetStudentDocumentsAsync(string studentId);
-        Task<bool> CompleteRegistrationAsync(string studentId);
+        Task<decimal> GetStudentAccountBalanceAsync(int studentId);
+        Task<bool> UpdateStudentAccountBalanceAsync(int studentId, decimal amount);
+        Task<bool> ChangeStudentStatusAsync(int studentId, StudentStatus status);
+        Task<List<CourseRegistrationDto>> GetStudentCoursesAsync(int studentId);
+        Task<List<StudentDocumentDto>> GetStudentDocumentsAsync(int studentId);
+        Task<bool> CompleteRegistrationAsync(int studentId);
         Task<int> GetTotalStudentsCountAsync();
         Task<int> GetActiveStudentsCountAsync();
+        Task<int> GetStudentsCountByGenderAsync(bool isMale);
         Task<int> GetNewStudentsCountAsync();
         Task<double> GetAverageGPAAsync();
-        Task<List<InvoiceDto>> GetStudentInvoicesAsync(string studentId);
+        Task<List<InvoiceDto>> GetStudentInvoicesAsync(int studentId);
+        Task<int> GetNewStudentsCountAsync(DateTime? startDate = null, DateTime? endDate = null, string academicYear = null);
+        Task<List<StudentCountryDistributionDto>> GetStudentsByCountryAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string academicYear = null);
     }
 }

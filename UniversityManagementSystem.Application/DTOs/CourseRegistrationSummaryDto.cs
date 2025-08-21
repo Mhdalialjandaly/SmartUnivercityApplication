@@ -9,5 +9,8 @@ namespace UniversityManagementSystem.Application.DTOs
         public int CompletedRegistrations { get; set; }
         public decimal TotalRevenue { get; set; }
         public decimal OutstandingPayments { get; set; }
+        public decimal AverageAmountPaid { get; set; }
+        public string MostPopularCourse { get; set; }
+        public int RecentRegistrationsCount { get; set; }
     }
 }

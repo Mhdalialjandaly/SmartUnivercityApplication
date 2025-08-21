@@ -1,0 +1,520 @@
+﻿@page "/finance/employee-salaries"
+@attribute [Authorize]
+@inject IEmployeeSalaryServices EmployeeSalaryService
+@inject IUserServices UserService
+@rendermode InteractiveServer
+
+<PageTitle>رواتب الموظفين - الجامعة الذكية</PageTitle>
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="content" data-background-color="dark">
+                <div class="page-inner">
+                    <!-- شريط العنوان والتنقل -->
+                    <div class="page-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="page-title text-white">
+                                <i class="fas fa-file-invoice-dollar me-2"></i> إدارة رواتب الموظفين
+                            </h4>
+                            <div class="ml-md-auto">
+                                <ul class="breadcrumbs">
+                                    <li class="nav-home">
+                                        <a href="/">
+                                            <i class="fas fa-home text-white"></i>
+                                        </a>
+                                    </li>
+                                    <li class="separator">
+                                        <i class="fas fa-chevron-left text-white"></i>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="financial-management" class="text-white">الشؤون المالية</a>
+                                    </li>
+                                    <li class="separator">
+                                        <i class="fas fa-chevron-left text-white"></i>
+                                    </li>
+                                    <li class="nav-item">
+                                        <span class="text-white">رواتب الموظفين</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بطاقات الإحصائيات -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-primary-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@salarySummary.TotalSalaries</h2>
+                                            <p class="mb-0">إجمالي الرواتب</p>
+                                        </div>
+                                        <div class="icon-shape bg-primary-light rounded-circle">
+                                            <i class="fas fa-file-invoice-dollar text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-success-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@salarySummary.TotalAmount.ToString("C")</h2>
+                                            <p class="mb-0">إجمالي المبالغ</p>
+                                        </div>
+                                        <div class="icon-shape bg-success-light rounded-circle">
+                                            <i class="fas fa-money-check-alt text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-warning-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@salarySummary.PendingSalaries</h2>
+                                            <p class="mb-0">الرواتب المعلقة</p>
+                                        </div>
+                                        <div class="icon-shape bg-warning-light rounded-circle">
+                                            <i class="fas fa-clock text-warning"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-info-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@salarySummary.PendingAmount.ToString("C")</h2>
+                                            <p class="mb-0">المبالغ المعلقة</p>
+                                        </div>
+                                        <div class="icon-shape bg-info-light rounded-circle">
+                                            <i class="fas fa-exclamation-circle text-info"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="#" class="text-white">
+                                            عرض التفاصيل <i class="fas fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- لوحة التحكم الرئيسية -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex align-items-center">
+                                <h4 class="card-title">قائمة الرواتب</h4>
+                                <div class="ml-auto">
+                                    <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#addSalaryModal">
+                                        <i class="fas fa-plus me-2"></i>إضافة راتب جديد
+                                    </button>
+                                    <div class="dropdown d-inline">
+                                        <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <i class="fas fa-bolt me-2"></i>روابط سريعة
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="/financial-management">
+                                                <i class="fas fa-money-bill-wave me-2"></i>لوحة التحكم المالية
+                                            </a>
+                                            <a class="dropdown-item" href="/finance/student-payments">
+                                                <i class="fas fa-receipt me-2"></i>مدفوعات الطلاب
+                                            </a>
+                                            <a class="dropdown-item" href="/finance/reports">
+                                                <i class="fas fa-chart-bar me-2"></i>التقارير المالية
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- شريط البحث والتصفية -->
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <div class="input-icon">
+                                            <input type="text" class="form-control" placeholder="ابحث عن موظف..." @bind="searchTerm" @oninput="SearchSalaries">
+                                            <span class="input-icon-addon">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <select class="form-control" @onchange="FilterByStatus">
+                                            <option value="">جميع الحالات</option>
+                                            <option value="مدفوع">مدفوع</option>
+                                            <option value="معلق">معلق</option>
+                                            <option value="مرفوض">مرفوض</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- جدول الرواتب -->
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>الموظف</th>
+                                            <th>الوظيفة</th>
+                                            <th>الراتب الأساسي</th>
+                                            <th>البدلات</th>
+                                            <th>الخصومات</th>
+                                            <th>العلاوات</th>
+                                            <th>الصافي</th>
+                                            <th>تاريخ الراتب</th>
+                                            <th>الحالة</th>
+                                            <th>إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (salaries.Any())
+                                        {
+                                            @foreach (var salary in salaries)
+                                            {
+                                                <tr>
+                                                    <td>@salary.Id</td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(salary.EmployeeName)&background=2c3e50&color=fff"
+                                                                 class="rounded-circle mr-3"
+                                                                 width="40" height="40"
+                                                                 alt="صورة الموظف" />
+                                                            <div>
+                                                                <span class="d-block font-weight-bold">@salary.EmployeeName</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>@salary.EmployeePosition</td>
+                                                    <td>@salary.BaseSalary.ToString("C")</td>
+                                                    <td>@salary.Allowances.ToString("C")</td>
+                                                    <td><span class="text-danger">@salary.Deductions.ToString("C")</span></td>
+                                                    <td>@salary.Bonus.ToString("C")</td>
+                                                    <td><strong>@salary.NetSalary.ToString("C")</strong></td>
+                                                    <td>@salary.SalaryDate.ToString("yyyy-MM-dd")</td>
+                                                    <td>
+                                                        <span class="badge @(salary.Status == "مدفوع" ? "bg-success" :
+                                                                            salary.Status == "معلق" ? "bg-warning" : "bg-danger")">
+                                                            @salary.Status
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item" href="javascript:void(0)" @onclick="() => ViewSalaryDetails(salary)">
+                                                                    <i class="fas fa-eye mr-2"></i>عرض التفاصيل
+                                                                </a>
+                                                                <a class="dropdown-item" href="javascript:void(0)" @onclick="() => EditSalary(salary)">
+                                                                    <i class="fas fa-edit mr-2"></i>تعديل
+                                                                </a>
+                                                                <div class="dropdown-divider"></div>
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteSalary(salary.Id)">
+                                                                    <i class="fas fa-trash mr-2"></i>حذف
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="11" class="text-center">
+                                                    <div class="py-5">
+                                                        <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                                                        <p class="text-muted">لا توجد رواتب مسجلة</p>
+                                                        <button class="btn btn-primary" data-toggle="modal" data-target="#addSalaryModal">
+                                                            <i class="fas fa-plus mr-2"></i>إضافة راتب جديد
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إضافة راتب جديد -->
+<div class="modal fade" id="addSalaryModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-invoice-dollar mr-2"></i>إضافة راتب جديد
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- شريط التقدم -->
+                <div class="form-progress mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-center">
+                            <div class="step-circle active">
+                                1
+                            </div>
+                            <div class="step-label">معلومات الراتب</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="step-circle">
+                                2
+                            </div>
+                            <div class="step-label">التفاصيل المالية</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="step-circle">
+                                3
+                            </div>
+                            <div class="step-label">التأكيد</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- محتوى النموذج -->
+                <form class="salary-form">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الموظف *</label>
+                            <select class="form-control" @bind="newSalary.EmployeeId" required>
+                                <option value="">اختر الموظف</option>
+                                @foreach (var employee in employees)
+                                {
+                                    <option value="@employee.Id">@($"{employee.FirstName} {employee.LastName}")</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">تاريخ الراتب *</label>
+                            <input type="date" class="form-control" @bind="newSalary.SalaryDate" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">الراتب الأساسي *</label>
+                            <input type="number" step="0.01" class="form-control" placeholder="أدخل الراتب الأساسي" @bind="newSalary.BaseSalary" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">البدلات</label>
+                            <input type="number" step="0.01" class="form-control" placeholder="أدخل البدلات" @bind="newSalary.Allowances">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">الخصومات</label>
+                            <input type="number" step="0.01" class="form-control" placeholder="أدخل الخصومات" @bind="newSalary.Deductions">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">العلاوات</label>
+                            <input type="number" step="0.01" class="form-control" placeholder="أدخل العلاوات" @bind="newSalary.Bonus">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الراتب الصافي</label>
+                            <input type="number" step="0.01" class="form-control" value="@netSalary" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الحالة *</label>
+                            <select class="form-control" @bind="newSalary.Status" required>
+                                <option value="مدفوع">مدفوع</option>
+                                <option value="معلق">معلق</option>
+                                <option value="مرفوض">مرفوض</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الملاحظات</label>
+                        <textarea class="form-control" rows="2" placeholder="أدخل الملاحظات" @bind="newSalary.Notes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="CreateSalary">
+                    <i class="fas fa-save mr-2"></i>حفظ الراتب
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<EmployeeSalaryDto> salaries = new();
+    private List<UserDto> employees = new();
+    private EmployeeSalaryDto newSalary = new();
+    private SalarySummaryDto salarySummary = new();
+    private string searchTerm = "";
+    private string selectedStatus = "";
+
+    private decimal netSalary => newSalary.BaseSalary + newSalary.Allowances + newSalary.Bonus - newSalary.Deductions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEmployees();
+        await LoadSalarySummary();
+        await LoadSalaries();
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            employees = await UserService.GetAllUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading employees: {ex.Message}");
+        }
+    }
+
+    private async Task LoadSalaries()
+    {
+        try
+        {
+            salaries = await EmployeeSalaryService.GetAllSalariesAsync();
+
+            // تطبيق الفلاتر
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                salaries = salaries.Where(s =>
+                    s.EmployeeName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(selectedStatus))
+            {
+                salaries = salaries.Where(s => s.Status == selectedStatus).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading salaries: {ex.Message}");
+        }
+    }
+
+    private async Task LoadSalarySummary()
+    {
+        try
+        {
+            salarySummary = await EmployeeSalaryService.GetSalarySummaryAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading salary summary: {ex.Message}");
+        }
+    }
+
+    private async Task SearchSalaries(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        await LoadSalaries();
+    }
+
+    private async Task FilterByStatus(ChangeEventArgs e)
+    {
+        selectedStatus = e.Value?.ToString() ?? "";
+        await LoadSalaries();
+    }
+
+    private async Task CreateSalary()
+    {
+        try
+        {
+            newSalary.NetSalary = netSalary;
+            newSalary.SalaryDate = DateTime.Now;
+
+            var createdSalary = await EmployeeSalaryService.CreateSalaryAsync(newSalary);
+
+            // إعادة تعيين النموذج
+            newSalary = new EmployeeSalaryDto();
+
+            // تحديث القائمة والإحصائيات
+            await LoadSalarySummary();
+            await LoadSalaries();
+
+            // إغلاق المودال
+            // await JSRuntime.InvokeVoidAsync("hideModal", "addSalaryModal");
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating salary: {ex.Message}");
+        }
+    }
+
+    private void ViewSalaryDetails(EmployeeSalaryDto salary)
+    {
+        // عرض تفاصيل الراتب
+    }
+
+    private void EditSalary(EmployeeSalaryDto salary)
+    {
+        // تعديل الراتب
+    }
+
+    private async Task DeleteSalary(int salaryId)
+    {
+        try
+        {
+            await EmployeeSalaryService.DeleteSalaryAsync(salaryId);
+
+            // تحديث القائمة والإحصائيات
+            await LoadSalarySummary();
+            await LoadSalaries();
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting salary: {ex.Message}");
+        }
+    }
+}

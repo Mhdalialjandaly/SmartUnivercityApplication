@@ -5,6 +5,7 @@ namespace UniversityManagementSystem.Domain.Interfaces
 {
     public interface IRepository<T> where T : class, IEntity
     {
+        IQueryable<T> GetAllIncluding(params Expression<Func<T, object>>[] includeProperties);
         Task<T> GetByIdAsync(object id, params Expression<Func<T, object>>[] includeProperties);
         Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties);

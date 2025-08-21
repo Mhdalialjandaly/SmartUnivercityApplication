@@ -1,0 +1,731 @@
+﻿@page "/finance/reports"
+@attribute [Authorize]
+@inject IFinanceServices FinanceService
+@inject IDepartmentServices DepartmentService
+@rendermode InteractiveServer
+
+<PageTitle>التقارير المالية - الجامعة الذكية</PageTitle>
+
+<div class="main-panel">
+    <div class="content">
+        <div class="page-inner">
+            <div class="content" data-background-color="dark">
+                <div class="page-inner">
+                    <!-- شريط العنوان والتنقل -->
+                    <div class="page-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="page-title text-white">
+                                <i class="fas fa-chart-bar me-2"></i> التقارير المالية
+                            </h4>
+                            <div class="ml-md-auto">
+                                <ul class="breadcrumbs">
+                                    <li class="nav-home">
+                                        <a href="/">
+                                            <i class="fas fa-home text-white"></i>
+                                        </a>
+                                    </li>
+                                    <li class="separator">
+                                        <i class="fas fa-chevron-left text-white"></i>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/financial-management" class="text-white">الشؤون المالية</a>
+                                    </li>
+                                    <li class="separator">
+                                        <i class="fas fa-chevron-left text-white"></i>
+                                    </li>
+                                    <li class="nav-item">
+                                        <span class="text-white">التقارير المالية</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بطاقات الإحصائيات -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-primary-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@reportCount</h2>
+                                            <p class="mb-0">إجمالي التقارير</p>
+                                        </div>
+                                        <div class="icon-shape bg-primary-light rounded-circle">
+                                            <i class="fas fa-file-alt text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-success-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@generatedReports</h2>
+                                            <p class="mb-0">تقارير مولدة</p>
+                                        </div>
+                                        <div class="icon-shape bg-success-light rounded-circle">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-warning-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@pendingReports</h2>
+                                            <p class="mb-0">تقارير معلقة</p>
+                                        </div>
+                                        <div class="icon-shape bg-warning-light rounded-circle">
+                                            <i class="fas fa-clock text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-dark bg-info-gradient">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h2 class="mb-0">@scheduledReports</h2>
+                                            <p class="mb-0">تقارير مجدولة</p>
+                                        </div>
+                                        <div class="icon-shape bg-info-light rounded-circle">
+                                            <i class="fas fa-calendar-alt text-info"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- لوحة التحكم الرئيسية -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex align-items-center">
+                                <h4 class="card-title">إدارة التقارير المالية</h4>
+                                <div class="ml-auto">
+                                    <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#generateReportModal">
+                                        <i class="fas fa-plus me-2"></i>توليد تقرير جديد
+                                    </button>
+                                    <button class="btn btn-secondary btn-round" data-toggle="modal" data-target="#scheduleReportModal">
+                                        <i class="fas fa-calendar-plus me-2"></i>جدولة تقرير
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- باقي الكود كما هو حتى علامات التبويب -->
+                            <li class="nav-item">
+                                <a class="nav-link" id="monthly-tab" data-toggle="pill" href="#monthly" role="tab" @onclick="async () => await LoadReportsByType(Monthly)">
+                                    <i class="fas fa-calendar-alt me-2"></i>تقارير شهرية
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="quarterly-tab" data-toggle="pill" href="#quarterly" role="tab" @onclick="async () => await LoadReportsByType(Quarterly)">
+                                    <i class="fas fa-calendar me-2"></i>تقارير ربع سنوية
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="annual-tab" data-toggle="pill" href="#annual" role="tab" @onclick="async () => await LoadReportsByType(Annual)">
+                                    <i class="fas fa-calendar-check me-2"></i>تقارير سنوية
+                                </a>
+                            </li>
+
+                            <!-- محتوى علامات التبويب -->
+                            <div class="tab-content mt-3" id="reportsTabsContent">
+                                <!-- جميع التقارير -->
+                                <div class="tab-pane fade show active" id="all-reports" role="tabpanel">
+                                    <div class="row mb-3">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <div class="input-icon">
+                                                    <input type="text" class="form-control" placeholder="بحث في التقارير..." @bind="searchTerm" @oninput="SearchReports">
+                                                    <span class="input-icon-addon">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <select class="form-control" @onchange="FilterByStatus">
+                                                    <option value="">جميع الحالات</option>
+                                                    <option value="generated">مولد</option>
+                                                    <option value="pending">معلق</option>
+                                                    <option value="scheduled">مجدول</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th width="50px">#</th>
+                                                    <th>اسم التقرير</th>
+                                                    <th width="150px">النوع</th>
+                                                    <th width="150px">الفترة</th>
+                                                    <th width="120px">تاريخ الإنشاء</th>
+                                                    <th width="100px">الحالة</th>
+                                                    <th width="150px">الإجراءات</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (financialReports.Any())
+                                                {
+                                                    @for (int i = 0; i < financialReports.Count; i++)
+                                                    {
+                                                        var report = financialReports[i];
+                                                        <tr>
+                                                            <td>@report.Id</td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="archive-icon bg-primary-light rounded-circle mr-3">
+                                                                        <i class="fas fa-file-pdf text-primary"></i>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span class="d-block font-weight-bold">@report.Title</span>
+                                                                        <small class="text-muted">@report.Description</small>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge badge-secondary">@GetReportTypeText(report.Type)</span>
+                                                            </td>
+                                                            <td>@report.Period</td>
+                                                            <td>@report.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                                            <td>
+                                                                <span class="badge @GetStatusClass(report.Status)">
+                                                                    @GetStatusText(report.Status)
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                                        <i class="fas fa-ellipsis-v"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu">
+                                                                        <a class="dropdown-item" href="#" @onclick="() => DownloadReport(report.Id)">
+                                                                            <i class="fas fa-download mr-2"></i>تحميل
+                                                                        </a>
+                                                                        <a class="dropdown-item" href="#" @onclick="() => ViewReport(report.Id)">
+                                                                            <i class="fas fa-eye mr-2"></i>عرض
+                                                                        </a>
+                                                                        <a class="dropdown-item" href="#" @onclick="() => EditReport(report)">
+                                                                            <i class="fas fa-edit mr-2"></i>تعديل
+                                                                        </a>
+                                                                        <div class="dropdown-divider"></div>
+                                                                        <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteReport(report.Id)">
+                                                                            <i class="fas fa-trash mr-2"></i>حذف
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td colspan="7">
+                                                            <div class="text-center py-5">
+                                                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                                                <p class="text-muted">لا توجد تقارير مالية</p>
+                                                                <button class="btn btn-primary" data-toggle="modal" data-target="#generateReportModal">
+                                                                    <i class="fas fa-plus mr-2"></i>توليد تقرير جديد
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- ترقيم الصفحات -->
+                                    @if (totalPages > 1)
+                                    {
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="text-muted">
+                                                عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, reportCount) من @reportCount
+                                            </div>
+                                            <ul class="pagination">
+                                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                                    <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                                        <i class="fas fa-angle-double-right"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                                        <i class="fas fa-angle-right"></i>
+                                                    </a>
+                                                </li>
+
+                                                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                                {
+                                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                                        <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                                    </li>
+                                                }
+
+                                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                                        <i class="fas fa-angle-left"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                                    <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                                        <i class="fas fa-angle-double-left"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- تقارير شهرية -->
+                                <div class="tab-pane fade" id="monthly" role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">التقارير الشهرية</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- محتوى التقارير الشهرية -->
+                                            <p>محتوى التقارير الشهرية سيتم عرضه هنا.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- تقارير ربع سنوية -->
+                                <div class="tab-pane fade" id="quarterly" role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">التقارير ربع سنوية</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- محتوى التقارير ربع سنوية -->
+                                            <p>محتوى التقارير ربع سنوية سيتم عرضه هنا.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- تقارير سنوية -->
+                                <div class="tab-pane fade" id="annual" role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">التقارير السنوية</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- محتوى التقارير السنوية -->
+                                            <p>محتوى التقارير السنوية سيتم عرضه هنا.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال توليد تقرير جديد -->
+<div class="modal fade" id="generateReportModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-pdf mr-2"></i>توليد تقرير مالي جديد
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">اسم التقرير *</label>
+                            <input type="text" class="form-control" placeholder="أدخل اسم التقرير" @bind="newReport.Title" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">نوع التقرير *</label>
+                            <select class="form-control" @bind="newReport.Type" required>
+                                <option value="">اختر نوع التقرير</option>
+                                <option value="monthly">تقرير شهري</option>
+                                <option value="quarterly">تقرير ربع سنوي</option>
+                                <option value="annual">تقرير سنوي</option>
+                                <option value="custom">فترة مخصصة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">القسم</label>
+                            <select class="form-control" @bind="newReport.DepartmentId">
+                                <option value="">جميع الأقسام</option>
+                                @foreach (var dept in departments)
+                                {
+                                    <option value="@dept.Id">@dept.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">من تاريخ *</label>
+                            <input type="date" class="form-control" @bind="newReport.StartDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">إلى تاريخ *</label>
+                            <input type="date" class="form-control" @bind="newReport.EndDate" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">نوع المعاملات</label>
+                        <select class="form-control" @bind="newReport.TransactionType">
+                            <option value="all">جميع المعاملات</option>
+                            <option value="income">الإيرادات فقط</option>
+                            <option value="expense">المصروفات فقط</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-control" rows="3" placeholder="أدخل وصف التقرير" @bind="newReport.Description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="GenerateNewReport">
+                    <i class="fas fa-file-pdf mr-2"></i>توليد التقرير
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال جدولة تقرير -->
+<div class="modal fade" id="scheduleReportModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus mr-2"></i>جدولة تقرير مالي
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">اسم التقرير *</label>
+                        <input type="text" class="form-control" placeholder="أدخل اسم التقرير" @bind="scheduledReport.Title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">نوع التقرير *</label>
+                        <select class="form-control" @bind="scheduledReport.Type" required>
+                            <option value="">اختر نوع التقرير</option>
+                            <option value="monthly">تقرير شهري</option>
+                            <option value="quarterly">تقرير ربع سنوي</option>
+                            <option value="annual">تقرير سنوي</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">يوم التوليد</label>
+                            <input type="number" class="form-control" min="1" max="31" placeholder="اليوم" @bind="scheduledReport.DayOfMonth">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الوقت</label>
+                            <input type="time" class="form-control" @bind="scheduledReport.Time">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">القسم</label>
+                        <select class="form-control" @bind="scheduledReport.DepartmentId">
+                            <option value="">جميع الأقسام</option>
+                            @foreach (var dept in departments)
+                            {
+                                <option value="@dept.Id">@dept.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-control" rows="2" placeholder="أدخل وصف التقرير" @bind="scheduledReport.Description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
+                </button>
+                <button type="button" class="btn btn-success" @onclick="ScheduleReport">
+                    <i class="fas fa-calendar-check mr-2"></i>جدولة التقرير
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .archive-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .badge-status-generated {
+        background-color: #1cc88a;
+        color: #fff;
+    }
+
+    .badge-status-pending {
+        background-color: #f6c23e;
+        color: #fff;
+    }
+
+    .badge-status-scheduled {
+        background-color: #4e73df;
+        color: #fff;
+    }
+</style>
+
+@code {
+    private List<FinancialReportDto> financialReports = new();
+    private List<DepartmentDto> departments = new();
+    private FinancialReportDto newReport = new();
+    private ScheduledReportDto scheduledReport = new();
+    private string searchTerm = "";
+    private string selectedStatus = "";
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageSize = 10;
+    private int reportCount = 0;
+    private int generatedReports = 0;
+    private int pendingReports = 0;
+    private int scheduledReports = 0;
+    public string Monthly = "monthly";
+public string Quarterly = "quarterly";
+public string Annual = "annual";
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadReports();
+        await LoadReportStats();
+    }
+
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await DepartmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+
+    private async Task LoadReports()
+    {
+        try
+        {
+            // هنا يجب استبدال هذا بالخدمة الفعلية
+            financialReports = new List<FinancialReportDto>();
+            totalPages = 1;
+            reportCount = financialReports.Count;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading reports: {ex.Message}");
+        }
+    }
+
+    private async Task LoadReportStats()
+    {
+        try
+        {
+            // هنا يجب استبدال هذا بالخدمة الفعلية
+            generatedReports = 15;
+            pendingReports = 3;
+            scheduledReports = 5;
+            reportCount = generatedReports + pendingReports + scheduledReports;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading report statistics: {ex.Message}");
+        }
+    }
+
+    private async Task LoadReportsByType(string type)
+    {
+        try
+        {
+            // تحميل التقارير حسب النوع
+            await LoadReports();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading reports by type: {ex.Message}");
+        }
+    }
+
+    private async Task SearchReports(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadReports();
+    }
+
+    private async Task FilterByStatus(ChangeEventArgs e)
+    {
+        selectedStatus = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadReports();
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadReports();
+        }
+    }
+
+    private async Task GenerateNewReport()
+    {
+        try
+        {
+            // هنا يجب استبدال هذا بالخدمة الفعلية
+            // var createdReport = await FinanceService.GenerateReportAsync(newReport);
+
+            // تحديث القائمة والإحصائيات
+            await LoadReports();
+            await LoadReportStats();
+
+            // إغلاق المودال
+            // JS.InvokeVoidAsync("$('#generateReportModal').modal('hide')");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating report: {ex.Message}");
+        }
+    }
+
+    private async Task ScheduleReport()
+    {
+        try
+        {
+            // هنا يجب استبدال هذا بالخدمة الفعلية
+            // var scheduled = await FinanceService.ScheduleReportAsync(scheduledReport);
+
+            // تحديث الإحصائيات
+            await LoadReportStats();
+
+            // إغلاق المودال
+            // JS.InvokeVoidAsync("$('#scheduleReportModal').modal('hide')");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error scheduling report: {ex.Message}");
+        }
+    }
+
+    private async Task DownloadReport(int reportId)
+    {
+        try
+        {
+            // كود لتحميل التقرير
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error downloading report: {ex.Message}");
+        }
+    }
+
+    private async Task ViewReport(int reportId)
+    {
+        // عرض تفاصيل التقرير
+    }
+
+    private async Task EditReport(FinancialReportDto report)
+    {
+        // تعديل التقرير
+    }
+
+    private async Task DeleteReport(int reportId)
+    {
+        try
+        {
+            // هنا يجب استبدال هذا بالخدمة الفعلية
+            // await FinanceService.DeleteReportAsync(reportId);
+
+            // تحديث القائمة والإحصائيات
+            await LoadReports();
+            await LoadReportStats();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting report: {ex.Message}");
+        }
+    }
+
+    private string GetReportTypeText(string type)
+    {
+        return type switch
+        {
+            "monthly" => "شهري",
+            "quarterly" => "ربع سنوي",
+            "annual" => "سنوي",
+            "custom" => "مخصص",
+            _ => type
+        };
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "generated" => "badge-status-generated",
+            "pending" => "badge-status-pending",
+            "scheduled" => "badge-status-scheduled",
+            _ => "badge-secondary"
+        };
+    }
+
+    private string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "generated" => "مولد",
+            "pending" => "معلق",
+            "scheduled" => "مجدول",
+            _ => status
+        };
+    }
+}

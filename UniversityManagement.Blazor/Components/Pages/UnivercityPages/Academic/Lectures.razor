@@ -1,0 +1,532 @@
+﻿@page "/academic/lectures"
+@attribute [Authorize]
+@inject ILectureServices LectureService
+@inject ICourseServices CourseService
+@rendermode InteractiveServer
+
+<PageTitle>إدارة المحاضرات - الجامعة الذكية</PageTitle>
+<div class="main-panel">
+		<div class="content">
+			<div class="page-inner" dir="rtl">
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 fw-bold text-primary">إدارة المحاضرات</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                            <li class="breadcrumb-item"><a href="/academic">الشؤون الأكاديمية</a></li>
+                            <li class="breadcrumb-item active">المحاضرات</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLectureModal">
+                        <i class="fas fa-plus me-2"></i>إضافة محاضرة جديدة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول المحاضرات -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">جدول المحاضرات</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-md-end gap-2">
+                                <input type="date" class="form-control" style="max-width: 150px;"  @onchange="LoadLecturesByDate">
+                                <select class="form-select" style="max-width: 200px;" @onchange="FilterByCourse">
+                                    <option value="">جميع المواد</option>
+                                    @foreach (var course in courses)
+                                    {
+                                        <option value="@course.Id">@course.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>المادة</th>
+                                    <th>عنوان المحاضرة</th>
+                                    <th>التاريخ</th>
+                                    <th>الوقت</th>
+                                    <th>المكان</th>
+                                    <th>النوع</th>
+                                    <th>الحضور</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (lectures.Any())
+                                {
+                                    @for (int i = 0; i < lectures.Count; i++)
+                                    {
+                                        var lecture = lectures[i];
+                                        <tr class="@(lecture.IsCancelled ? "table-secondary" : "")">
+                                            <td><strong>@lecture.CourseName</strong></td>
+                                            <td>@lecture.Title</td>
+                                            <td>@lecture.LectureDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@lecture.StartTime.ToString(@"hh\:mm") - @lecture.EndTime.ToString(@"hh\:mm")</td>
+                                            <td>@lecture.Location</td>
+                                            <td>
+                                                <span class="badge bg-info">@lecture.LectureType</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">@lecture.PresentStudents</span> / 
+                                                <span class="badge bg-danger">@lecture.AbsentStudents</span>
+                                            </td>
+                                            <td>
+                                                @if (lecture.IsCancelled)
+                                                {
+                                                    <span class="badge bg-danger">ملغاة</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">مجدولة</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item" href="/academic/lectures/@lecture.Id"><i class="fas fa-eye me-2"></i>عرض التفاصيل</a></li>
+                                                        <li><a class="dropdown-item" href="/academic/lectures/@lecture.Id/attendance"><i class="fas fa-user-check me-2"></i>إدارة الحضور</a></li>
+                                                        @if (!lecture.IsCancelled)
+                                                        {
+                                                            <li><a class="dropdown-item text-warning" href="javascript:void(0)" @onclick="() => CancelLecture(lecture.Id)"><i class="fas fa-times me-2"></i>إلغاء المحاضرة</a></li>
+                                                            <li><a class="dropdown-item text-info" href="javascript:void(0)" @onclick="() => RescheduleLecture(lecture)"><i class="fas fa-calendar-alt me-2"></i>إعادة جدولة</a></li>
+                                                        }
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item" href="javascript:void(0)" @onclick="() => EditLecture(lecture)"><i class="fas fa-edit me-2"></i>تعديل</a></li>
+                                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteLecture(lecture.Id)"><i class="fas fa-trash me-2"></i>حذف</a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="9" class="text-center">لا توجد محاضرات</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div></div></div>
+<!-- Modal إضافة محاضرة جديدة -->
+<div class="modal fade" id="addLectureModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة محاضرة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">المادة *</label>
+                            <select class="form-select" @bind="newLecture.CourseId" required>
+                                <option value="">اختر المادة</option>
+                                @foreach (var course in courses)
+                                {
+                                    <option value="@course.Id">@course.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">عنوان المحاضرة *</label>
+                            <input type="text" class="form-control" placeholder="أدخل عنوان المحاضرة" @bind="newLecture.Title" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">التاريخ *</label>
+                            <input type="date" class="form-control" @bind="newLecture.LectureDate" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">وقت البدء *</label>
+                            <input type="time" class="form-control" @bind="newLecture.StartTime" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">وقت الانتهاء *</label>
+                            <input type="time" class="form-control" @bind="newLecture.EndTime" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">المكان</label>
+                            <input type="text" class="form-control" placeholder="أدخل مكان المحاضرة" @bind="newLecture.Location">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">نوع المحاضرة</label>
+                            <select class="form-select" @bind="newLecture.LectureType">
+                                <option value="محاضرة">محاضرة</option>
+                                <option value="تمرين">تمرين</option>
+                                <option value="مختبر">مختبر</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-control" rows="2" placeholder="أدخل وصف المحاضرة" @bind="newLecture.Description"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" rows="2" placeholder="أدخل الملاحظات" @bind="newLecture.Notes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" @onclick="CreateLecture">حفظ المحاضرة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تعديل المحاضرة -->
+<div class="modal fade" id="editLectureModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المحاضرة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (editingLecture != null)
+                {
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المادة *</label>
+                                <select class="form-select" @bind="editingLecture.CourseId" required>
+                                    <option value="">اختر المادة</option>
+                                    @foreach (var course in courses)
+                                    {
+                                        <option value="@course.Id">@course.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">عنوان المحاضرة *</label>
+                                <input type="text" class="form-control" placeholder="أدخل عنوان المحاضرة" @bind="editingLecture.Title" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">التاريخ *</label>
+                                <input type="date" class="form-control" @bind="editingLecture.LectureDate" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">وقت البدء *</label>
+                                <input type="time" class="form-control" @bind="editingLecture.StartTime" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">وقت الانتهاء *</label>
+                                <input type="time" class="form-control" @bind="editingLecture.EndTime" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المكان</label>
+                                <input type="text" class="form-control" placeholder="أدخل مكان المحاضرة" @bind="editingLecture.Location">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">نوع المحاضرة</label>
+                                <select class="form-select" @bind="editingLecture.LectureType">
+                                    <option value="محاضرة">محاضرة</option>
+                                    <option value="تمرين">تمرين</option>
+                                    <option value="مختبر">مختبر</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea class="form-control" rows="2" placeholder="أدخل وصف المحاضرة" @bind="editingLecture.Description"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" rows="2" placeholder="أدخل الملاحظات" @bind="editingLecture.Notes"></textarea>
+                        </div>
+                    </form>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" @onclick="UpdateLecture">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal إعادة جدولة المحاضرة -->
+<div class="modal fade" id="rescheduleLectureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إعادة جدولة المحاضرة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (reschedulingLecture != null)
+                {
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">التاريخ الجديد *</label>
+                            <input type="date" class="form-control" @bind="newLectureDate" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">وقت البدء الجديد *</label>
+                                <input type="time" class="form-control" @bind="newLectureStartTime" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">وقت الانتهاء الجديد *</label>
+                                <input type="time" class="form-control" @bind="newLectureEndTime" required>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" @onclick="ConfirmReschedule">إعادة الجدولة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<LectureDto> lectures = new();
+    private List<CourseDto> courses = new();
+    private LectureDto newLecture = new();
+    private LectureDto editingLecture;
+    private LectureDto reschedulingLecture;
+    private DateTime selectedDate = DateTime.Now;
+    private int? selectedCourseId = null;
+    private DateTime newLectureDate = DateTime.Now;
+    private DateTime newLectureStartTime = DateTime.Now;
+    private DateTime newLectureEndTime = DateTime.Now;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCourses();
+        await LoadLectures();
+    }
+
+    private async Task LoadCourses()
+    {
+        try
+        {
+            courses = await CourseService.GetAllCoursesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading courses: {ex.Message}");
+        }
+    }
+
+    private async Task LoadLectures()
+    {
+        try
+        {
+            lectures = await LectureService.GetLecturesByDateAsync(selectedDate);
+            
+            // تطبيق الفلترة حسب المادة
+            if (selectedCourseId.HasValue)
+            {
+                lectures = lectures.Where(l => l.CourseId == selectedCourseId.Value).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading lectures: {ex.Message}");
+        }
+    }
+
+    private async Task LoadLecturesByDate(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out DateTime date))
+        {
+            selectedDate = date;
+            await LoadLectures();
+        }
+    }
+
+    private async Task FilterByCourse(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        selectedCourseId = string.IsNullOrEmpty(value) ? null : int.Parse(value);
+        await LoadLectures();
+    }
+
+    private async Task CreateLecture()
+    {
+        try
+        {
+            newLecture.CreatedDate = DateTime.Now;
+            
+            var createdLecture = await LectureService.CreateLectureAsync(newLecture);
+            
+            // إعادة تعيين النموذج
+            newLecture = new LectureDto();
+            
+            // تحديث القائمة
+            await LoadLectures();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating lecture: {ex.Message}");
+        }
+    }
+
+    private void EditLecture(LectureDto lecture)
+    {
+        editingLecture = new LectureDto
+        {
+            Id = lecture.Id,
+            CourseId = lecture.CourseId,
+            Title = lecture.Title,
+            Description = lecture.Description,
+            LectureDate = lecture.LectureDate,
+            StartTime = lecture.StartTime,
+            EndTime = lecture.EndTime,
+            Location = lecture.Location,
+            LectureType = lecture.LectureType,
+            IsCancelled = lecture.IsCancelled,
+            Notes = lecture.Notes
+        };
+        
+        // فتح الـ Modal
+        // JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#editLectureModal")?.show();
+    }
+
+    private async Task UpdateLecture()
+    {
+        if (editingLecture != null)
+        {
+            try
+            {
+                await LectureService.UpdateLectureAsync(editingLecture.Id, editingLecture);
+                
+                // إغلاق الـ Modal
+                // JS.InvokeVoidAsync("bootstrap.Modal.getInstance", "#editLectureModal")?.hide();
+                
+                // تحديث القائمة
+                await LoadLectures();
+                
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating lecture: {ex.Message}");
+            }
+        }
+    }
+
+    private void RescheduleLecture(LectureDto lecture)
+    {
+        reschedulingLecture = lecture;
+        newLectureDate = lecture.LectureDate;
+        newLectureStartTime = lecture.StartTime;
+        newLectureEndTime = lecture.EndTime;
+        
+        // فتح الـ Modal
+        // JS.InvokeVoidAsync("bootstrap.Modal.getOrCreateInstance", "#rescheduleLectureModal")?.show();
+    }
+
+    private async Task ConfirmReschedule()
+    {
+        if (reschedulingLecture != null)
+        {
+            try
+            {
+                await LectureService.RescheduleLectureAsync(
+                    reschedulingLecture.Id,
+                    newLectureDate,
+                    newLectureStartTime,
+                    newLectureEndTime);
+                
+                // إغلاق الـ Modal
+                // JS.InvokeVoidAsync("bootstrap.Modal.getInstance", "#rescheduleLectureModal")?.hide();
+                
+                // تحديث القائمة
+                await LoadLectures();
+                
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error rescheduling lecture: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task CancelLecture(int lectureId)
+    {
+        try
+        {
+            await LectureService.CancelLectureAsync(lectureId);
+            
+            // تحديث القائمة
+            await LoadLectures();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cancelling lecture: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteLecture(int lectureId)
+    {
+        try
+        {
+            await LectureService.DeleteLectureAsync(lectureId);
+            
+            // تحديث القائمة
+            await LoadLectures();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting lecture: {ex.Message}");
+        }
+    }
+}

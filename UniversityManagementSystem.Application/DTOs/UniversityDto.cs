@@ -12,8 +12,5 @@ namespace UniversityManagementSystem.Application.DTOs
         public int Id { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
-        public int UniversityId { get; set; }
-        public UniversityDto University { get; set; }
-        public IList<StudentDto> Students { get; set; }
     }
 }

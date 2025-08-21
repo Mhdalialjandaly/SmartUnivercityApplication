@@ -1,0 +1,549 @@
+﻿@page "/students/{studentId}"
+@attribute [Authorize]
+@inject IStudentServices _studentService
+@inject IDepartmentServices _departmentService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@inject UniversityDbContext _context
+<PageTitle>تفاصيل الطالب - الجامعة الذكية</PageTitle>
+
+@if (studentDetails == null)
+{
+    <div class="loading-container">
+        <div class="spinner">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+        <div class="loading-text">جاري تحميل بيانات الطالب...</div>
+    </div>
+}
+else
+{
+    <div class="main-panel">
+        <div class="content">
+            <div class="page-inner" dir="rtl">
+                <div class="student-details-container">
+                    <!-- Header Section -->
+                    <div class="student-header">
+                        <div class="header-content">
+                            <div class="breadcrumb-nav">
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i> الرئيسية</a></li>
+                                        <li class="breadcrumb-item"><a href="/students"><i class="fas fa-users"></i> شؤون الطلاب</a></li>
+                                        <li class="breadcrumb-item active"><i class="fas fa-user-graduate"></i> @($"{studentDetails.FirstName} {studentDetails.LastName}")</li>
+                                    </ol>
+                                </nav>
+                            </div>
+
+                            <div class="student-title">
+                                <h1><i class="fas fa-id-card"></i> تفاصيل الطالب</h1>
+                                <div class="student-id">رقم القيد: @studentDetails.StudentId</div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <a href="/students/@studentDetails.StudentId/edit" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> تعديل البيانات
+                                </a>
+                                <button class="btn btn-delete" @onclick="ConfirmAndDelete">
+                                    <i class="fas fa-trash-alt"></i> حذف الطالب
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="student-basic-info">
+                            <div class="student-avatar">
+                                <div class="avatar-circle">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                            </div>
+                            <div class="student-summary">
+                                <h2>@($"{studentDetails.FirstName} {studentDetails.LastName}")</h2>
+                                <div class="department-badge">
+                                    <i class="fas fa-building"></i> @GetDepartmentName(studentDetails.DepartmentId)
+                                </div>
+                                <div class="academic-year">
+                                    <i class="fas fa-calendar-alt"></i> @GetAcademicYear(studentDetails.RegistrationDate)
+                                </div>
+                                @if (studentDetails.GPA != 0)
+                                {
+                                    <div class="gpa-badge">
+                                        المعدل التراكمي:
+                                        <span class="badge @GetGpaBadgeClass(studentDetails.GPA)">@studentDetails.GPA.ToString("F2")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="student-details-grid">
+                        <!-- معلومات أساسية -->
+                        <div class="detail-card">
+                            <div class="card-header bg-primary">
+                                <i class="fas fa-user-tie"></i> المعلومات الشخصية
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-calendar-day"></i> تاريخ الميلاد:</span>
+                                    <span class="info-value">@(studentDetails.BirthOfDate != DateTime.MinValue ? studentDetails.BirthOfDate.ToString("yyyy-MM-dd") : "غير محدد")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-venus-mars"></i> الجنس:</span>
+                                    <span class="info-value">@(studentDetails.Sexual == true ? "ذكر" : "أنثى")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-praying-hands"></i> الديانة:</span>
+                                    <span class="info-value">@studentDetails.Religion</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-flag"></i> الجنسية:</span>
+                                    <span class="info-value">@studentDetails.NationalityName</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-users"></i> القومية:</span>
+                                    <span class="info-value">@studentDetails.PoliticalNationalism</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات الاتصال -->
+                        <div class="detail-card">
+                            <div class="card-header bg-info">
+                                <i class="fas fa-phone-alt"></i> معلومات الاتصال
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-mobile-alt"></i> الهاتف الأول:</span>
+                                    <span class="info-value">@studentDetails.Phone</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-phone"></i> الهاتف الثاني:</span>
+                                    <span class="info-value">@studentDetails.SecoundPhone</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-home"></i> محل السكن:</span>
+                                    <span class="info-value">@studentDetails.HomeAddress</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-house-user"></i> رقم الدار:</span>
+                                    <span class="info-value">@studentDetails.HomeNumber</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-map-marked-alt"></i> العنوان الدائم:</span>
+                                    <span class="info-value">@studentDetails.FullAddress</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات وطنية -->
+                        <div class="detail-card">
+                            <div class="card-header bg-warning">
+                                <i class="fas fa-id-card"></i> المعلومات الوطنية
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-id-card-alt"></i> رقم الهوية:</span>
+                                    <span class="info-value">@studentDetails.CivilstatusIDNumberAndNationalCard</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-map-marker-alt"></i> صادرة من:</span>
+                                    <span class="info-value">@studentDetails.CivilstatusIDNumberAndNationalCardFrom</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-calendar-check"></i> تاريخ الإصدار:</span>
+                                    <span class="info-value">@(studentDetails.CivilstatusIDNumberAndNationalCardDate != DateTime.MinValue ? studentDetails.CivilstatusIDNumberAndNationalCardDate.ToString("yyyy-MM-dd") : "غير محدد")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-certificate"></i> رقم شهادة الجنسية:</span>
+                                    <span class="info-value">@studentDetails.NationalityCertificateNumber</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-map-marker-alt"></i> صادرة من (شهادة الجنسية):</span>
+                                    <span class="info-value">@studentDetails.NationalityCertificateNumberFrom</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-calendar-check"></i> تاريخ إصدار شهادة الجنسية:</span>
+                                    <span class="info-value">@(studentDetails.NationalityCertificateNumberDate != DateTime.MinValue ? studentDetails.NationalityCertificateNumberDate.ToString("yyyy-MM-dd") : "غير محدد")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات أكاديمية -->
+                        <div class="detail-card">
+                            <div class="card-header bg-success">
+                                <i class="fas fa-graduation-cap"></i> المعلومات الأكاديمية
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-school"></i> اسم المدرسة:</span>
+                                    <span class="info-value">@studentDetails.SchoolName</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-code-branch"></i> الفرع:</span>
+                                    <span class="info-value">@studentDetails.Branch</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-calendar-day"></i> تاريخ التخرج:</span>
+                                    <span class="info-value">@(studentDetails.DateOfSchoolGraduate != DateTime.MinValue ? studentDetails.DateOfSchoolGraduate.ToString("yyyy-MM-dd") : "غير محدد")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-percentage"></i> المجموع بدون إضافات:</span>
+                                    <span class="info-value">@studentDetails.StudentTotalWithoutAdditions</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-percentage"></i> المجموع مع إضافات:</span>
+                                    <span class="info-value">@studentDetails.StudentTotalWithAdditions</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-chart-line"></i> المعدل بدون إضافات:</span>
+                                    <span class="info-value">@studentDetails.StudentGPAWithoutAdditions</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-chart-line"></i> المعدل مع إضافات:</span>
+                                    <span class="info-value">@studentDetails.StudentGPAWithAdditions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات وظيفية -->
+                        <div class="detail-card">
+                            <div class="card-header bg-secondary">
+                                <i class="fas fa-briefcase"></i> المعلومات الوظيفية
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-user-tie"></i> حالة التوظيف:</span>
+                                    <span class="info-value">@(studentDetails.TrueIsEmployee == true ? "موظف" : "غير موظف")</span>
+                                </div>
+                                @if (studentDetails.TrueIsEmployee == true)
+                                {
+                                    <div class="info-item">
+                                        <span class="info-label"><i class="fas fa-building"></i> مكان العمل:</span>
+                                        <span class="info-value">@studentDetails.WorkAddress</span>
+                                    </div>
+                                }
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-door-open"></i> قناة القبول:</span>
+                                    <span class="info-value">@GetTunnelName(studentDetails.TunnelId)</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-door-open"></i> قسم التسجيل:</span>
+                                    <span class="info-value">@studentDetails.SubmissionDepartment</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-door-open"></i> قناة التسجيل:</span>
+                                    <span class="info-value">@studentDetails.TunnelDepartment</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات النظام -->
+                        <div class="detail-card">
+                            <div class="card-header bg-dark">
+                                <i class="fas fa-cogs"></i> معلومات النظام
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-user-circle"></i> اسم المستخدم:</span>
+                                    <span class="info-value">@studentDetails.UserNameOnSite</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-info-circle"></i> حالة الحساب:</span>
+                                    <span class="info-value">@studentDetails.StatusOnSite</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-user-check"></i> حالة الطالب:</span>
+                                    <span class="info-value">@studentDetails.Status</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-wallet"></i> رصيد الحساب:</span>
+                                    <span class="info-value">@studentDetails.AccountBalance.ToString("C")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-calendar-alt"></i> تاريخ التسجيل:</span>
+                                    <span class="info-value">@(studentDetails.RegistrationDate != DateTime.MinValue ? studentDetails.RegistrationDate.ToString("yyyy-MM-dd") : "غير محدد")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-receipt"></i> رقم وصل الحسابات:</span>
+                                    <span class="info-value">@studentDetails.AccountsReceiptNumber</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-key"></i> رقم الامتحاني:</span>
+                                    <span class="info-value">@studentDetails.ExamNumber</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-lock"></i> الرقم السري:</span>
+                                    <span class="info-value">@studentDetails.SecretNumber</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-check-circle"></i> تم إكمال التسجيل الإلكتروني:</span>
+                                    <span class="info-value">@(studentDetails.ERegistrationCompleted ? "نعم" : "لا")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-check-circle"></i> تم إكمال التسجيل:</span>
+                                    <span class="info-value">@(studentDetails.RegistraionCompleted ? "نعم" : "لا")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-check-circle"></i> تم إكمال التقديم:</span>
+                                    <span class="info-value">@(studentDetails.SubmissionIsCompleted ? "نعم" : "لا")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal تأكيد الحذف -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i> تأكيد الحذف
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    هل أنت متأكد أنك تريد حذف الطالب التالي بشكل دائم؟
+                </div>
+                <div class="student-to-delete">
+                    <div class="student-name">
+                        <i class="fas fa-user-graduate me-2"></i> @($"{studentDetails?.FirstName} {studentDetails?.LastName}")
+                    </div>
+                    <div class="student-id">
+                        <i class="fas fa-id-card me-2"></i> رقم القيد: @studentDetails?.StudentId
+                    </div>
+                    <div class="student-department">
+                        <i class="fas fa-building me-2"></i> القسم: @GetDepartmentName(studentDetails?.DepartmentId ?? 0)
+                    </div>
+                </div>
+                <div class="warning-note mt-3">
+                    <i class="fas fa-info-circle text-warning me-2"></i>
+                    <strong>تنبيه:</strong> لا يمكن التراجع عن هذه العملية بعد التنفيذ.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> إلغاء
+                </button>
+                <button type="button" class="btn btn-danger" @onclick="DeleteStudentConfirmed">
+                    <i class="fas fa-trash-alt me-2"></i> تأكيد الحذف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تأكيد الحذف - نسخة Bootstrap -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i> تأكيد الحذف
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    هل أنت متأكد أنك تريد حذف الطالب التالي بشكل دائم؟
+                </div>
+                <div class="student-to-delete">
+                    <div class="student-name">
+                        <i class="fas fa-user-graduate me-2"></i> @($"{studentDetails?.FirstName} {studentDetails?.LastName}")
+                    </div>
+                    <div class="student-id">
+                        <i class="fas fa-id-card me-2"></i> رقم القيد: @studentDetails?.StudentId
+                    </div>
+                    <div class="student-department">
+                        <i class="fas fa-building me-2"></i> القسم: @GetDepartmentName(studentDetails?.DepartmentId ?? 0)
+                    </div>
+                </div>
+                <div class="warning-note mt-3">
+                    <i class="fas fa-info-circle text-warning me-2"></i>
+                    <strong>تنبيه:</strong> لا يمكن التراجع عن هذه العملية بعد التنفيذ.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> إلغاء
+                </button>
+                <button type="button" class="btn btn-danger" @onclick="DeleteStudentConfirmed">
+                    <i class="fas fa-trash-alt me-2"></i> تأكيد الحذف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter] public string studentId { get; set; } = string.Empty;
+    private Student studentDetails = new();
+    private List<DepartmentDto> departments = new();
+    private List<Tunnel> tunnels = new();
+    private bool showDeleteModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadTunnels();
+        await LoadStudentDetails();
+    }
+
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await _departmentService.GetAllDepartmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+
+    private async Task LoadTunnels()
+    {
+        try
+        {
+            tunnels = await _context.Tunnels.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading tunnels: {ex.Message}");
+        }
+    }
+
+    private async Task LoadStudentDetails()
+    {
+        try
+        {
+            var student = await _context.Students
+                .Include(s => s.Department)
+                .Include(s => s.Tunnel)
+                .FirstOrDefaultAsync(e => e.StudentId == studentId);
+
+            if (student != null)
+            {
+                studentDetails = student;
+            }
+            else
+            {
+                Console.WriteLine($"Student with ID {studentId} not found.");
+                Navigation.NavigateTo("/students");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading student details: {ex.Message}");
+        }
+    }
+
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }
+
+    private string GetTunnelName(int tunnelId)
+    {
+        var tunnel = tunnels.FirstOrDefault(t => t.Id == tunnelId);
+        return tunnel?.Name ?? "غير محدد";
+    }
+
+    private string GetAcademicYear(DateTime registrationDate)
+    {
+        if (registrationDate == DateTime.MinValue) return "غير محدد";
+
+        var years = DateTime.Now.Year - registrationDate.Year;
+        return years switch
+        {
+            0 => "السنة الأولى",
+            1 => "السنة الثانية",
+            2 => "السنة الثالثة",
+            3 => "السنة الرابعة",
+            _ => years > 3 ? "متخرج" : "غير محدد"
+        };
+    }
+
+    private string GetGpaBadgeClass(double gpa)
+    {
+        return gpa switch
+        {
+            >= 3.5 => "gpa-excellent",
+            >= 2.5 => "gpa-good",
+            > 0 => "gpa-weak",
+            _ => "gpa-none"
+        };
+    }
+
+    private async Task ConfirmAndDelete()
+    {
+        try
+        {
+            await InvokeAsync(() =>
+            {
+                showDeleteModal = true;
+                StateHasChanged();
+            });
+        }
+        catch
+        {
+            showDeleteModal = true;
+            StateHasChanged();
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteModal = false;
+        StateHasChanged();
+    }
+
+    private async Task DeleteStudentConfirmed()
+    {
+        showDeleteModal = false;
+        StateHasChanged();
+
+        try
+        {
+            // تحديث تاريخ الحذف بدلاً من الحذف الفعلي
+            studentDetails.DeletedAt = DateTime.Now;
+            studentDetails.Status = StudentStatus.Deleted; // إذا كان لديك هذا الـ Enum
+
+            _context.Students.Update(studentDetails);
+            await _context.SaveChangesAsync();
+
+            Navigation.NavigateTo("/students");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting student: {ex.Message}");
+        }
+    }
+}
+<script>
+    window.showDeleteModal = function () {
+        var modalElement = document.getElementById('deleteModal');
+        if (modalElement) {
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+    }
+
+    window.hideDeleteModal = function () {
+        var modalElement = document.getElementById('deleteModal');
+        if (modalElement) {
+            var modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            }
+        }
+    }
+</script>

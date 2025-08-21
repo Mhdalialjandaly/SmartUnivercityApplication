@@ -8,7 +8,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public string StudentId { get; set; }
+        public int StudentId { get; set; }
 
         [Required]
         public int CourseId { get; set; }
@@ -42,5 +42,9 @@ namespace UniversityManagementSystem.Domain.Entities
         public DateTime ModifiedAt { get ; set ; }
         public string ModifiedBy { get ; set ; }
         public string DeletedBy { get ; set ; }
+
+        public string StudentName { get; set; }
+        public string CourseName { get; set; } 
+
     }
 }

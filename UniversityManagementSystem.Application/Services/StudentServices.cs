@@ -26,7 +26,7 @@ namespace UniversityManagementSystem.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<StudentDto> GetStudentByIdAsync(string studentId)
+        public async Task<StudentDto> GetStudentByIdAsync(int studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId);
             return _mapper.Map<StudentDto>(student);
@@ -43,10 +43,11 @@ namespace UniversityManagementSystem.Application.Services
             var student = _mapper.Map<Student>(studentDto);
             await _studentRepository.AddAsync(student);
             await _unitOfWork.CommitAsync();
-            return _mapper.Map<StudentDto>(student);
+            
+            return studentDto;
         }
 
-        public async Task UpdateStudentAsync(string studentId, StudentDto studentDto)
+        public async Task UpdateStudentAsync(int studentId, StudentDto studentDto)
         {
             var existingStudent = await _studentRepository.GetByIdAsync(studentId);
             if (existingStudent == null)
@@ -57,7 +58,7 @@ namespace UniversityManagementSystem.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task DeleteStudentAsync(string studentId)
+        public async Task DeleteStudentAsync(int studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId);
             if (student == null)
@@ -67,12 +68,12 @@ namespace UniversityManagementSystem.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<bool> StudentExistsAsync(string studentId)
+        public async Task<bool> StudentExistsAsync(int studentId)
         {
-            return await _studentRepository.ExistsAsync(s => s.StudentId == studentId);
+            return await _studentRepository.ExistsAsync(s => s.Id == studentId);
         }
 
-        public async Task<decimal> GetStudentAccountBalanceAsync(string studentId)
+        public async Task<decimal> GetStudentAccountBalanceAsync(int studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId);
             if (student == null)
@@ -81,7 +82,7 @@ namespace UniversityManagementSystem.Application.Services
             return student.AccountBalance;
         }
 
-        public async Task<bool> UpdateStudentAccountBalanceAsync(string studentId, decimal amount)
+        public async Task<bool> UpdateStudentAccountBalanceAsync(int studentId, decimal amount)
         {
             var student = await _studentRepository.GetByIdAsync(studentId);
             if (student == null)
@@ -93,7 +94,7 @@ namespace UniversityManagementSystem.Application.Services
             return true;
         }
 
-        public async Task<bool> ChangeStudentStatusAsync(string studentId, StudentStatus status)
+        public async Task<bool> ChangeStudentStatusAsync(int studentId, StudentStatus status)
         {
             var student = await _studentRepository.GetByIdAsync(studentId);
             if (student == null)
@@ -105,19 +106,19 @@ namespace UniversityManagementSystem.Application.Services
             return true;
         }
 
-        public async Task<List<CourseRegistrationDto>> GetStudentCoursesAsync(string studentId)
+        public async Task<List<CourseRegistrationDto>> GetStudentCoursesAsync(int studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId, s => s.CourseRegistrations);
             return _mapper.Map<List<CourseRegistrationDto>>(student.CourseRegistrations).ToList() ?? new List<CourseRegistrationDto>();
         }
 
-        public async Task<List<StudentDocumentDto>> GetStudentDocumentsAsync(string studentId)
+        public async Task<List<StudentDocumentDto>> GetStudentDocumentsAsync(int studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId, s => s.StudentDocuments);
             return _mapper.Map<List<StudentDocumentDto>>(student.CourseRegistrations).ToList() ?? new List<StudentDocumentDto>();
         }
 
-        public async Task<bool> CompleteRegistrationAsync(string studentId)
+        public async Task<bool> CompleteRegistrationAsync(int studentId)
         {
             var student = await _studentRepository.GetByIdAsync(studentId);
             if (student == null)
@@ -140,6 +141,12 @@ namespace UniversityManagementSystem.Application.Services
         {
             var students = await _studentRepository.GetAllAsync();
             return students.Where(e=>e.Status == StudentStatus.Active).Count();
+        }  
+        
+        public async Task<int> GetStudentsCountByGenderAsync(bool isMale)
+        {
+            var students = await _studentRepository.GetAllAsync();
+            return students.Where(e=>e.Sexual == isMale).Count();
         }
 
         public async Task<int> GetNewStudentsCountAsync()
@@ -155,26 +162,77 @@ namespace UniversityManagementSystem.Application.Services
             return courses.Average(e => e.Select(d => d.GPA).Count());
         }
 
-        public async Task<PaginatedResult<StudentDto>> GetStudentsPagedAsync(int pageNumber, int pageSize, string term, int? departmentId, StudentStatus status)
+        public async Task<PaginatedResult<Student>> GetStudentsPagedAsync(int pageNumber, int pageSize, string term, int? departmentId, StudentStatus status)
         {
-            var students = await _studentRepository.GetPagedAsync(pageNumber, pageSize);
-            
-            return new PaginatedResult<StudentDto>
+            try
             {
-                Data = _mapper.Map<List<StudentDto>>(students),
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalRecords = students.Count(),
-                TotalPages = (int)Math.Ceiling(students.Count() / (double)pageSize)
-            };
+                // 1. بناء الاستعلام الأساسي مع التضمينات اللازمة
+                var query =await _studentRepository.GetAllAsync(
+                    s => s.Department,
+                    s => s.Nationality,
+                    s => s.Tunnel
+                );
+                var res = query.ToList();
+                // 2. تطبيق الفلاتر
+                if (!string.IsNullOrEmpty(term))
+                {
+                    query = query.Where(s =>
+                        s.FirstName.Contains(term) ||
+                        s.LastName.Contains(term) ||
+                        s.StudentId.Contains(term));
+                }
+
+                if (departmentId.HasValue)
+                {
+                    query = query.Where(s => s.DepartmentId == departmentId.Value);
+                }
+
+                if (status != StudentStatus.All)
+                {
+                    query = query.Where(s => s.Status == status);
+                }
+
+                // 3. الحصول على العدد الكلي قبل التقسيم إلى صفحات
+                var totalRecords =  query.Count();
+
+                // 4. تطبيق التقسيم إلى صفحات وجلب البيانات
+                var students =  query
+                    .OrderBy(s => s.LastName)
+                    .ThenBy(s => s.FirstName)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+                
+
+                return new PaginatedResult<Student>
+                {
+                    Data = students,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalRecords = totalRecords,
+                    TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+                };
+            }
+            catch (Exception ex)
+            {
+                // يمكنك استخدام نظام التسجيل (Logging) هنا
+                throw new ApplicationException("حدث خطأ أثناء جلب بيانات الطلاب", ex);
+            }
         }
-        public async Task<List<InvoiceDto>> GetStudentInvoicesAsync(string studentId)
+        public async Task<List<InvoiceDto>> GetStudentInvoicesAsync(int studentId)
         {
+            List<CourseRegistration> courses = new List<CourseRegistration>();
             try
             {
                 var invoices = new List<InvoiceDto>();
                 var Students = await _studentRepository.GetByIdAsync(studentId,e => e.CourseRegistrations);
-                foreach (var item in Students.CourseRegistrations)
+
+                if (Students.CourseRegistrations is null)
+                    courses = new List<CourseRegistration>();
+                else
+                    courses = Students.CourseRegistrations.ToList();
+
+                foreach (var item in courses)
                 {
                     invoices.Add(new InvoiceDto {Amount = item.CourseFee , Date = DateTime.Now,InvoiceNumber = GenerateInvoiceNumber() });
                 }
@@ -189,6 +247,95 @@ namespace UniversityManagementSystem.Application.Services
         private string GenerateInvoiceNumber()
         {
             return $"INV-{DateTime.Now:yyyy}-{new Random().Next(10000, 99999)}";
+        }
+
+        public async Task<int> GetNewStudentsCountAsync(DateTime? startDate = null, DateTime? endDate = null, string academicYear = null)
+        {
+            try
+            {
+                // تحديد الفترة الزمنية الافتراضية إذا لم يتم توفيرها
+                var effectiveStartDate = startDate ?? DateTime.Now.AddMonths(-1); // آخر شهر كافتراضي
+                var effectiveEndDate = endDate ?? DateTime.Now;
+
+                // بناء الاستعلام الأساسي
+                var query = await _studentRepository.GetAllAsync();
+                query = query.Where(s => s.RegistrationDate >= effectiveStartDate &&
+                               s.RegistrationDate <= effectiveEndDate &&
+                               s.RegistraionCompleted);
+
+                // تطبيق فلترة السنة الأكاديمية إذا تم توفيرها
+                if (!string.IsNullOrEmpty(academicYear))
+                {
+                    query = query.Where(s => s.AcademicYear == academicYear);
+                }
+
+                // تنفيذ الاستعلام وإرجاع النتيجة
+                return  query.Count();
+            }
+            catch (Exception ex)
+            {
+                // يمكنك استخدام نظام التسجيل (Logging) هنا
+                throw new ApplicationException("An error occurred while counting new students.", ex);
+            }
+        }
+        public async Task<List<StudentCountryDistributionDto>> GetStudentsByCountryAsync(
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            string academicYear = null)
+        {
+            try
+            {
+                // تطبيق الفلترات الأساسية
+                var query = await _studentRepository.GetAllAsync();
+                query = query.Where(s => s.RegistraionCompleted);
+
+                // فلترة حسب التاريخ إذا تم توفيره
+                if (startDate.HasValue)
+                {
+                    query = query.Where(s => s.RegistrationDate >= startDate.Value);
+                }
+
+                if (endDate.HasValue)
+                {
+                    query = query.Where(s => s.RegistrationDate <= endDate.Value);
+                }
+
+                // فلترة حسب السنة الأكاديمية إذا تم توفيرها
+                if (!string.IsNullOrEmpty(academicYear))
+                {
+                    query = query.Where(s => s.AcademicYear == academicYear);
+                }
+
+                // تجميع البيانات حسب الدولة
+                var result =  query
+                    .GroupBy(s => new { s.Nationality.CountryCode, s.Nationality.CountryName })
+                    .Select(g => new StudentCountryDistributionDto
+                    {
+                        CountryCode = g.Key.CountryCode,
+                        CountryName = g.Key.CountryName,
+                        StudentCount = g.Count(),
+                        Percentage = 0 // سيتم حسابها لاحقا
+                    })
+                    .OrderByDescending(x => x.StudentCount)
+                    .ToList();
+
+                // حساب النسب المئوية
+                var totalStudents = result.Sum(x => x.StudentCount);
+                if (totalStudents > 0)
+                {
+                    foreach (var item in result)
+                    {
+                        item.Percentage = Math.Round((double)item.StudentCount / totalStudents * 100, 2);
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // يمكنك استخدام نظام التسجيل (Logging) هنا
+                throw new ApplicationException("An error occurred while retrieving students by country.", ex);
+            }
         }
     }
 }

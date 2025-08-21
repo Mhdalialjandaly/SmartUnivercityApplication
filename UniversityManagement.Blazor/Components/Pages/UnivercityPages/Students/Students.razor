@@ -1,0 +1,997 @@
+﻿@page "/students-managment"
+@attribute [Authorize]
+@inject UniversityDbContext _context
+@rendermode InteractiveServer
+@inject IMapper _mapperh
+@inject IStudentServices _studentService
+@inject IDepartmentServices _departmentService
+@inject INationalityServices _nationalityService
+
+<PageTitle>شؤون الطلاب - الجامعة الذكية</PageTitle>
+
+	<div class="main-panel">
+		<div class="content">
+			<div class="page-inner">
+<div class="content" data-background-color="dark">
+    <div class="page-inner">
+        <!-- شريط العنوان والتنقل -->
+        <div class="page-header">
+            <div class="d-flex align-items-center">
+                <h4 class="page-title text-white">
+                    <i class="fas fa-users-cog me-2"></i> إدارة الطلاب 
+                </h4>
+                <div class="ml-md-auto">
+                    <ul class="breadcrumbs">
+                        <li class="nav-home">
+                            <a href="/">
+                                <i class="fas fa-home text-white"></i>
+                            </a>
+                        </li>
+                        <li class="separator">
+                            <i class="fas fa-chevron-left text-white"></i>
+                        </li>
+                        <li class="nav-item">
+                            <span class="text-white">إدارة الطلاب</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقات الإحصائيات -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card card-dark bg-primary-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@totalStudents</h2>
+                                <p class="mb-0">إجمالي الطلاب</p>
+                            </div>
+                            <div class="icon-shape bg-primary-light rounded-circle">
+                                <i class="fas fa-users text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" @onclick="() => LoadStudents(StudentStatus.All)" class="text-white">
+                                عرض الكل <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card card-dark bg-success-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@activeStudents</h2>
+                                <p class="mb-0">طلاب نشطين</p>
+                            </div>
+                            <div class="icon-shape bg-success-light rounded-circle">
+                                <i class="fas fa-user-check text-success"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" @onclick="() => LoadStudents(StudentStatus.Active)" class="text-white">
+                                عرض النشطين <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card card-dark bg-warning-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@newStudents</h2>
+                                <p class="mb-0">طلاب جدد</p>
+                            </div>
+                            <div class="icon-shape bg-warning-light rounded-circle">
+                                <i class="fas fa-user-plus text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" @onclick="() => LoadStudents(StudentStatus.New)" class="text-white">
+                                عرض الجدد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card card-dark bg-info-gradient">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-0">@averageGPA.ToString("F2")</h2>
+                                <p class="mb-0">متوسط المعدل</p>
+                            </div>
+                            <div class="icon-shape bg-info-light rounded-circle">
+                                <i class="fas fa-chart-line text-info"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" class="text-white">
+                                تحليل النتائج <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم الرئيسية -->
+        <div class="card" >
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title">قائمة الطلاب</h4>
+                    <div class="ml-auto">
+                        <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#addStudentModal">
+                            <i class="fas fa-user-plus me-2"></i>طالب جديد
+                        </button>
+                        <div class="dropdown d-inline">
+                            <button class="btn btn-secondary btn-round dropdown-toggle" type="button" data-toggle="dropdown">
+                                <i class="fas fa-bolt me-2"></i>روابط سريعة
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/apply/status"><i class="fas fa-search me-2"></i>متابعة الطلبات</a>
+                                <a class="dropdown-item" href="/apply"><i class="fas fa-file-alt me-2"></i>طلبات التقديم</a>
+                                <a class="dropdown-item" href="/admin/applications"><i class="fas fa-tasks me-2"></i>متابعة الإدارة</a>
+                                <a class="dropdown-item" href="/student/registrations"><i class="fas fa-book me-2"></i>تسجيل المواد</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body" >
+                <!-- علامات التبويب -->
+                <ul class="nav nav-pills nav-secondary" id="studentTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="all-tab" data-toggle="pill" href="#all" role="tab" @onclick="() => LoadStudents(StudentStatus.All)">
+                            <i class="fas fa-list me-2"></i>الكل
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="active-tab" data-toggle="pill" href="#active" role="tab" @onclick="() => LoadStudents(StudentStatus.Active)">
+                            <i class="fas fa-check-circle me-2"></i>نشطين
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="new-tab" data-toggle="pill" href="#new" role="tab" @onclick="() => LoadStudents(StudentStatus.New)">
+                            <i class="fas fa-user-clock me-2"></i>جدد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="graduated-tab" data-toggle="pill" href="#graduated" role="tab" @onclick="() => LoadStudents(StudentStatus.Graduated)">
+                            <i class="fas fa-user-graduate me-2"></i>خريجون
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- شريط البحث والتصفية -->
+                <div class="row mt-3">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <div class="input-icon">
+                                <input type="text" class="form-control" placeholder="ابحث عن طالب..." @bind="searchTerm" @oninput="SearchStudents">
+                                <span class="input-icon-addon">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <select class="form-control" @onchange="FilterByDepartment">
+                                <option value="">كل الأقسام</option>
+                                @foreach (var dept in departments)
+                                {
+                                    <option value="@dept.Id">@dept.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- جدول الطلاب -->
+                            <div class="table-responsive" dir="rtl" >
+                                <table class="table table-hover" >
+                        <thead>
+                            <tr>
+                                <th width="50px">#</th>
+                                <th>الطالب</th>
+                                <th width="120px">الرقم الجامعي</th>
+                                <th width="150px">القسم</th>
+                                <th width="120px">المستوى</th>
+                                <th width="100px">المعدل</th>
+                                <th width="100px">الحالة</th>
+                                <th width="80px">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (StudentsList.Any())
+                            {
+                                @for (int i = 0; i < StudentsList.Count; i++)
+                                {
+                                    var student = StudentsList[i];
+                                    <tr>
+                                        <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(student.FullName)&background=2c3e50&color=fff"
+                                                     class="rounded-circle mr-3"
+                                                     width="40" height="40"
+                                                     alt="صورة الطالب" />
+                                                <div>
+                                                    <span class="d-block font-weight-bold">@student.FullName</span>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-phone-alt mr-1"></i> @student.Phone
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@student.StudentId</td>
+                                        <td>
+                                            <span class="badge badge-primary">
+                                                @GetDepartmentName(student.DepartmentId)
+                                            </span>
+                                        </td>
+                                        <td>@GetAcademicYear(student.RegistrationDate)</td>
+                                        <td>
+                                            <span class="badge @GetGpaClass(student.GPA)">
+                                                @(student.GPA != 0 ? student.GPA.ToString("F2") : "-")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetStatusClass(student.Status)">
+                                                @GetStatusText(student.Status)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                                <a class="dropdown-item" href="/students/@student.StudentId">
+                                                        <i class="fas fa-eye mr-2"></i>عرض
+                                                    </a>
+                                                                <a class="dropdown-item" href="/students/@student.StudentId/edit">
+                                                        <i class="fas fa-edit mr-2"></i>اكمال عملية التسجيل
+                                                    </a>
+                                                                <a class="dropdown-item" href="/students/@student.StudentId/invoices">
+                                                        <i class="fas fa-file-invoice mr-2"></i>الفواتير
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+                                                                <a class="dropdown-item text-danger" href="#" @onclick="() => DeleteStudent(student.Id)">
+                                                        <i class="fas fa-trash mr-2"></i>حذف
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">لا توجد بيانات للطلاب</p>
+                                            <button class="btn btn-primary" data-toggle="modal" data-target="#addStudentModal">
+                                                <i class="fas fa-plus mr-2"></i>إضافة طالب جديد
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ترقيم الصفحات -->
+                @if (totalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalStudents) من @totalStudents
+                        </div>
+                        <ul class="pagination">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+
+                            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+</div></div></div>
+<!-- مودال إضافة طالب جديد -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-hidden="true" dir="rtl">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus mr-2"></i>إضافة طالب جديد
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- شريط التقدم -->
+                <div class="form-progress mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        @for (int i = 1; i <= totalSteps; i++)
+                        {
+                            <div class="text-center">
+                                <div class="step-circle @(i <= currentStep ? "active" : "") @(i < currentStep ? "completed" : "")">
+                                    @i
+                                </div>
+                                <div class="step-label">المرحلة @i</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- محتوى النموذج -->
+                <form class="student-form">
+                    <!-- المرحلة 1: المعلومات الأساسية -->
+                    @if (currentStep == 1)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-id-card mr-2"></i>المعلومات الأساسية
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم الطالب</label>
+                                        <input type="text" class="form-control" placeholder="أدخل رقم الطالب" @bind="newStudent.StudentId" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>القسم</label>
+                                        <select class="form-control" @bind="newStudent.DepartmentId" required>
+                                            <option value="">اختر القسم</option>
+                                            @foreach (var dept in departments)
+                                            {
+                                                <option value="@dept.Id">@dept.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>الاسم الأول</label>
+                                        <input type="text" class="form-control" placeholder="الاسم الأول" @bind="FirstName" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>اسم العائلة</label>
+                                        <input type="text" class="form-control" placeholder="اسم العائلة" @bind="LastName" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>السنة الدراسية</label>
+                                        <input type="text" class="form-control" placeholder="السنة الدراسية" @bind="newStudent.AcademicYear">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>تاريخ الولادة</label>
+                                        <input type="date" class="form-control" @bind="newStudent.BirthOfDate">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>الجنس</label>
+                                        <select class="form-control" @bind="newStudent.Sexual">
+                                            <option value="true">ذكر</option>
+                                            <option value="false">أنثى</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>الديانة</label>
+                                        <input type="text" class="form-control" placeholder="الديانة" @bind="newStudent.Religion">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- المرحلة 2: معلومات الاتصال -->
+                    @if (currentStep == 2)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-phone-alt mr-2"></i>معلومات الاتصال
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم الهاتف</label>
+                                        <input type="tel" class="form-control" placeholder="رقم الهاتف" @bind="newStudent.Phone" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم هاتف إضافي</label>
+                                        <input type="tel" class="form-control" placeholder="رقم هاتف إضافي" @bind="newStudent.SecoundPhone">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>البريد الإلكتروني</label>
+                                        <input type="email" class="form-control" placeholder="البريد الإلكتروني" @bind="Email">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>محل السكن</label>
+                                        <input type="text" class="form-control" placeholder="محافظة - منطقة - حي" @bind="newStudent.HomeAddress" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>رقم المنزل</label>
+                                        <input type="text" class="form-control" placeholder="رقم المنزل" @bind="newStudent.HomeNumber">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label>العنوان الدائم</label>
+                                        <textarea class="form-control" rows="2" placeholder="العنوان بالتفصيل" @bind="newStudent.FullAddress" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (currentStep == 3)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-passport mr-2"></i>معلومات الهوية والجنسية
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم البطاقة المدنية/الجواز</label>
+                                        <input type="text" class="form-control" @bind="newStudent.CivilstatusIDNumberAndNationalCard" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>جهة إصدار البطاقة</label>
+                                        <input type="text" class="form-control" @bind="newStudent.CivilstatusIDNumberAndNationalCardFrom" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>تاريخ إصدار البطاقة</label>
+                                        <input type="date" class="form-control" @bind="newStudent.CivilstatusIDNumberAndNationalCardDate" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم شهادة الجنسية</label>
+                                        <input type="text" class="form-control" @bind="newStudent.NationalityCertificateNumber" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>جهة إصدار شهادة الجنسية</label>
+                                        <input type="text" class="form-control" @bind="newStudent.NationalityCertificateNumberFrom" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>تاريخ إصدار شهادة الجنسية</label>
+                                        <input type="date" class="form-control" @bind="newStudent.NationalityCertificateNumberDate" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>الجنسية</label>
+                                        <select class="form-control" @bind="newStudent.NationalityId">
+                                            <option value="">اختر الجنسية</option>
+                                            @foreach (var nationality in nationalities)
+                                            {
+                                                <option value="@nationality.Id">@nationality.CountryName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (currentStep == 4)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-graduation-cap mr-2"></i>معلومات التعليم السابق
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>اسم المدرسة</label>
+                                        <input type="text" class="form-control" @bind="newStudent.SchoolName" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>التخصص</label>
+                                        <input type="text" class="form-control" @bind="newStudent.Branch" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>تاريخ التخرج</label>
+                                        <input type="date" class="form-control" @bind="newStudent.DateOfSchoolGraduate" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المعدل التراكمي بدون إضافي</label>
+                                        <input type="number" class="form-control" @bind="newStudent.StudentGPAWithoutAdditions" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المعدل التراكمي مع إضافي</label>
+                                        <input type="number" class="form-control" @bind="newStudent.StudentGPAWithAdditions" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المجموع بدون إضافي</label>
+                                        <input type="number" class="form-control" @bind="newStudent.StudentTotalWithoutAdditions" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>المجموع مع إضافي</label>
+                                        <input type="number" class="form-control" @bind="newStudent.StudentTotalWithAdditions" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (currentStep == 5)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-user-lock mr-2"></i>معلومات تسجيل الدخول
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>اسم المستخدم على الموقع</label>
+                                        <input type="text" class="form-control" @bind="newStudent.UserNameOnSite" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>كلمة المرور على الموقع</label>
+                                        <input type="password" class="form-control" @bind="newStudent.PasswordOnSite" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>حالة الحساب</label>
+                                        <input type="text" class="form-control" @bind="newStudent.StatusOnSite" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>البريد الإلكتروني</label>
+                                        <input type="email" class="form-control" @bind="newStudent.Email" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (currentStep == 6)
+                    {
+                        <div class="form-step active">
+                            <h6 class="form-step-title mb-4">
+                                <i class="fas fa-info-circle mr-2"></i>معلومات إضافية
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>الحالة الاجتماعية</label>
+                                        <input type="text" class="form-control" @bind="newStudent.PoliticalNationalism" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>العمل (نعم/لا)</label>
+                                        <select class="form-control" @bind="newStudent.TrueIsEmployee">
+                                            <option value="true">نعم</option>
+                                            <option value="false">لا</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>عنوان العمل</label>
+                                        <input type="text" class="form-control" @bind="newStudent.WorkAddress" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم الامتحان</label>
+                                        <input type="number" class="form-control" @bind="newStudent.ExamNumber" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>الرقم السري</label>
+                                        <input type="number" class="form-control" @bind="newStudent.SecretNumber" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>هل تم التسجيل عبر النفق؟</label>
+                                        <select class="form-control" @bind="newStudent.ApplyTunnel">
+                                            <option value="true">نعم</option>
+                                            <option value="false">لا</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                              @*   <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم النفق</label>
+                                        <input type="number" class="form-control" @bind="newStudent.TunnelId" />
+                                    </div>
+                                </div> *@
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>رقم النفق</label>
+                                        <select class="form-control" @bind="newStudent.TunnelId" required>
+                                            <option value="">اختر النفق</option>
+                                            @foreach (var dept in tunnels)
+                                            {
+                                                <option value="@dept.Id">@dept.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>إلغاء
+                </button>
+
+                @if (currentStep > 1)
+                {
+                    <button type="button" class="btn btn-outline-primary" @onclick="PreviousStep">
+                        <i class="fas fa-arrow-right mr-2"></i>السابق
+                    </button>
+                }
+
+                @if (currentStep < totalSteps)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="NextStep">
+                        التالي <i class="fas fa-arrow-left ml-2"></i>
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-success" @onclick="SaveStudent">
+                        <i class="fas fa-save mr-2"></i>حفظ الطالب
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    private string searchTerm = "";
+    private List<Student> StudentsList = new();
+    private List<DepartmentDto> departments = new();
+    private List<Tunnel> tunnels = new();
+    private StudentDto newStudent = new();
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    private int currentStep = 1;
+    private const int totalSteps = 6;
+    private List<NationalityDto> nationalities = new();
+    // إحصائيات
+    private int totalStudents = 0;
+    private int activeStudents = 0;
+    private int newStudents = 0;
+    private double averageGPA = 0;
+
+    // ترقيم الصفحات
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageSize = 10;
+
+    // الفلاتر
+    private StudentStatus currentStatus = StudentStatus.All;
+    private int? selectedDepartmentId = null;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+        await LoadNationalities();
+        await LoadStatistics();
+        await LoadStudents(StudentStatus.All);
+    }
+    private void NextStep()
+    {
+        if (currentStep < totalSteps)
+        {
+            currentStep++;
+        }
+    }
+
+    private void PreviousStep()
+    {
+        if (currentStep > 1)
+        {
+            currentStep--;
+        }
+    }
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departments = await _departmentService.GetAllDepartmentsAsync();
+            tunnels = await _context.Tunnels.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+    private async Task LoadNationalities()
+    {
+        try
+        {
+            nationalities = await _nationalityService.GetAllNationalitiesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+        }
+    }
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            totalStudents = await _studentService.GetTotalStudentsCountAsync();
+            activeStudents = await _studentService.GetActiveStudentsCountAsync();
+            newStudents = await _studentService.GetNewStudentsCountAsync();
+            averageGPA = await _studentService.GetAverageGPAAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+        }
+    }
+
+    private async Task LoadStudents(StudentStatus status)
+    {
+        try
+        {
+            currentStatus = status;
+            var result = await _studentService.GetStudentsPagedAsync(
+                currentPage,
+                pageSize,
+                searchTerm,
+                selectedDepartmentId,
+                status);
+            var studentsList = result.Data.ToList();
+            totalPages = result.TotalPages;
+            totalStudents = result.TotalRecords;
+            StudentsList = studentsList;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading students: {ex.Message}");
+        }
+    }
+
+    private async Task SearchStudents(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadStudents(currentStatus);
+    }
+
+    private async Task FilterByDepartment(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        selectedDepartmentId = string.IsNullOrEmpty(value) ? null : int.Parse(value);
+        currentPage = 1;
+        await LoadStudents(currentStatus);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadStudents(currentStatus);
+        }
+    }
+
+    private string GetDepartmentName(int departmentId)
+    {
+        var department = departments.FirstOrDefault(d => d.Id == departmentId);
+        return department?.Name ?? "غير محدد";
+    }
+
+    private string GetAcademicYear(DateTime registrationDate)
+    {
+        var years = DateTime.Now.Year - registrationDate.Year;
+        return years switch
+        {
+            0 => "السنة الأولى",
+            1 => "السنة الثانية",
+            2 => "السنة الثالثة",
+            3 => "السنة الرابعة",
+            _ => "متخرج"
+        };
+    }
+
+    private async Task SaveStudent()
+    {
+        try
+        {
+            newStudent.FullName = FirstName + "-" + LastName;
+            
+            await _studentService.CreateStudentAsync(newStudent);
+            // إعادة تحميل القائمة
+            await LoadStudents(currentStatus);
+
+            await OnInitializedAsync();
+            // إعادة تعيين النموذج
+            newStudent = new StudentDto();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving student: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteStudent(int studentId)
+    {
+        if (await ConfirmDelete())
+        {
+            try
+            {
+                await _studentService.DeleteStudentAsync(studentId);
+                await LoadStudents(currentStatus);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting student: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task<bool> ConfirmDelete()
+    {
+        // تنفيذ منطق التأكيد هنا
+        return true;
+    }
+
+    // Helper functions
+    private string GetGpaClass(double gpa)
+    {
+        if (gpa == 0) return "gpa-na";
+        if (gpa >= 3.5) return "gpa-excellent";
+        if (gpa >= 2.5) return "gpa-good";
+        return "gpa-weak";
+    }
+
+    private string GetStatusClass(StudentStatus status)
+    {
+        return status switch
+        {
+            StudentStatus.Active => "status-active",
+            StudentStatus.Suspended => "status-suspended",
+            _ => "status-inactive"
+        };
+    }
+
+    private string GetStatusText(StudentStatus status)
+    {
+        return status switch
+        {
+            StudentStatus.Active => "نشط",
+            StudentStatus.Suspended => "موقوف",
+            _ => "غير نشط"
+        };
+    }
+}

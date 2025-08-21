@@ -4,12 +4,16 @@ using UniversityManagementSystem.Domain.Enums;
 namespace UniversityManagementSystem.Application.DTOs
 {
     public class StudentDto
-    {
-        public string Id { get; set; }
-        public string StudentId { get; set; }
+    {     
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string FullName { get; set; }
+        public string Email { get; set; }
+        public string StudentId { get; set; }
         public string Phone { get; set; }
         public int DepartmentId { get; set; }
+        public string PasswordHash { get; set; }
         public decimal AccountBalance { get; set; }
         public string HomeAddress { get; set; }
         public string Religion { get; set; }
@@ -19,7 +23,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public DateTime BirthOfDate { get; set; }
         public bool Sexual { get; set; }
         public string PoliticalNationalism { get; set; }
-        public string Nationality { get; set; }
+        public string NationalityName { get; set; }
         public int HomeNumber { get; set; }
         public string CivilstatusIDNumberAndNationalCard { get; set; }
         public string CivilstatusIDNumberAndNationalCardFrom { get; set; }
@@ -52,14 +56,21 @@ namespace UniversityManagementSystem.Application.DTOs
         public double GPA { get; set; }
         public string FullAddress { get; set; }
         public string AcademicYear { get; set; }
-        public string Image { get; set; }
-
+        public int NationalityId { get; set; }
         // العلاقات
         public DepartmentDto Department { get; set; }
-        public Tunnel Tunnel { get; set; }
-        public List<University> Universities { get; set; }
-        public List<CourseRegistration> CourseRegistrations { get; set; }
-        public List<StudentDocument> StudentDocuments { get; set; }
-        public List<Attendance> Attendances { get; set; }
+        public TunnelDto Tunnel { get; set; }
+        public NationalityDto Nationality { get; set; }
+        public List<CourseRegistrationDto> CourseRegistrations { get; set; }
+        public List<StudentDocumentDto> StudentDocuments { get; set; }
+        public List<AttendanceDto> Attendances { get; set; }
+        public List<StudentApplicationDto> StudentApplications { get; set; }
+        public List<StudentPaymentDto> StudentPayments { get; set; }
+        public List<StudentAttendanceDto> StudentAttendances { get; set; }
+        public DateTime DeletedAt { get; set; }
+        public DateTime ModifiedAt { get; set; }
+        public string ModifiedBy { get; set; }
+        public string DeletedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

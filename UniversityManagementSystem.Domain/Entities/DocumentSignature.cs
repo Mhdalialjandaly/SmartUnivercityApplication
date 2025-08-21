@@ -25,10 +25,14 @@ namespace UniversityManagementSystem.Domain.Entities
 
         // العلاقات
         public virtual OfficialDocument Document { get; set; }
-        public DateTime CreatedAt { get ; set ; }
-        public DateTime DeletedAt { get ; set ; }
-        public DateTime ModifiedAt { get ; set ; }
-        public string ModifiedBy { get ; set ; }
-        public string DeletedBy { get ; set ; }
+        public DateTime SignedDate { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public DateTime? ModifiedAt { get; set; }
+        public string ModifiedBy { get; set; }
+        public string DeletedBy { get; set; }
+        DateTime IEntity.DeletedAt { get ; set ; }
+        DateTime IEntity.ModifiedAt { get ; set ; }
     }
 }

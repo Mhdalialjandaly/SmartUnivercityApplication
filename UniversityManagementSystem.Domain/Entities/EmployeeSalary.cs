@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using UniversityManagementSystem.Domain.Enums;
 
 namespace UniversityManagementSystem.Domain.Entities
 {
@@ -32,10 +33,10 @@ namespace UniversityManagementSystem.Domain.Entities
 
         [Required]
         [StringLength(20)]
-        public string Status { get; set; } = "مدفوع"; // مدفوع, معلق, مرفوض
+        public string Status { get; set; } 
 
         [StringLength(200)]
-        public string Notes { get; set; } = "";
+        public string Notes { get; set; } 
 
         // العلاقات
         public virtual User Employee { get; set; }
@@ -44,5 +45,17 @@ namespace UniversityManagementSystem.Domain.Entities
         public DateTime ModifiedAt { get ; set ; }
         public string ModifiedBy { get ; set ; }
         public string DeletedBy { get ; set ; }
+
+        public string EmployeeName { get; set; } = string.Empty;
+
+        public string EmployeePosition { get; set; } = string.Empty;
+        public DateTime PaymentDate { get; set; }
+
+        public string PaymentMethod { get; set; } = string.Empty;
+
+        public int DepartmentId { get; set; }
+
+        // Navigation Properties
+        public virtual Department Department { get; set; } = null!;
     }
 }
