@@ -1,0 +1,665 @@
+﻿@page "/student-services"
+@attribute [Authorize(Roles = "Admin")]
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخدمات الطلابية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* أنماط CSS من ملف ITSulu */
+        @@import url("https://fonts.googleapis.com/css2?family=Satisfy&family=Sora:wght@100;200;300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap");
+        
+        :root {
+            --primary-color: #f57c00;
+            --dark-color: #121820;
+            --light-color: #ffffff;
+            --gray-color: #f5f5f5;
+            --text-color: #333333;
+        }
+        
+        body {
+            font-family: "Sora", sans-serif;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            line-height: 170%;
+        }
+        
+        .faculty-dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header h3 {
+            color: white;
+            margin: 10px 0;
+            font-size: 18px;
+            font-family: "Syne", sans-serif;
+            font-weight: 600;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 400;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-right: 3px solid var(--primary-color);
+        }
+        
+        .sidebar-menu i {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: var(--gray-color);
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-box input {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+            font-family: "Sora", sans-serif;
+        }
+        
+        .search-box button {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 0 5px 5px 0;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-family: "Sora", sans-serif;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-family: "Syne", sans-serif;
+            font-weight: 600;
+            color: #121820;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            font-family: "Sora", sans-serif;
+        }
+        
+        .btn i {
+            margin-left: 5px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e57100;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #777;
+        }
+        
+        .btn-outline:hover {
+            background: #f5f5f5;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), #ff9800);
+            color: white;
+        }
+        
+        .service-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .service-header h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            font-family: "Syne", sans-serif;
+            font-weight: 600;
+        }
+        
+        .service-body {
+            padding: 20px;
+        }
+        
+        .service-description {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .service-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-item .number {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .stat-item .label {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .service-footer {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+        
+        .badge-warning {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+        
+        .badge-primary {
+            background: rgba(245, 124, 0, 0.1);
+            color: var(--primary-color);
+        }
+        
+        @@media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h3, .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar-menu i {
+                margin-left: 0;
+            }
+            
+            .services-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .faculty-dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu ul {
+                display: flex;
+            }
+            
+            .sidebar-menu li {
+                margin-bottom: 0;
+                margin-left: 5px;
+            }
+            
+            .sidebar-menu a {
+                border-radius: 5px;
+                border-right: none !important;
+                border-bottom: 3px solid transparent;
+            }
+            
+            .sidebar-menu a:hover, .sidebar-menu a.active {
+                border-right: none;
+                border-bottom: 3px solid var(--primary-color);
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="faculty-dashboard">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://via.placeholder.com/50" alt="Logo">
+                <h3>النظام الاداري</h3>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="/techers"><i class="fas fa-home"></i> <span>الرئيسية</span></a></li>
+                    <li><a href="/coursesview"><i class="fas fa-book"></i> <span>المقررات</span></a></li>
+                    <li><a href="/calendarview"><i class="fas fa-calendar-alt"></i> <span>الجدول الدراسي</span></a></li>
+                    <li><a href="/studentsview"><i class="fas fa-users"></i> <span>الطلاب</span></a></li>
+                    <li><a href="/assessments"><i class="fas fa-clipboard-list"></i> <span>التقييمات</span></a></li>
+                    <li><a href="/reportsview"><i class="fas fa-chart-bar"></i> <span>التقارير</span></a></li>
+                    <li><a href="/departmentsview"><i class="fas fa-building"></i> <span>الأقسام</span></a></li>
+                    <li><a href="/careers"><i class="fas fa-briefcase"></i> <span>التوظيف</span></a></li>
+                    <li><a href="/tuitionview"><i class="fas fa-money-bill-wave"></i> <span>الرسوم الدراسية</span></a></li>
+                    <li><a href="/eventview"><i class="fas fa-calendar-day"></i> <span>الفعاليات</span></a></li>
+                    <li><a href="/archiveview"><i class="fas fa-archive"></i> <span>الأرشيف</span></a></li>
+                    <li><a href="/student-projects"><i class="fas fa-laptop-code"></i> <span>المشاريع الطلابية</span></a></li>
+                    <li><a href="/acceptance"><i class="fas fa-user-check"></i> <span>طلبات القبول</span></a></li>
+                    <li><a href="/official-books"><i class="fas fa-book-open"></i> <span>الكتب الرسمية</span></a></li>
+                    <li><a href="/settingsview"><i class="fas fa-cog"></i> <span>الإعدادات</span></a></li>
+                    <li><a href="/logoutview"><i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- الشريط العلوي -->
+            <div class="top-bar">
+                <div class="search-box">
+                    <input type="text" placeholder="بحث في الخدمات الطلابية...">
+                    <button class="btn btn-outline"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <h4>د. أحمد محمد</h4>
+                        <p>أستاذ مساعد - قسم علوم الحاسب</p>
+                    </div>
+                    <img src="https://via.placeholder.com/40" alt="User">
+                </div>
+            </div>
+
+            <!-- رأس الصفحة -->
+            <div class="page-header">
+                <h1><i class="fas fa-concierge-bell"></i> الخدمات الطلابية</h1>
+                <button class="btn btn-primary"><i class="fas fa-plus"></i> إضافة خدمة جديدة</button>
+            </div>
+
+            <!-- بطاقات الخدمات -->
+            <div class="services-grid">
+                <!-- خدمة 1 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>طلب شهادة تخرج</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            تقديم طلب للحصول على شهادة التخرج الرسمية بعد إكمال متطلبات التخرج.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">1,250</div>
+                                <div class="label">طلب</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">5</div>
+                                <div class="label">أيام متوسط</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 2 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>إعارة كتب مكتبة</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            خدمة إعارة الكتب والمراجع من مكتبة الجامعة للطلاب والأساتذة.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">8,500</div>
+                                <div class="label">كتاب معار</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">14</div>
+                                <div class="label">يوم إعارة</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 3 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-bus"></i>
+                        </div>
+                        <h3>خدمة النقل الجامعي</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            توفير وسائل النقل للطلاب من وإلى الجامعة في أوقات محددة.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">3,200</div>
+                                <div class="label">طالب مستفيد</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">15</div>
+                                <div class="label">حافلة</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 4 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3>خدمات الطعام</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            تقديم وجبات طعام متنوعة وصحية في قاعة الطعام الجامعية.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">4,800</div>
+                                <div class="label">طالب مستفيد</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">3</div>
+                                <div class="label">وجبة يومياً</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-warning">قيد التطوير</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 5 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h3>طلب سكن جامعي</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            تقديم طلب للحصول على سكن جامعي للطلاب من خارج المدينة.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">1,800</div>
+                                <div class="label">طالب مقيم</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">85%</div>
+                                <div class="label">إشغال</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 6 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3>الرعاية الصحية</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            تقديم الخدمات الطبية والصحية للطلاب والموظفين في الجامعة.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">2,400</div>
+                                <div class="label">زيارة شهرية</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">24/7</div>
+                                <div class="label">متاح</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 7 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <h3>دعم تقني</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            المساعدة التقنية للطلاب في استخدام الأنظمة والمنصات التعليمية.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">500</div>
+                                <div class="label">طلب شهري</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">2</div>
+                                <div class="label">ساعة متوسط</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+
+                <!-- خدمة 8 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>الإرشاد الأكاديمي</h3>
+                    </div>
+                    <div class="service-body">
+                        <p class="service-description">
+                            تقديم الاستشارات الأكاديمية والتوجيه للطلاب في مسارهم الدراسي.
+                        </p>
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <div class="number">850</div>
+                                <div class="label">جلسة شهري</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">25</div>
+                                <div class="label">مستشار</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-footer">
+                        <span class="badge badge-success">متوفر</span>
+                        <button class="btn btn-outline">إدارة الخدمة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تفعيل القائمة الجانبية
+        document.querySelectorAll('.sidebar-menu a').forEach(item => {
+            item.addEventListener('click', function(e) {
+                document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -20,7 +20,6 @@ namespace UniversityManagement.Blazor
             builder.Services.AddServices(builder.Configuration);
             builder.Services.AddSignalR();
             builder.Services.AddHttpContextAccessor();
-
             // إنشاء configuration يدوياً
             var mapperConfig = new MapperConfiguration(cfg =>
             {

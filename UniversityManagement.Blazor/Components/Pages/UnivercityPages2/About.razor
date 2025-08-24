@@ -1,0 +1,975 @@
+﻿@page "/about"
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>النظام الجامعي الذكي - الجامعة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* أنماط CSS من ملف النص */
+        *,*:before,*:after {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        html,body {
+            padding: 0;
+            margin: 0;
+            font-family: "Sora", sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            color: rgba(18, 24, 32, 0.7);
+            line-height: 170%;
+            background-color: #f9f9f9;
+        }
+
+        h1,h2,h3,h4,h5,h6 {
+            font-family: "Sora", sans-serif;
+            color: rgb(18, 24, 32);
+            font-weight: 600;
+            line-height: 140%;
+        }
+
+        h1 {
+            font-size: 42px;
+        }
+
+        h2 {
+            font-size: 36px;
+        }
+
+        h3 {
+            font-size: 28px;
+        }
+
+        h4 {
+            font-size: 22px;
+        }
+
+        h5 {
+            font-size: 18px;
+        }
+
+        h6 {
+            font-size: 16px;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .mil-accent {
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-bold {
+            font-weight: 500;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .mil-section {
+            padding: 80px 0;
+        }
+
+        .mil-section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .mil-section-title h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .mil-section-title p {
+            color: rgba(18, 24, 32, 0.5);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .mil-flex {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .mil-flex-center {
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .mil-mb-30 {
+            margin-bottom: 30px;
+        }
+
+        .mil-mb-60 {
+            margin-bottom: 60px;
+        }
+
+        .mil-mb-90 {
+            margin-bottom: 90px;
+        }
+
+        .mil-mt-30 {
+            margin-top: 30px;
+        }
+
+        .mil-mt-60 {
+            margin-top: 60px;
+        }
+
+        .mil-mt-90 {
+            margin-top: 90px;
+        }
+
+        .mil-center {
+            text-align: center;
+        }
+
+        .mil-up {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mil-up:after {
+            content: "";
+            width: 30%;
+            padding-bottom: 30%;
+            background-color: rgb(245, 124, 0);
+            position: absolute;
+            bottom: -15%;
+            left: -10%;
+            border-radius: 50%;
+        }
+
+        .mil-up.mil-type-2:after {
+            left: auto;
+            right: -10%;
+        }
+
+        .mil-button {
+            cursor: pointer;
+            height: 60px;
+            padding: 0 40px;
+            font-family: "Sora", sans-serif;
+            font-size: 16px;
+            color: rgb(18, 24, 32);
+            font-weight: 500;
+            white-space: nowrap;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            text-align: center;
+            border: none;
+            border-radius: 40px;
+            background-color: rgb(245, 124, 0);
+            color: white;
+            -webkit-transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-button:hover {
+            -webkit-transform: translateY(-5px);
+            transform: translateY(-5px);
+            -webkit-box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+            box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+        }
+
+        .mil-button.mil-button-sm {
+            height: 50px;
+            padding: 0 30px;
+            font-size: 14px;
+        }
+
+        .mil-icon-box {
+            padding: 40px;
+            border-radius: 10px;
+            background-color: white;
+            -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            -webkit-transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .mil-icon-box:hover {
+            -webkit-transform: translateY(-10px);
+            transform: translateY(-10px);
+            -webkit-box-shadow: 0px 10px 40px 0px rgba(18, 24, 32, 0.15);
+            box-shadow: 0px 10px 40px 0px rgba(18, 24, 32, 0.15);
+        }
+
+        .mil-icon-box .mil-icon {
+            font-size: 40px;
+            color: rgb(245, 124, 0);
+            margin-bottom: 20px;
+        }
+
+        .mil-icon-box h5 {
+            margin-bottom: 15px;
+        }
+
+        .mil-icon-box p {
+            margin-bottom: 20px;
+        }
+
+        .mil-link {
+            font-family: "Sora", sans-serif;
+            font-size: 16px;
+            color: rgb(18, 24, 32);
+            font-weight: 600;
+            white-space: nowrap;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .mil-link i {
+            font-size: 12px;
+            color: rgb(255, 255, 255);
+            margin-left: 15px;
+            background-color: rgb(245, 124, 0);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-link:hover i {
+            -webkit-transform: translateX(5px);
+            transform: translateX(5px);
+        }
+
+        .mil-top-panel {
+            padding: 0 10px;
+            height: 80px;
+            background-color: rgb(255, 255, 255);
+            width: 100%;
+            z-index: 999;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: justify;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .mil-logo img {
+            height: 50px;
+        }
+
+        .mil-navigation nav ul {
+            list-style: none;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .mil-navigation nav ul li {
+            margin: 0 15px;
+            position: relative;
+        }
+
+        .mil-navigation nav ul li a {
+            font-family: "Sora", sans-serif;
+            text-decoration: none;
+            color: rgb(18, 24, 32);
+            font-weight: 400;
+            white-space: nowrap;
+            -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-navigation nav ul li a:hover {
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-menu-btn {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: rgb(18, 24, 32);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transition: inherit;
+            transition: inherit;
+        }
+
+        .mil-menu-btn span {
+            position: relative;
+        }
+
+        .mil-menu-btn span:after, .mil-menu-btn span:before {
+            position: absolute;
+        }
+
+        .mil-menu-btn span:before {
+            top: -8px;
+        }
+
+        .mil-menu-btn span:after {
+            top: 8px;
+        }
+
+        .mil-menu-btn.mil-active span {
+            background: transparent;
+        }
+
+        .mil-menu-btn.mil-active span:before {
+            top: 0;
+            -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        .mil-menu-btn.mil-active span:after {
+            top: 0;
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+
+        .mil-hero {
+            padding: 180px 0 100px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mil-hero:after {
+            content: "";
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background-color: rgba(245, 124, 0, 0.1);
+            position: absolute;
+            top: -250px;
+            right: -250px;
+        }
+
+        .mil-hero h1 {
+            font-size: 48px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .mil-hero p {
+            font-size: 18px;
+            color: rgba(18, 24, 32, 0.6);
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+
+        .mil-hero-buttons {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            gap: 15px;
+        }
+
+        .mil-hero-buttons .mil-button {
+            background-color: rgb(18, 24, 32);
+            color: white;
+        }
+
+        .mil-hero-buttons .mil-button:hover {
+            background-color: rgb(30, 38, 50);
+        }
+
+        .mil-hero-buttons .mil-button.mil-button-2 {
+            background-color: transparent;
+            color: rgb(18, 24, 32);
+            border: 2px solid rgb(18, 24, 32);
+        }
+
+        .mil-hero-buttons .mil-button.mil-button-2:hover {
+            background-color: rgba(18, 24, 32, 0.05);
+        }
+
+        .mil-stats {
+            background-color: white;
+            padding: 60px 0;
+            border-top: 1px solid rgba(18, 24, 32, 0.05);
+            border-bottom: 1px solid rgba(18, 24, 32, 0.05);
+        }
+
+        .mil-stats .container {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: justify;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+        }
+
+        .mil-stat {
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .mil-stat .mil-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: rgb(245, 124, 0);
+            margin-bottom: 10px;
+        }
+
+        .mil-stat .mil-text {
+            font-size: 16px;
+            color: rgba(18, 24, 32, 0.5);
+        }
+
+        .mil-features {
+            background-color: #f9f9f9;
+        }
+
+        .mil-icon-frame {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            background-color: rgba(245, 124, 0, 0.1);
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mil-icon-frame i {
+            font-size: 30px;
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-icon-frame:before {
+            content: "";
+            background-color: rgb(245, 124, 0);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -2px;
+            right: -3px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .mil-footer {
+            background-color: rgb(18, 24, 32);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 80px 0 40px;
+        }
+
+        .mil-footer h5 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .mil-footer-links ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mil-footer-links ul li {
+            margin-bottom: 12px;
+        }
+
+        .mil-footer-links ul li a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-footer-links ul li a:hover {
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-footer-social {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mil-footer-social a {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-footer-social a:hover {
+            background-color: rgb(245, 124, 0);
+            -webkit-transform: translateY(-3px);
+            transform: translateY(-3px);
+        }
+
+        .mil-copyright {
+            text-align: center;
+            padding-top: 40px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @@media screen and (max-width: 1200px) {
+            .mil-hero {
+                padding: 150px 0 80px;
+            }
+
+            .mil-hero h1 {
+                font-size: 42px;
+            }
+
+            .mil-stat {
+                padding: 0 15px;
+                margin-bottom: 20px;
+            }
+
+            .mil-stat .mil-number {
+                font-size: 32px;
+            }
+        }
+
+        @@media screen and (max-width: 992px) {
+            .mil-top-panel {
+                height: 70px;
+            }
+
+            .mil-navigation {
+                display: none;
+            }
+
+            .mil-menu-btn {
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+            }
+
+            .mil-hero {
+                padding: 130px 0 60px;
+                text-align: center;
+            }
+
+            .mil-hero h1 {
+                font-size: 36px;
+            }
+
+            .mil-hero p {
+                margin: 0 auto 30px;
+            }
+
+            .mil-hero-buttons {
+                -webkit-box-pack: center;
+                -ms-flex-pack: center;
+                justify-content: center;
+            }
+
+            .mil-stats .container {
+                -webkit-box-orient: vertical;
+                -webkit-box-direction: normal;
+                -ms-flex-direction: column;
+                flex-direction: column;
+            }
+
+            .mil-stat {
+                width: 100%;
+                margin-bottom: 30px;
+            }
+
+            .mil-icon-box {
+                padding: 30px;
+            }
+
+            .mil-icon-frame {
+                width: 60px;
+                height: 60px;
+            }
+
+            .mil-icon-frame i {
+                font-size: 24px;
+            }
+        }
+
+        @@media screen and (max-width: 768px) {
+            .mil-hero {
+                padding: 120px 0 50px;
+            }
+
+            .mil-hero h1 {
+                font-size: 32px;
+            }
+
+            .mil-hero p {
+                font-size: 16px;
+            }
+
+            .mil-hero-buttons {
+                -webkit-box-orient: vertical;
+                -webkit-box-direction: normal;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .mil-section {
+                padding: 60px 0;
+            }
+
+            .mil-section-title h2 {
+                font-size: 32px;
+            }
+
+            .mil-icon-box {
+                padding: 25px;
+            }
+
+            .mil-footer {
+                padding: 60px 0 30px;
+            }
+
+            .mil-footer-social {
+                -webkit-box-pack: center;
+                -ms-flex-pack: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Panel -->
+    <div class="mil-top-panel">
+        <div class="mil-logo">
+            <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
+        </div>
+        <div class="mil-navigation">
+            <nav>
+                <ul>
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#about">عن الجامعة</a></li>
+                    <li><a href="#departments">الأقسام</a></li>
+                    <li><a href="#admissions">القبول</a></li>
+                    <li><a href="#contact">اتصل بنا</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="mil-menu-btn">
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="mil-hero" id="home">
+        <div class="container">
+            <div class="mil-hero-content">
+                <h1>مرحباً بكم في الجامعة الذكية</h1>
+                <p>جامعة رائدة في التعليم والبحث العلمي، تقدم تجربة تعليمية متميزة باستخدام أحدث التقنيات.</p>
+                <div class="mil-hero-buttons">
+                    <a href="#admissions" class="mil-button">ابدأ الآن</a>
+                    <a href="#about" class="mil-button mil-button-2">تعرف علينا أكثر</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="mil-stats">
+        <div class="container">
+            <div class="mil-stat">
+                <div class="mil-number">15,000+</div>
+                <div class="mil-text">طالب</div>
+            </div>
+            <div class="mil-stat">
+                <div class="mil-number">350+</div>
+                <div class="mil-text">عضو هيئة تدريس</div>
+            </div>
+            <div class="mil-stat">
+                <div class="mil-number">50+</div>
+                <div class="mil-text">تخصص دراسي</div>
+            </div>
+            <div class="mil-stat">
+                <div class="mil-number">25+</div>
+                <div class="mil-text">عام من التميز</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="mil-section" id="about">
+        <div class="container">
+            <div class="mil-section-title mil-center">
+                <h2>عن الجامعة</h2>
+                <p>نبذة مختصرة عن تاريخنا ورسالتنا وقيمنا</p>
+            </div>
+            <div class="mil-flex mil-flex-center">
+                <div class="mil-about-content">
+                    <h3>جامعة رائدة في التعليم والابتكار</h3>
+                    <p>تأسست جامعتنا على مبادئ التميز الأكاديمي والبحث العلمي المبتكر. نسعى لتقديم بيئة تعليمية محفزة تمكن طلابنا من تحقيق إمكاناتهم الكاملة.</p>
+                    <p>نؤمن بأن التعليم هو أساس التقدم، ونعمل على دمج أحدث التقنيات في منهجنا الدراسي لضمان مواكبة تطورات العصر.</p>
+                    <a href="#departments" class="mil-link">اكتشف أقسامنا <i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="mil-section mil-features" id="departments">
+        <div class="container">
+            <div class="mil-section-title mil-center">
+                <h2>الأقسام والكليات</h2>
+                <p>نوفر مجموعة واسعة من التخصصات في مختلف المجالات</p>
+            </div>
+            <div class="mil-flex">
+                <div class="mil-icon-box">
+                    <div class="mil-icon-frame">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h5>كلية علوم الحاسب والمعلومات</h5>
+                    <p>تقدم برامج متقدمة في علوم الحاسب، هندسة البرمجيات، وأمن المعلومات.</p>
+                    <a href="#" class="mil-link">المزيد <i class="fas fa-arrow-left"></i></a>
+                </div>
+                <div class="mil-icon-box">
+                    <div class="mil-icon-frame">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h5>كلية الطب</h5>
+                    <p>برنامج طب شامل يجمع بين التعليم النظري والتطبيقي في بيئة طبية متقدمة.</p>
+                    <a href="#" class="mil-link">المزيد <i class="fas fa-arrow-left"></i></a>
+                </div>
+                <div class="mil-icon-box">
+                    <div class="mil-icon-frame">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5>كلية إدارة الأعمال</h5>
+                    <p>تطوير المهارات القيادية والإدارية لمواكبة متطلبات السوق العالمي.</p>
+                    <a href="#" class="mil-link">المزيد <i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admissions Section -->
+    <section class="mil-section" id="admissions">
+        <div class="container">
+            <div class="mil-section-title mil-center">
+                <h2>القبول والتسجيل</h2>
+                <p>ابدأ رحلتك الأكاديمية معنا</p>
+            </div>
+            <div class="mil-flex mil-flex-center">
+                <div class="mil-admission-content">
+                    <h3>شروط القبول</h3>
+                    <ul>
+                        <li>شهادة الثانوية العامة أو ما يعادلها</li>
+                        <li>الحد الأدنى من المعدل المطلوب حسب التخصص</li>
+                        <li>اجتياز اختبار القبول (إن وجد)</li>
+                        <li>مقابلة شخصية (لبعض التخصصات)</li>
+                    </ul>
+                    <a href="#" class="mil-button mil-mt-30">تقدم بطلب الآن</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="mil-section" id="contact">
+        <div class="container">
+            <div class="mil-section-title mil-center">
+                <h2>اتصل بنا</h2>
+                <p>نحن هنا للإجابة عن أي استفسارات لديك</p>
+            </div>
+            <div class="mil-flex mil-flex-center">
+                <div class="mil-contact-content">
+                    <div class="mil-flex mil-mb-30">
+                        <div class="mil-icon-frame">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h5>العنوان</h5>
+                            <p>شارع الجامعة، المدينة، البلد</p>
+                        </div>
+                    </div>
+                    <div class="mil-flex mil-mb-30">
+                        <div class="mil-icon-frame">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h5>رقم الهاتف</h5>
+                            <p>+966 12 345 6789</p>
+                        </div>
+                    </div>
+                    <div class="mil-flex">
+                        <div class="mil-icon-frame">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h5>البريد الإلكتروني</h5>
+                            <p>info@university.edu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mil-footer">
+        <div class="container">
+            <div class="mil-flex">
+                <div class="mil-footer-col">
+                    <h5>الجامعة الذكية</h5>
+                    <p>نهدف إلى توفير تعليم عالي الجودة يواكب التطورات التكنولوجية ويعزز البحث العلمي.</p>
+                    <div class="mil-footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="mil-footer-col mil-footer-links">
+                    <h5>روابط سريعة</h5>
+                    <ul>
+                        <li><a href="#home">الرئيسية</a></li>
+                        <li><a href="#about">عن الجامعة</a></li>
+                        <li><a href="#departments">الأقسام</a></li>
+                        <li><a href="#admissions">القبول</a></li>
+                        <li><a href="#contact">اتصل بنا</a></li>
+                    </ul>
+                </div>
+                <div class="mil-footer-col mil-footer-links">
+                    <h5>الخدمات الإلكترونية</h5>
+                    <ul>
+                        <li><a href="#">نظام الطالب</a></li>
+                        <li><a href="#">نظام أعضاء هيئة التدريس</a></li>
+                        <li><a href="#">المكتبة الرقمية</a></li>
+                        <li><a href="#">البريد الإلكتروني</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mil-copyright">
+                <p>&copy; 2023 الجامعة الذكية. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.querySelector('.mil-menu-btn');
+            const navigation = document.querySelector('.mil-navigation');
+
+            menuBtn.addEventListener('click', function() {
+                menuBtn.classList.toggle('mil-active');
+                navigation.style.display = navigation.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close menu when clicking on a link (for mobile)
+            const navLinks = document.querySelectorAll('.mil-navigation a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 992) {
+                        menuBtn.classList.remove('mil-active');
+                        navigation.style.display = 'none';
+                    }
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

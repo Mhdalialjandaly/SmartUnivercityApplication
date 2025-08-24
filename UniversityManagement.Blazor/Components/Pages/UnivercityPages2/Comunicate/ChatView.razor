@@ -1,0 +1,819 @@
+﻿@page "/chatview"
+
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحادثة الداخلية - النظام الجامعي الذكي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* أنماط CSS من ملف النص */
+        *,*:before,*:after {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        html,body {
+            padding: 0;
+            margin: 0;
+            font-family: "Sora", sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            color: rgba(18, 24, 32, 0.7);
+            line-height: 170%;
+            background-color: #f9f9f9;
+        }
+
+        h1,h2,h3,h4,h5,h6 {
+            font-family: "Sora", sans-serif;
+            color: rgb(18, 24, 32);
+            font-weight: 600;
+            line-height: 140%;
+        }
+
+        h1 {
+            font-size: 42px;
+        }
+
+        h2 {
+            font-size: 36px;
+        }
+
+        h3 {
+            font-size: 28px;
+        }
+
+        h4 {
+            font-size: 22px;
+        }
+
+        h5 {
+            font-size: 18px;
+        }
+
+        h6 {
+            font-size: 16px;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .mil-accent {
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-bold {
+            font-weight: 500;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .mil-section {
+            padding: 80px 0;
+        }
+
+        .mil-section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .mil-section-title h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .mil-section-title p {
+            color: rgba(18, 24, 32, 0.5);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .mil-flex {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .mil-flex-center {
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .mil-mb-30 {
+            margin-bottom: 30px;
+        }
+
+        .mil-mb-60 {
+            margin-bottom: 60px;
+        }
+
+        .mil-mb-90 {
+            margin-bottom: 90px;
+        }
+
+        .mil-mt-30 {
+            margin-top: 30px;
+        }
+
+        .mil-mt-60 {
+            margin-top: 60px;
+        }
+
+        .mil-mt-90 {
+            margin-top: 90px;
+        }
+
+        .mil-center {
+            text-align: center;
+        }
+
+        .mil-button {
+            cursor: pointer;
+            height: 60px;
+            padding: 0 40px;
+            font-family: "Sora", sans-serif;
+            font-size: 16px;
+            color: rgb(18, 24, 32);
+            font-weight: 500;
+            white-space: nowrap;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            text-align: center;
+            border: none;
+            border-radius: 40px;
+            background-color: rgb(245, 124, 0);
+            color: white;
+            -webkit-transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-button:hover {
+            -webkit-transform: translateY(-5px);
+            transform: translateY(-5px);
+            -webkit-box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+            box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+        }
+
+        .mil-button.mil-button-sm {
+            height: 50px;
+            padding: 0 30px;
+            font-size: 14px;
+        }
+
+        .mil-top-panel {
+            padding: 0 10px;
+            height: 80px;
+            background-color: rgb(255, 255, 255);
+            width: 100%;
+            z-index: 999;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: justify;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .mil-logo img {
+            height: 50px;
+        }
+
+        .mil-navigation nav ul {
+            list-style: none;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .mil-navigation nav ul li {
+            margin: 0 15px;
+            position: relative;
+        }
+
+        .mil-navigation nav ul li a {
+            font-family: "Sora", sans-serif;
+            text-decoration: none;
+            color: rgb(18, 24, 32);
+            font-weight: 400;
+            white-space: nowrap;
+            -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+        .mil-navigation nav ul li a:hover {
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-menu-btn {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: rgb(18, 24, 32);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transition: inherit;
+            transition: inherit;
+        }
+
+        .mil-menu-btn span {
+            position: relative;
+        }
+
+        .mil-menu-btn span:before {
+            top: -8px;
+        }
+
+        .mil-menu-btn span:after {
+            top: 8px;
+        }
+
+        .mil-menu-btn.mil-active span {
+            background: transparent;
+        }
+
+        .mil-menu-btn.mil-active span:before {
+            top: 0;
+            -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        .mil-menu-btn.mil-active span:after {
+            top: 0;
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+
+        /* أنماط إضافية لواجهة المحادثة */
+        :root {
+            --primary-color: #f57c00;
+            --dark-color: #121820;
+            --light-color: #ffffff;
+            --gray-color: #f5f5f5;
+            --text-color: #333333;
+        }
+        
+        body {
+            font-family: 'Sora', sans-serif;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+            padding-top: 80px;
+        }
+        
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 80px);
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: var(--dark-color);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header h3 {
+            margin: 0;
+            color: white;
+        }
+        
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .conversations {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .conversation {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .conversation:hover, .conversation.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .conversation-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .conversation-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .conversation-info p {
+            margin: 0;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .conversation-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            background: white;
+        }
+        
+        .chat-header .avatar {
+            background: #2196f3;
+        }
+        
+        .chat-header-info {
+            flex: 1;
+        }
+        
+        .chat-header-info h3 {
+            margin: 0 0 5px 0;
+        }
+        
+        .chat-header-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .chat-actions button {
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            max-width: 80%;
+        }
+        
+        .message.sent {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+        
+        .message.received {
+            margin-right: auto;
+        }
+        
+        .message-content {
+            padding: 12px 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message.sent .message-content {
+            background: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.received .message-content {
+            background: white;
+            border: 1px solid #eee;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            margin-top: 5px;
+            color: #999;
+        }
+        
+        .message.sent .message-time {
+            text-align: left;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .message.received .message-time {
+            text-align: right;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+        }
+        
+        .chat-input button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .new-message-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @@media (max-width: 992px) {
+            .chat-container {
+                margin: 10px;
+                height: calc(100vh - 100px);
+            }
+            
+            .sidebar {
+                width: 250px;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: calc(100vh - 100px);
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 40%;
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Panel -->
+    <div class="mil-top-panel">
+        <div class="mil-logo">
+            <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
+        </div>
+        <div class="mil-navigation">
+            <nav>
+                <ul>
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#about">عن الجامعة</a></li>
+                    <li><a href="#departments">الأقسام</a></li>
+                    <li><a href="#admissions">القبول</a></li>
+                    <li><a href="#contact">اتصل بنا</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="mil-menu-btn">
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+        <!-- Sidebar with conversations -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>المحادثات</h3>
+            </div>
+            <div class="search-box">
+                <input type="text" placeholder="بحث في المحادثات...">
+            </div>
+            <div class="conversations">
+                <div class="conversation active">
+                    <div class="avatar">د.أ</div>
+                    <div class="conversation-info">
+                        <h4>د. أحمد محمد</h4>
+                        <p>شكراً لك على التحديث...</p>
+                    </div>
+                    <div class="conversation-time">10:30 ص</div>
+                </div>
+                <div class="conversation">
+                    <div class="avatar">ع.ب</div>
+                    <div class="conversation-info">
+                        <h4>عمادة الكلية</h4>
+                        <p>اجتماع غداً الساعة 2:00...</p>
+                    </div>
+                    <div class="conversation-time">9:15 ص</div>
+                </div>
+                <div class="conversation">
+                    <div class="avatar">س.ع</div>
+                    <div class="conversation-info">
+                        <h4>سارة العتيبي</h4>
+                        <p>هل يمكنني الحصول على...</p>
+                    </div>
+                    <div class="conversation-time">أمس</div>
+                </div>
+                <div class="conversation">
+                    <div class="avatar">م.ح</div>
+                    <div class="conversation-info">
+                        <h4>محمد الحربي</h4>
+                        <p>أرفقت ملف التقرير...</p>
+                    </div>
+                    <div class="conversation-time">أمس</div>
+                </div>
+                <div class="conversation">
+                    <div class="avatar">ك.خ</div>
+                    <div class="conversation-info">
+                        <h4>كلية الهندسة</h4>
+                        <p>دعوة لحضور المؤتمر...</p>
+                    </div>
+                    <div class="conversation-time">2 يونيو</div>
+                </div>
+                <div class="conversation">
+                    <div class="avatar">ن.س</div>
+                    <div class="conversation-info">
+                        <h4>نورا السلمان</h4>
+                        <p>شكراً لمساعدتك...</p>
+                    </div>
+                    <div class="conversation-time">1 يونيو</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main chat area -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="avatar">د.أ</div>
+                <div class="chat-header-info">
+                    <h3>د. أحمد محمد</h3>
+                    <p>متصل الآن - أستاذ مساعد - قسم علوم الحاسب</p>
+                </div>
+                <div class="chat-actions">
+                    <button><i class="fas fa-phone"></i></button>
+                    <button><i class="fas fa-video"></i></button>
+                    <button><i class="fas fa-ellipsis-v"></i></button>
+                </div>
+            </div>
+
+            <div class="chat-messages">
+                <div class="message received">
+                    <div class="message-content">
+                        <p>مرحباً بك أستاذ، أتمنى أن تكون بخير. أود الاستفسار عن موعد تسليم التقرير النهائي لمشروع البحث.</p>
+                        <div class="message-time">10:15 ص</div>
+                    </div>
+                </div>
+                
+                <div class="message sent">
+                    <div class="message-content">
+                        <p>وعليكم السلام ورحمة الله، أنا بخير بحمد الله. التقرير النهائي يجب تسليمه قبل نهاية الأسبوع القادم الموافق 15 يونيو.</p>
+                        <div class="message-time">10:20 ص</div>
+                    </div>
+                </div>
+                
+                <div class="message received">
+                    <div class="message-content">
+                        <p>شكراً لك على التوضيح. هل يمكنني إرسال مسودة أولية قبل ذلك للاستفادة من ملاحظاتكم؟</p>
+                        <div class="message-time">10:22 ص</div>
+                    </div>
+                </div>
+                
+                <div class="message sent">
+                    <div class="message-content">
+                        <p>بالطبع، يسعدني مساعدتك. يمكنك إرسال المسودة قبل يومين من الموعد النهائي، وسأقوم بمراجعتها وإرسال ملاحظاتي لك.</p>
+                        <div class="message-time">10:25 ص</div>
+                    </div>
+                </div>
+                
+                <div class="message received">
+                    <div class="message-content">
+                        <p>جميل، سأقوم بإرسالها في موعد مناسب. شكراً لك على دعمكم المستمر.</p>
+                        <div class="message-time">10:28 ص</div>
+                    </div>
+                </div>
+                
+                <div class="message sent">
+                    <div class="message-content">
+                        <p>على الرحب والسعة. إذا كانت لديك أي استفسارات أخرى فلا تتردد في التواصل معي.</p>
+                        <div class="message-time">10:30 ص</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" placeholder="اكتب رسالتك...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Message Button -->
+    <button class="new-message-btn">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.querySelector('.mil-menu-btn');
+            const navigation = document.querySelector('.mil-navigation');
+
+            menuBtn.addEventListener('click', function() {
+                menuBtn.classList.toggle('mil-active');
+                navigation.style.display = navigation.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close menu when clicking on a link (for mobile)
+            const navLinks = document.querySelectorAll('.mil-navigation a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 992) {
+                        menuBtn.classList.remove('mil-active');
+                        navigation.style.display = 'none';
+                    }
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // تفعيل المحادثات
+            const conversations = document.querySelectorAll('.conversation');
+            conversations.forEach(conv => {
+                conv.addEventListener('click', function() {
+                    conversations.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // إرسال رسالة
+            const chatInput = document.querySelector('.chat-input input');
+            const sendButton = document.querySelector('.chat-input button');
+            const chatMessages = document.querySelector('.chat-messages');
+            
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message sent';
+                    messageElement.innerHTML = `
+                        <div class="message-content">
+                            <p>${message}</p>
+                            <div class="message-time">الآن</div>
+                        </div>
+                    `;
+                    chatMessages.appendChild(messageElement);
+                    chatInput.value = '';
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+            
+            sendButton.addEventListener('click', sendMessage);
+            
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

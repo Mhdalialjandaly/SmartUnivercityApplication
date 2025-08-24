@@ -1,0 +1,598 @@
+﻿@page "/logoutview"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@inject ILogger<LogOutView> Logger
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@inject IHttpContextAccessor? HttpContextAccessor
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الخروج - الجامعة الذكية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* أنماط CSS من ملف النص */
+        *, *:before, *:after {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body {
+            padding: 0;
+            margin: 0;
+            font-family: "Sora", sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            color: rgba(18, 24, 32, 0.7);
+            line-height: 170%;
+            background-color: #f9f9f9;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Sora", sans-serif;
+            color: rgb(18, 24, 32);
+            font-weight: 600;
+            line-height: 140%;
+        }
+
+        h1 {
+            font-size: 42px;
+        }
+
+        h2 {
+            font-size: 36px;
+        }
+
+        h3 {
+            font-size: 28px;
+        }
+
+        h4 {
+            font-size: 22px;
+        }
+
+        h5 {
+            font-size: 18px;
+        }
+
+        h6 {
+            font-size: 16px;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .mil-accent {
+            color: rgb(245, 124, 0);
+        }
+
+        .mil-bold {
+            font-weight: 500;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .mil-section {
+            padding: 80px 0;
+        }
+
+        .mil-section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+            .mil-section-title h2 {
+                font-size: 36px;
+                margin-bottom: 15px;
+            }
+
+            .mil-section-title p {
+                color: rgba(18, 24, 32, 0.5);
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+        .mil-flex {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .mil-flex-center {
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .mil-mb-30 {
+            margin-bottom: 30px;
+        }
+
+        .mil-mb-60 {
+            margin-bottom: 60px;
+        }
+
+        .mil-mb-90 {
+            margin-bottom: 90px;
+        }
+
+        .mil-mt-30 {
+            margin-top: 30px;
+        }
+
+        .mil-mt-60 {
+            margin-top: 60px;
+        }
+
+        .mil-mt-90 {
+            margin-top: 90px;
+        }
+
+        .mil-center {
+            text-align: center;
+        }
+
+        .mil-button {
+            cursor: pointer;
+            height: 60px;
+            padding: 0 40px;
+            font-family: "Sora", sans-serif;
+            font-size: 16px;
+            color: rgb(18, 24, 32);
+            font-weight: 500;
+            white-space: nowrap;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            text-align: center;
+            border: none;
+            border-radius: 40px;
+            background-color: rgb(245, 124, 0);
+            color: white;
+            -webkit-transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+            transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+        }
+
+            .mil-button:hover {
+                -webkit-transform: translateY(-5px);
+                transform: translateY(-5px);
+                -webkit-box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+                box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+            }
+
+            .mil-button.mil-button-sm {
+                height: 50px;
+                padding: 0 30px;
+                font-size: 14px;
+            }
+
+        .mil-top-panel {
+            padding: 0 10px;
+            height: 80px;
+            background-color: rgb(255, 255, 255);
+            width: 100%;
+            z-index: 999;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: justify;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .mil-logo img {
+            height: 50px;
+        }
+
+        .mil-navigation nav ul {
+            list-style: none;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+            .mil-navigation nav ul li {
+                margin: 0 15px;
+                position: relative;
+            }
+
+                .mil-navigation nav ul li a {
+                    font-family: "Sora", sans-serif;
+                    text-decoration: none;
+                    color: rgb(18, 24, 32);
+                    font-weight: 400;
+                    white-space: nowrap;
+                    -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+                    transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+                }
+
+                    .mil-navigation nav ul li a:hover {
+                        color: rgb(245, 124, 0);
+                    }
+
+        .mil-menu-btn {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+            .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
+                content: "";
+                display: block;
+                width: 24px;
+                height: 2px;
+                background: rgb(18, 24, 32);
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+                -webkit-transition: inherit;
+                transition: inherit;
+            }
+
+            .mil-menu-btn span {
+                position: relative;
+            }
+
+                .mil-menu-btn span:before {
+                    top: -8px;
+                }
+
+                .mil-menu-btn span:after {
+                    top: 8px;
+                }
+
+            .mil-menu-btn.mil-active span {
+                background: transparent;
+            }
+
+                .mil-menu-btn.mil-active span:before {
+                    top: 0;
+                    -webkit-transform: rotate(45deg);
+                    transform: rotate(45deg);
+                }
+
+                .mil-menu-btn.mil-active span:after {
+                    top: 0;
+                    -webkit-transform: rotate(-45deg);
+                    transform: rotate(-45deg);
+                }
+
+        /* أنماط إضافية لواجهة تسجيل الخروج */
+        :root {
+            --primary-color: #f57c00;
+            --dark-color: #121820;
+            --light-color: #ffffff;
+            --gray-color: #f5f5f5;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+            padding-top: 80px;
+        }
+
+        .logout-container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logout-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(245, 124, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+            .logout-icon i {
+                font-size: 40px;
+                color: var(--primary-color);
+            }
+
+        .logout-container h2 {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .logout-container p {
+            margin-bottom: 30px;
+            color: rgba(18, 24, 32, 0.7);
+            line-height: 1.6;
+        }
+
+        .user-info {
+            background: var(--gray-color);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: right;
+        }
+
+            .user-info p {
+                margin: 10px 0;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .user-info span:first-child {
+                font-weight: 500;
+                color: var(--dark-color);
+            }
+
+        .logout-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            flex: 1;
+        }
+
+            .btn-primary:hover {
+                background: #e57100;
+            }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #777;
+            flex: 1;
+        }
+
+            .btn-outline:hover {
+                background: #f5f5f5;
+            }
+
+        .session-info {
+            background: rgba(76, 175, 80, 0.1);
+            border-right: 3px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: right;
+        }
+
+            .session-info p {
+                margin: 0;
+                color: #4caf50;
+                font-weight: 500;
+            }
+
+        @@media (max-width: 768px) {
+            .logout-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            .logout-buttons {
+                flex-direction: column;
+            }
+
+            .mil-top-panel {
+                height: 70px;
+            }
+
+            .mil-navigation {
+                display: none;
+            }
+
+            .mil-menu-btn {
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Panel -->
+    <div class="mil-top-panel">
+        <div class="mil-logo">
+            <a href="/"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
+        </div>
+        <div class="mil-navigation">
+            <nav>
+                <ul>
+                    <li><a href="/">الرئيسية</a></li>
+                    <li><a href="/about">عن الجامعة</a></li>
+                    <li><a href="/departments">الأقسام</a></li>
+                    <li><a href="/admissions">القبول</a></li>
+                    <li><a href="/contact">اتصل بنا</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="mil-menu-btn">
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Logout Container -->
+    <section class="mil-section">
+        <div class="container">
+            <div class="logout-container">
+                <div class="logout-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+
+                <h2>تسجيل الخروج</h2>
+                <p>هل أنت متأكد أنك تريد تسجيل الخروج من النظام؟</p>
+
+                @if (authState != null && authState.User.Identity.IsAuthenticated)
+                {
+                    <div class="user-info">
+                        <p><span>اسم المستخدم:</span> <span>@authState.User.Identity.Name</span></p>
+                        <p><span>الدور:</span> <span>@UserRole</span></p>
+                        <p><span>القسم:</span> <span>@UserDepartment</span></p>
+                        <p><span>آخر تسجيل دخول:</span> <span>@LastLogin</span></p>
+                    </div>
+                }
+
+                <div class="session-info">
+                    <p><i class="fas fa-info-circle"></i> سيتم إنهاء جلستك الحالية وتسجيل الخروج من جميع الأجهزة المتصلة</p>
+                </div>
+
+                <div class="logout-buttons">
+                    <button class="btn btn-outline" @onclick="CancelLogout">إلغاء</button>
+                    @* استخدم نموذج HTML لتسجيل الخروج *@
+                    <form action="/Account/Logout" method="post" style="display:inline;">
+                        @* تضمين رمز Anti-Forgery *@
+                        <input name="__RequestVerificationToken" type="hidden" value="@AntiForgeryToken" />
+                        @* تضمين عنوان URL للعودة إذا لزم الأمر *@
+                        <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+                        <button type="submit" class="btn btn-primary">تأكيد تسجيل الخروج</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuBtn = document.querySelector('.mil-menu-btn');
+            const navigation = document.querySelector('.mil-navigation');
+
+            menuBtn.addEventListener('click', function () {
+                menuBtn.classList.toggle('mil-active');
+                navigation.style.display = navigation.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close menu when clicking on a link (for mobile)
+            const navLinks = document.querySelectorAll('.mil-navigation a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 992) {
+                        menuBtn.classList.remove('mil-active');
+                        navigation.style.display = 'none';
+                    }
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+@code {
+    private AuthenticationState? authState;
+    private string UserRole = "غير محدد";
+    private string UserDepartment = "غير محدد";
+    private string LastLogin = "غير متوفر";
+    private string ReturnUrl { get; set; } = "/";
+    private string? AntiForgeryToken { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // الحصول على حالة المصادقة
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            // جلب معلومات المستخدم من UserManager
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user != null)
+            {
+                // تعيين معلومات المستخدم
+                UserRole = authState.User.IsInRole("Admin") ? "مدير" :
+                           authState.User.IsInRole("Faculty") ? "عضو هيئة تدريس" :
+                           authState.User.IsInRole("Student") ? "طالب" : "مستخدم";
+
+                // يمكن هنا جلب القسم من قاعدة البيانات أو المطالبات
+                UserDepartment = "علوم الحاسب"; // مثال
+                LastLogin = user.LastLoginDate?.ToString("dd MMMM yyyy - HH:mm") ?? "غير متوفر";
+            }
+        }
+
+        // إنشاء رمز Anti-Forgery
+        var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor?.HttpContext ?? default);
+        AntiForgeryToken = tokens?.RequestToken;
+
+        // الحصول على عنوان URL الحالي
+        ReturnUrl = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).PathAndQuery;
+    }
+
+    private void CancelLogout()
+    {
+        // العودة إلى الصفحة السابقة
+        NavigationManager.NavigateTo("/");
+    }
+
+}

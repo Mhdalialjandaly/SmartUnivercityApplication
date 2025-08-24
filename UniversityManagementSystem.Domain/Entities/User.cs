@@ -15,8 +15,8 @@ namespace UniversityManagementSystem.Domain.Entities
         public int? NationalityId { get; set; } 
 
         public string Avatar { get; set; }
-        public Nationality Nationality { get; set; } 
-
+        public Nationality Nationality { get; set; }
+        public DateTime? LastLoginDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime DeletedAt { get; set; }
         public DateTime ModifiedAt { get; set; }

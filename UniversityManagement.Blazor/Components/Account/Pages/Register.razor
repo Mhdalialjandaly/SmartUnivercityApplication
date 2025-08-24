@@ -14,17 +14,93 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>تسجيل حساب جديد</PageTitle>
+<PageTitle>تسجيل حساب جديد - الجامعة الذكية</PageTitle>
 
-	<div class="main-panel">
-		<div class="content">
-			<div class="page-inner">
-<div class="login-background">
+<div class="smart-university-login">
+    <div class="login-background">
+        <div class="floating-shapes">
+            <!-- Graduation Cap -->
+            <div class="shape shape-1">
+                <svg viewBox="0 0 100 100" class="shape-icon">
+                    <path d="M20,40 L50,20 L80,40 L80,70 L20,70 Z" fill="none" stroke="#f57c00" stroke-width="2" />
+                    <path d="M50,20 L50,10" stroke="#f57c00" stroke-width="2" />
+                    <path d="M30,70 L30,85" stroke="#f57c00" stroke-width="2" />
+                    <path d="M70,70 L70,85" stroke="#f57c00" stroke-width="2" />
+                </svg>
+            </div>
+
+            <!-- Book -->
+            <div class="shape shape-2">
+                <svg viewBox="0 0 100 100" class="shape-icon">
+                    <rect x="20" y="20" width="60" height="60" rx="5" fill="none" stroke="#f57c00" stroke-width="2" />
+                    <line x1="25" y1="30" x2="75" y2="30" stroke="#f57c00" stroke-width="2" />
+                    <line x1="25" y1="40" x2="75" y2="40" stroke="#f57c00" stroke-width="2" />
+                    <line x1="25" y1="50" x2="75" y2="50" stroke="#f57c00" stroke-width="2" />
+                </svg>
+            </div>
+
+            <!-- Atom -->
+            <div class="shape shape-3">
+                <svg viewBox="0 0 100 100" class="shape-icon">
+                    <circle cx="50" cy="50" r="5" fill="#f57c00" />
+                    <circle cx="50" cy="50" r="30" fill="none" stroke="#f57c00" stroke-width="1" stroke-dasharray="5,5" />
+                    <line x1="50" y1="20" x2="50" y2="80" stroke="#f57c00" stroke-width="1" />
+                    <line x1="20" y1="50" x2="80" y2="50" stroke="#f57c00" stroke-width="1" />
+                    <line x1="29" y1="29" x2="71" y2="71" stroke="#f57c00" stroke-width="1" />
+                    <line x1="29" y1="71" x2="71" y2="29" stroke="#f57c00" stroke-width="1" />
+                </svg>
+            </div>
+
+            <!-- Building -->
+            <div class="shape shape-4">
+                <svg viewBox="0 0 100 100" class="shape-icon">
+                    <rect x="30" y="30" width="40" height="50" fill="none" stroke="#f57c00" stroke-width="2" />
+                    <rect x="20" y="20" width="60" height="10" fill="none" stroke="#f57c00" stroke-width="2" />
+                    <rect x="35" y="40" width="10" height="10" fill="none" stroke="#f57c00" stroke-width="1" />
+                    <rect x="55" y="40" width="10" height="10" fill="none" stroke="#f57c00" stroke-width="1" />
+                    <rect x="35" y="60" width="10" height="10" fill="none" stroke="#f57c00" stroke-width="1" />
+                    <rect x="55" y="60" width="10" height="10" fill="none" stroke="#f57c00" stroke-width="1" />
+                </svg>
+            </div>
+
+            <!-- Diploma -->
+            <div class="shape shape-5">
+                <svg viewBox="0 0 100 100" class="shape-icon">
+                    <rect x="20" y="30" width="60" height="40" rx="5" fill="none" stroke="#f57c00" stroke-width="2" />
+                    <path d="M20,50 L35,40 L50,50 L65,40 L80,50" stroke="#f57c00" stroke-width="1" fill="none" />
+                    <circle cx="50" cy="65" r="8" fill="none" stroke="#f57c00" stroke-width="1" />
+                </svg>
+            </div>
+        </div>
+        <div class="particles-container">
+            <div class="particle particle-1"></div>
+            <div class="particle particle-2"></div>
+            <div class="particle particle-3"></div>
+            <div class="particle particle-4"></div>
+            <div class="particle particle-5"></div>
+        </div>
+        <div class="realistic-shapes">
+            <div class="realistic-shape shape-a"></div>
+            <div class="realistic-shape shape-b"></div>
+            <div class="realistic-shape shape-c"></div>
+            <div class="realistic-shape shape-d"></div>
+        </div>
+    </div>
+
     <div class="login-container">
         <div class="login-card">
-            <div class="login-header text-center">
-                <h1 class="title-animation">إنشاء حساب جديد</h1>
-                <p class="subtitle">يرجى ملء المعلومات التالية لإنشاء حسابك</p>
+            <div class="login-header">
+                <div class="logo-wrapper">
+                    <div class="university-logo">
+                        <svg viewBox="0 0 100 100" class="logo-icon">
+                            <circle cx="50" cy="35" r="20" fill="none" stroke="#f57c00" stroke-width="3" />
+                            <path d="M30 70 L50 50 L70 70" fill="none" stroke="#f57c00" stroke-width="3" />
+                            <path d="M40 85 L50 75 L60 85" fill="none" stroke="#f57c00" stroke-width="3" />
+                        </svg>
+                    </div>
+                    <h1 class="title-animation">الجامعة الذكية</h1>
+                </div>
+                <p class="subtitle">إنشاء حساب جديد</p>
             </div>
 
             <div class="login-form">
@@ -34,35 +110,49 @@
                     <ValidationSummary class="text-danger validation-summary" role="alert" />
 
                     <div class="form-group">
-                        <div class="input-icon">
-                            <i class="fas fa-envelope"></i>
-                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="" />
-                            <span class="placeholder-text typing-animation">البريد الإلكتروني</span>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder=" " />
+                            <label class="input-label">البريد الإلكتروني</label>
                         </div>
                         <ValidationMessage For="() => Input.Email" class="text-danger" />
                     </div>
 
                     <div class="form-group">
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="" />
-                            <span class="placeholder-text typing-animation delay-1">كلمة المرور</span>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder=" " />
+                            <label class="input-label">كلمة المرور</label>
                         </div>
                         <ValidationMessage For="() => Input.Password" class="text-danger" />
                     </div>
 
                     <div class="form-group">
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                            <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="" />
-                            <span class="placeholder-text typing-animation delay-2">تأكيد كلمة المرور</span>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder=" " />
+                            <label class="input-label">تأكيد كلمة المرور</label>
                         </div>
                         <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
                     </div>
 
-                    <button type="submit" class="btn-login pulse-animation">
-                        <i class="fas fa-user-plus me-2"></i>
-                        إنشاء الحساب
+                    <button type="submit" class="btn-login pulse-animation" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <i class="fas fa-spinner fa-spin me-2"></i>
+                            <span>جاري إنشاء الحساب...</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-user-plus me-2"></i>
+                            <span>إنشاء الحساب</span>
+                        }
                     </button>
                 </EditForm>
 
@@ -73,265 +163,334 @@
         </div>
     </div>
 </div>
-        </div>
-    </div>
-</div>
+
 <style>
-    /* الصفحة: تصميم مناسب لداشبورد الجامعة - RTL */
-    .login-background {
+    /* الصفحة: تسجيل حساب جديد - الجامعة الذكية */
+    .smart-university-login {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(180deg, #f3f7fb 0%, #08051f 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Sora', sans-serif;
         direction: rtl;
+        overflow: hidden;
     }
 
-    .login-container {
+    /* خلفية متحركة */
+    .login-background {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        max-width: 480px;
-        padding: 1rem;
+        height: 100%;
+        background: linear-gradient(135deg, #121820 0%, #181e26 50%, #121820 100%);
+        overflow: hidden;
+    }
+
+    /* الأشكال العائمة - أشكال أكاديمية */
+    .floating-shapes .shape {
+        position: absolute;
+        animation: float 8s ease-in-out infinite;
+        opacity: 0.7;
+    }
+
+    .shape-icon {
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: #f57c00;
+    }
+
+    .shape-1 {
+        width: 80px;
+        height: 80px;
+        top: 15%;
+        left: 8%;
+        animation-delay: 0s;
+    }
+
+    .shape-2 {
+        width: 60px;
+        height: 60px;
+        top: 75%;
+        left: 85%;
+        animation-delay: 2s;
+    }
+
+    .shape-3 {
+        width: 70px;
+        height: 70px;
+        top: 45%;
+        left: 80%;
+        animation-delay: 4s;
+    }
+
+    .shape-4 {
+        width: 90px;
+        height: 90px;
+        top: 80%;
+        left: 10%;
+        animation-delay: 1s;
+    }
+
+    .shape-5 {
+        width: 75px;
+        height: 75px;
+        top: 25%;
+        left: 75%;
+        animation-delay: 3s;
+    }
+
+    /* أشكال واقعية */
+    .realistic-shapes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .realistic-shape {
+        position: absolute;
+        background: rgba(245, 124, 0, 0.1);
+        border: 1px solid rgba(245, 124, 0, 0.2);
+        border-radius: 10px;
+        transform-origin: center;
+    }
+
+    .shape-a {
+        width: 150px;
+        height: 150px;
+        top: 10%;
+        left: 20%;
+        transform: rotate(30deg);
+        animation: drift 20s infinite linear;
+    }
+
+    .shape-b {
+        width: 100px;
+        height: 100px;
+        top: 60%;
+        left: 70%;
+        transform: rotate(-15deg);
+        animation: drift 25s infinite linear reverse;
+    }
+
+    .shape-c {
+        width: 120px;
+        height: 80px;
+        top: 30%;
+        left: 60%;
+        transform: rotate(45deg);
+        animation: drift 18s infinite linear;
+    }
+
+    .shape-d {
+        width: 80px;
+        height: 120px;
+        top: 70%;
+        left: 25%;
+        transform: rotate(-30deg);
+        animation: drift 22s infinite linear reverse;
+    }
+
+    /* الجسيمات */
+    .particles-container .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(245, 124, 0, 0.6);
+        border-radius: 50%;
+        animation: particle-float 4s ease-in-out infinite;
+    }
+
+    .particle-1 {
+        top: 20%;
+        left: 30%;
+        animation-delay: 0s;
+    }
+
+    .particle-2 {
+        top: 60%;
+        left: 70%;
+        animation-delay: 0.5s;
+    }
+
+    .particle-3 {
+        top: 40%;
+        left: 20%;
+        animation-delay: 1s;
+    }
+
+    .particle-4 {
+        top: 80%;
+        left: 50%;
+        animation-delay: 1.5s;
+    }
+
+    .particle-5 {
+        top: 30%;
+        left: 80%;
+        animation-delay: 2s;
+    }
+
+    /* حاوية تسجيل الدخول */
+    .login-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 10;
     }
 
     .login-card {
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(16, 24, 40, 0.08);
-        padding: 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        padding: 2.5rem;
         width: 100%;
-        border: 1px solid #e6eef2;
-        animation: fadeIn 0.45s ease-out;
+        max-width: 450px;
+        border: 1px solid rgba(245, 124, 0, 0.2);
+        animation: cardEntrance 0.8s ease-out;
+        transform-style: preserve-3d;
     }
 
-    /* header */
+    /* رأس البطاقة */
     .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .logo-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .university-logo {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f57c00, #d35400);
+        border-radius: 50%;
+        padding: 15px;
+        box-shadow: 0 10px 25px rgba(245, 124, 0, 0.3);
+    }
+
+    .logo-icon {
+        width: 100%;
+        height: 100%;
+        fill: white;
+    }
+
+    .login-header h1 {
+        color: #121820;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.5px;
+        font-family: 'Syne', sans-serif;
+    }
+
+    .subtitle {
+        color: rgba(18, 24, 32, 0.4);
+        font-size: 1rem;
+        margin: 0.5rem 0 0 0;
+    }
+
+    /* نموذج تسجيل الدخول */
+    .login-form {
+        margin-top: 1rem;
+    }
+
+    /* حقول الإدخال المحسنة */
+    .form-group {
+        position: relative;
         margin-bottom: 1.5rem;
     }
 
-        .login-header h1 {
-            color: #0f1724;
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin: 0 0 0.5rem 0;
-        }
-
-    .subtitle {
-        color: #64748b;
-        font-size: 0.95rem;
-        margin: 0;
-    }
-
-    /* تأثيرات الحركة */
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(12px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes typing {
-        0% {
-            width: 0;
-        }
-
-        50% {
-            width: 100%;
-        }
-
-        100% {
-            width: 50%;
-        }
-    }
-
-    @@keyframes blink-caret {
-        from, to {
-            border-color: transparent;
-        }
-
-        50% {
-            border-color: #9ca3af;
-        }
-    }
-
-    @@keyframes titleAnimation {
-        0% {
-            letter-spacing: -0.5em;
-            opacity: 0;
-        }
-
-        40% {
-            opacity: 0.6;
-        }
-
-        100% {
-            letter-spacing: normal;
-            opacity: 1;
-        }
-    }
-
-    @@keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.03);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    /* Title */
-    .title-animation {
-        animation: titleAnimation 1.2s ease-out both;
-        color: #0f1724;
-        font-weight: 700;
-        font-size: 1.25rem;
-        margin: 0;
-        display: inline-block;
-    }
-
-    .pulse-animation {
-        animation: pulse 2.2s infinite;
-    }
-
-        .pulse-animation:hover {
-            animation: none;
-            transform: translateY(-2px);
-        }
-
-    .delay-1 {
-        animation-delay: 0.45s;
-    }
-
-    .delay-2 {
-        animation-delay: 0.9s;
-    }
-
-    /* placeholder & inputs */
-    .form-group {
+    .input-wrapper {
         position: relative;
-        margin-bottom: 1.25rem;
-    }
-
-    .placeholder-text {
-        position: absolute;
-        right: 3rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-        font-size: 0.95rem;
-        pointer-events: none;
-        white-space: nowrap;
-        overflow: hidden;
-        width: calc(60% - 3.5rem);
-    }
-
-    .typing-animation {
-        border-right: 2px solid #9ca3af;
-        animation: typing 3.5s steps(70, end) infinite, blink-caret 0.75s step-end infinite;
     }
 
     .input-icon {
-        position: relative;
-        direction: rtl;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(18, 24, 32, 0.4);
+        z-index: 2;
+        font-size: 1.1rem;
     }
-
-        .input-icon i {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-size: 1rem;
-        }
 
     .form-control {
         width: 100%;
-        padding: 0.75rem 2.5rem 0.75rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        transition: all 0.22s ease;
-        background-color: #08051f;
+        padding: 1rem 3.5rem 1rem 1rem;
+        border: 2px solid rgba(18, 24, 32, 0.1);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        color: #121820;
         direction: rtl;
-        color: white;
+        position: relative;
+        z-index: 1;
+        font-family: 'Sora', sans-serif;
     }
 
         .form-control:focus {
             outline: none;
-            border-color: #0ea37a;
-            background-color: #08051f;
-            box-shadow: 0 0 0 6px rgba(14, 163, 122, 0.06);
+            border-color: #f57c00;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(245, 124, 0, 0.1);
         }
 
-            .form-control:focus + .placeholder-text {
-                display: none;
+            .form-control:not(:placeholder-shown) ~ .input-label,
+            .form-control:focus ~ .input-label {
+                top: -10px;
+                right: 15px;
+                font-size: 0.8rem;
+                background: white;
+                padding: 0 8px;
+                color: #f57c00;
+                font-weight: 600;
             }
 
-        .form-control:not(:placeholder-shown) + .placeholder-text {
-            display: none;
-        }
-
-    /* زر التسجيل */
-    .btn-login {
-        background-color: #03000f;
-        color: white;
-        border: none;
-        padding: 0.75rem;
-        border-radius: 10px;
+    .input-label {
+        position: absolute;
+        top: 50%;
+        right: 45px;
+        transform: translateY(-50%);
+        color: rgba(18, 24, 32, 0.4);
         font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        width: 100%;
-        transition: all 0.18s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
-        margin-top: 0.5rem;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        z-index: 0;
+        background: transparent;
+        padding: 0 5px;
     }
-
-        .btn-login:hover:not(:disabled) {
-            background-color: #08051f;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(3, 105, 88, 0.08);
-        }
-
-        .btn-login:disabled {
-            background-color: #9fe7d0;
-            cursor: not-allowed;
-        }
 
     /* رسائل الخطأ */
     .text-danger {
-        font-size: 0.87rem;
-        color: #dc2626;
-        margin-top: 0.25rem;
+        font-size: 0.85rem;
+        color: #ef4444;
+        margin-top: 0.3rem;
         display: block;
     }
 
     .validation-summary {
         background-color: #fef2f2;
         border: 1px solid #fecaca;
-        border-radius: 6px;
-        padding: 0.75rem;
-        margin-bottom: 1rem;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
     }
 
         .validation-summary ul {
@@ -344,51 +503,209 @@
             color: #dc2626;
         }
 
-    /* تذييل الصفحة */
+    /* زر تسجيل الدخول */
+    .btn-login {
+        background: linear-gradient(135deg, #f57c00, #d35400);
+        color: white;
+        border: none;
+        padding: 1.1rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        box-shadow: 0 8px 25px rgba(245, 124, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Sora', sans-serif;
+        margin-top: 0.5rem;
+    }
+
+        .btn-login:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(245, 124, 0, 0.4);
+        }
+
+        .btn-login:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+    /* تذييل تسجيل الدخول */
     .login-footer {
         text-align: center;
         margin-top: 1.5rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e2e8f0;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(18, 24, 32, 0.1);
     }
 
         .login-footer p {
-            color: #64748b;
-            font-size: 0.95rem;
+            color: rgba(18, 24, 32, 0.4);
             margin: 0;
+            font-size: 0.95rem;
         }
 
     .login-link {
-        color: #0ea37a;
+        color: #f57c00;
         text-decoration: none;
         font-weight: 600;
         transition: color 0.2s ease;
     }
 
         .login-link:hover {
-            color: #0d8a6a;
+            color: #d35400;
             text-decoration: underline;
         }
 
-    /* Responsive */
+    /* التأثيرات المتحركة */
+    @@keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        25% {
+            transform: translate(10px, 15px) rotate(5deg);
+        }
+
+        50% {
+            transform: translate(5px, 10px) rotate(-5deg);
+        }
+
+        75% {
+            transform: translate(-5px, 15px) rotate(3deg);
+        }
+    }
+
+    @@keyframes particle-float {
+        0%, 100% {
+            transform: translate(0, 0);
+            opacity: 0.6;
+        }
+
+        50% {
+            transform: translate(15px, -15px);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes cardEntrance {
+        0% {
+            opacity: 0;
+            transform: translateY(30px) rotateY(10deg);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0) rotateY(0deg);
+        }
+    }
+
+    @@keyframes titleAnimation {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.02);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes drift {
+        0% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        100% {
+            transform: translate(100px, 100px) rotate(360deg);
+        }
+    }
+
+    .title-animation {
+        animation: titleAnimation 0.8s ease-out;
+    }
+
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    /* استجابة للشاشات الصغيرة */
     @@media (max-width: 576px) {
         .login-card {
             margin: 1rem;
-            padding: 1.25rem;
+            padding: 2rem 1.5rem;
         }
 
         .login-header h1 {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
         }
 
-        .placeholder-text {
-            width: calc(55% - 3.5rem);
+        .university-logo {
+            width: 70px;
+            height: 70px;
+        }
+
+        .shape-1, .shape-2, .shape-3, .shape-4, .shape-5 {
+            width: 50px;
+            height: 50px;
+        }
+    }
+
+    @@media (max-width: 400px) {
+        .login-card {
+            padding: 1.5rem 1rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.3rem;
         }
     }
 </style>
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
+    private bool isSubmitting = false;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -400,39 +717,55 @@
 
     public async Task RegisterUser()
     {
-        var user = CreateUser();
+        isSubmitting = true;
+        StateHasChanged();
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
-
-        if (!result.Succeeded)
+        try
         {
-            identityErrors = result.Errors;
-            return;
+            var user = CreateUser();
+
+            await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+            var emailStore = GetEmailStore();
+            await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+            var result = await UserManager.CreateAsync(user, Input.Password);
+
+            if (!result.Succeeded)
+            {
+                identityErrors = result.Errors;
+                return;
+            }
+
+            Logger.LogInformation("تم إنشاء حساب جديد بكلمة مرور.");
+
+            var userId = await UserManager.GetUserIdAsync(user);
+            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+
+            await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+            if (UserManager.Options.SignIn.RequireConfirmedAccount)
+            {
+                RedirectManager.RedirectTo(
+                    "Account/RegisterConfirmation",
+                    new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            }
+
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            RedirectManager.RedirectTo(ReturnUrl);
         }
-
-        Logger.LogInformation("تم إنشاء حساب جديد بكلمة مرور.");
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        catch (Exception ex)
         {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            Logger.LogError(ex, "Error during registration");
+            identityErrors = new[] { new IdentityError { Description = "حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى." } };
         }
-
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
     }
 
     private User CreateUser()
