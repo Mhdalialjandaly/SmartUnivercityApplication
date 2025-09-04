@@ -17,6 +17,14 @@ namespace UniversityManagementSystem.Application.DTOs
         public string UploadedBy { get; set; }
         public DateTime? ExpiryDate { get; set; }
         public string Status { get; set; }
+        public string Code { get; set; } 
+        public string Category { get; set; } 
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public long Size { get; set; } = 0;
+        public int FileCount { get; set; } = 0;
+        public int DepartmentCount { get; set; } = 0;
+        public int PageCount { get; set; } = 0;
+        public string UnitType { get; set; } = "صفحة";
         public DepartmentDto Department { get; set; }
 
     }

@@ -3,9 +3,13 @@
 @inject IProfessorServices ProfessorService
 @inject IAcademicCalendarServices CalendarService
 @inject IToastService ToastService
+@inject IDepartmentServices DepartmentService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
+
+<!-- إضافة مكتبة Font Awesome للرموز -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     :root {
@@ -381,6 +385,7 @@
             gap: 15px;
         }
     }
+
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -428,20 +433,29 @@
         margin-bottom: 15px;
     }
 
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 500;
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
     }
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-family: 'Sora', sans-serif;
+    .form-col {
+        flex: 1;
     }
 
     .modal-footer {
@@ -471,11 +485,27 @@
         border: 1px solid #ddd;
         color: #777;
     }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 
 <div class="faculty-dashboard">
     <!-- الشريط الجانبي -->
-    <NavMenu2/>
+    <NavMenu2 />
     <!-- المحتوى الرئيسي -->
     <div class="main-content">
         @if (isLoading)
@@ -559,7 +589,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3>قائمة المدرسين</h3>
-                    <button class="btn btn-primary" @onclick="ShowAddProfessorModal">إضافة مدرس جديد</button>
+                    <button class="btn btn-primary" @onclick="()=> ShowProfessorModal()">إضافة مدرس جديد</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table">
@@ -594,7 +624,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline" @onclick="(()=>EditProfessor(professor))">
+                                        <button class="btn btn-sm btn-outline" @onclick="(()=>ShowProfessorModal(professor))">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-sm btn-outline" @onclick="(()=>DeleteProfessor(professor.Id))">
@@ -722,7 +752,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-primary" @onclick="() => EditProfessor(selectedProfessor)">
+                    <button class="btn btn-primary" @onclick="() => ShowProfessorModal(selectedProfessor)">
                         <i class="fas fa-edit"></i> تعديل
                     </button>
                     <button class="btn btn-outline" @onclick="CloseModal">
@@ -734,52 +764,75 @@
     </div>
 }
 
-<!-- Modal لإضافة مدرس جديد -->
-@if (showAddModal)
+<!-- Modal موحد للإضافة والتعديل -->
+@if (showProfessorModal)
 {
-    <div class="modal-overlay" @onclick="CloseAddModal">
+    <div class="modal-overlay" @onclick="CloseProfessorModal">
         <div class="modal-content" @onclick:stopPropagation>
             <div class="modal-header">
-                <h3>إضافة مدرس جديد</h3>
-                <button class="modal-close" @onclick="CloseAddModal">&times;</button>
+                <h3>@(isEditMode ? "تعديل بيانات المدرس" : "إضافة مدرس جديد")</h3>
+                <button class="modal-close" @onclick="CloseProfessorModal">&times;</button>
             </div>
             <div class="modal-body">
-                <form @onsubmit="AddProfessor">
-                    <div class="form-group">
-                        <label for="fullName">الاسم الكامل</label>
-                        <input type="text" id="fullName" @bind="newProfessor.FullName" required />
+                <form @onsubmit="SaveProfessor">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="firstName">الاسم الأول</label>
+                                <input type="text" id="firstName" @bind="currentProfessor.FirstName" required />
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="lastName">الاسم الأخير</label>
+                                <input type="text" id="lastName" @bind="currentProfessor.LastName" required />
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="employeeId">رقم الموظف</label>
-                        <input type="text" id="employeeId" @bind="newProfessor.EmployeeId" required />
+                        <input type="text" id="employeeId" @bind="currentProfessor.EmployeeId" required />
                     </div>
                     <div class="form-group">
-                        <label for="department">القسم</label>
-                        <input type="text" id="department" @bind="newProfessor.DepartmentName" required />
+                        <label for="departmentId">القسم</label>
+                        @if (departmentsLoading)
+                        {
+                            <div class="loading">جاري تحميل الأقسام...</div>
+                        }
+                        else
+                        {
+                            <select id="departmentId" @bind="currentProfessor.DepartmentId" required>
+                                <option value="">اختر القسم</option>
+                                @foreach (var dept in departments)
+                                {
+                                    <option value="@dept.Id">@dept.Name</option>
+                                }
+                            </select>
+                        }
                     </div>
                     <div class="form-group">
                         <label for="email">البريد الإلكتروني</label>
-                        <input type="email" id="email" @bind="newProfessor.Email" required />
+                        <input type="email" id="email" @bind="currentProfessor.Email" required />
                     </div>
                     <div class="form-group">
                         <label for="phone">الهاتف</label>
-                        <input type="text" id="phone" @bind="newProfessor.Phone" />
+                        <input type="text" id="phone" @bind="currentProfessor.Phone" />
                     </div>
                     <div class="form-group">
                         <label for="specialization">التخصص</label>
-                        <input type="text" id="specialization" @bind="newProfessor.Specialization" />
+                        <input type="text" id="specialization" @bind="currentProfessor.Specialization" />
                     </div>
                     <div class="form-group">
                         <label for="academicDegree">الدرجة العلمية</label>
-                        <input type="text" id="academicDegree" @bind="newProfessor.AcademicDegree" />
+                        <input type="text" id="academicDegree" @bind="currentProfessor.AcademicDegree" />
                     </div>
                     <div class="form-group">
                         <label for="salary">الراتب</label>
-                        <input type="number" id="salary" @bind="newProfessor.Salary" step="0.01" />
+                        <input type="number" id="salary" @bind="currentProfessor.Salary" step="0.01" />
                     </div>
                     <div class="form-group">
                         <label for="status">الحالة</label>
-                        <select id="status" @bind="newProfessor.Status">
+                        <select id="status" @bind="currentProfessor.Status">
                             <option value="Active">نشط</option>
                             <option value="Inactive">غير نشط</option>
                             <option value="OnLeave">في إجازة</option>
@@ -789,8 +842,17 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" @onclick="CloseAddModal">إلغاء</button>
-                <button class="btn btn-primary" @onclick="AddProfessor">حفظ</button>
+                <button class="btn btn-outline" @onclick="CloseProfessorModal">إلغاء</button>
+                <button class="btn btn-primary" @onclick="SaveProfessor" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span><span class="loading-spinner"></span> جاري الحفظ...</span>
+                    }
+                    else
+                    {
+                        <span>@(isEditMode ? "حفظ التغييرات" : "حفظ")</span>
+                    }
+                </button>
             </div>
         </div>
     </div>
@@ -812,15 +874,19 @@
     private bool isLoading = true;
     private bool hasError = false;
     private bool showDetailsModal = false;
-    private bool showAddModal = false; // متغير جديد لإظهار مودال الإضافة
+    private bool showProfessorModal = false;
+    private bool departmentsLoading = false;
+    private bool isSaving = false;
+    private bool isEditMode = false;
     private string searchTerm = "";
 
     private List<ProfessorDto> allProfessors = new List<ProfessorDto>();
     private List<ProfessorDto> filteredProfessors = new List<ProfessorDto>();
     private ProfessorDto selectedProfessor = null;
-    private ProfessorDto newProfessor = new ProfessorDto(); // كائن جديد للمدرس
+    private ProfessorDto currentProfessor = new ProfessorDto();
     private List<CourseDto> professorCourses = new List<CourseDto>();
     private List<ScheduleDto> professorSchedule = new List<ScheduleDto>();
+    private List<DepartmentDto> departments = new List<DepartmentDto>(); // قائمة الأقسام
 
     private int totalProfessors = 0;
     private int activeProfessors = 0;
@@ -933,12 +999,6 @@
         };
     }
 
-    private void EditProfessor(ProfessorDto professor)
-    {
-        // التنقل إلى صفحة التعديل
-        NavigationManager.NavigateTo($"/edit-professor/{professor.Id}");
-    }
-
     private async void DeleteProfessor(int professorId)
     {
         try
@@ -953,37 +1013,113 @@
         }
     }
 
-    // دوال جديدة لإدارة مودال الإضافة
-    private void ShowAddProfessorModal()
+    // دوال جديدة لإدارة المودال الموحد
+    private async void ShowProfessorModal(ProfessorDto professor = null)
     {
-        newProfessor = new ProfessorDto(); // إعادة تعيين الكائن
-        showAddModal = true;
+        isEditMode = professor != null;
+
+        if (isEditMode)
+        {
+            // نسخ بيانات المدرس للتعديل
+            currentProfessor = new ProfessorDto
+                {
+                    Id = professor.Id,
+                    FirstName = professor.FirstName,
+                    LastName = professor.LastName,
+                    FullName = professor.FullName,
+                    EmployeeId = professor.EmployeeId,
+                    DepartmentId = professor.DepartmentId,
+                    DepartmentName = professor.DepartmentName,
+                    Email = professor.Email,
+                    Phone = professor.Phone,
+                    Specialization = professor.Specialization,
+                    AcademicDegree = professor.AcademicDegree,
+                    Salary = professor.Salary,
+                    Status = professor.Status,
+                    HireDate = professor.HireDate,
+                    ProfileImageUrl = professor.ProfileImageUrl
+                };
+        }
+        else
+        {
+            // تهيئة كائن جديد للإضافة
+            currentProfessor = new ProfessorDto();
+        }
+
+        showProfessorModal = true;
+        await LoadDepartments(); // تحميل الأقسام عند فتح المودال
     }
 
-    private void CloseAddModal()
-    {
-        showAddModal = false;
-        newProfessor = new ProfessorDto();
-    }
-
-    private async Task AddProfessor()
+    private async Task LoadDepartments()
     {
         try
         {
-            // تعيين تاريخ التعيين الحالي كافتراضي
-            if (newProfessor.HireDate == default)
+            departmentsLoading = true;
+            StateHasChanged();
+
+             departments = await DepartmentService.GetAllDepartmentsAsync();
+
+          
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء تحميل الأقسام: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            departmentsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CloseProfessorModal()
+    {
+        showProfessorModal = false;
+        currentProfessor = new ProfessorDto();
+        isSaving = false;
+        isEditMode = false;
+    }
+
+    private async Task SaveProfessor()
+    {
+        if (isSaving) return; // منع النقر المتكرر
+
+        try
+        {
+            isSaving = true;
+            StateHasChanged();
+
+            // تعيين تاريخ التعيين الحالي كافتراضي إذا كان الإضافة
+            if (!isEditMode && currentProfessor.HireDate == default)
             {
-                newProfessor.HireDate = DateTime.Now;
+                currentProfessor.HireDate = DateTime.Now;
             }
 
-            await ProfessorService.CreateProfessorAsync(newProfessor);
-            ToastService.ShowSuccess("تم إضافة المدرس بنجاح", "نجاح");
-            CloseAddModal();
+            // تعيين الاسم الكامل من الاسم الأول والأخير
+            currentProfessor.FullName = $"{currentProfessor.FirstName} {currentProfessor.LastName}";
+
+            if (isEditMode)
+            {
+                await ProfessorService.UpdateProfessorAsync(currentProfessor.Id,currentProfessor);
+                ToastService.ShowSuccess("تم تحديث بيانات المدرس بنجاح", "نجاح");
+            }
+            else
+            {
+                await ProfessorService.CreateProfessorAsync(currentProfessor);
+                ToastService.ShowSuccess("تم إضافة المدرس بنجاح", "نجاح");
+            }
+
+            CloseProfessorModal();
             await LoadProfessors(); // إعادة تحميل البيانات
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"حدث خطأ أثناء الإضافة: {ex.Message}", "خطأ");
+            ToastService.ShowError($"حدث خطأ أثناء الحفظ: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
         }
     }
 }
