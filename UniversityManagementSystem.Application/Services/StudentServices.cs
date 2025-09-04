@@ -31,10 +31,16 @@ namespace UniversityManagementSystem.Application.Services
             var student = await _studentRepository.GetByIdAsync(studentId);
             return _mapper.Map<StudentDto>(student);
         }
+        
+        public async Task<List<StudentDto>> GetStudentsAsync(string term)
+        {
+            var student = await _studentRepository.GetAllAsync();
+            return _mapper.Map<List<StudentDto>>(student.Where(e=>e.FirstName.Contains(term) && e.LastName.Contains(term)));
+        }
 
         public async Task<List<StudentDto>> GetAllStudentsAsync()
         {
-            var students = await _studentRepository.GetAllAsync();
+            var students = await _studentRepository.GetAllAsync(e=>e.Department,e=>e.CourseRegistrations);
             return _mapper.Map<List<StudentDto>>(students);
         }
 

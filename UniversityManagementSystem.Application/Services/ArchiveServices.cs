@@ -38,6 +38,11 @@ namespace UniversityManagementSystem.Application.Services
                 TotalRecords = items.Count(),
                 TotalPages = (int)Math.Ceiling(items.Count() / (double)pageSize)
             };
+        } 
+        public async Task<List<ArchiveItemDto>> GettAllArchiveItems()
+        {
+            var items = await _archiveRepository.GetAllAsync();
+            return _mapper.Map<List<ArchiveItemDto>>(items);
         }
 
         public async Task<ArchiveItemDto> GetArchiveItemByIdAsync(int id)

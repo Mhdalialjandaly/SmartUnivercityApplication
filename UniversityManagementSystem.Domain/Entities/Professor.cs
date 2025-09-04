@@ -32,7 +32,8 @@ namespace UniversityManagementSystem.Domain.Entities
         [Required]
         public int DepartmentId { get; set; }
 
-     
+        public string ProfileImageUrl { get; set; }
+
         public Department Department { get; set; }
 
         public AcademicRank Rank { get; set; }

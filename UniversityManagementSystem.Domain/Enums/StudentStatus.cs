@@ -12,6 +12,7 @@ namespace UniversityManagementSystem.Domain.Enums
         Cancelled,
         Registred,
         None,
-        Deleted
+        Deleted,
+        Warrning
     }
 }

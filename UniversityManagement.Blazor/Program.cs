@@ -1,7 +1,5 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using UniversityManagement.Blazor.Components;
 using UniversityManagement.Blazor.Hubs;
 using UniversityManagement.Blazor.Services;
@@ -31,6 +29,7 @@ namespace UniversityManagement.Blazor
             builder.Services.AddSingleton<IMapper>(mapperConfig.CreateMapper());
 
             builder.Services.AddTransient<IEmailSender<User>, EmailSender>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -14,6 +14,16 @@
         public string Name { get; set; }
         public string Code { get; set; }
         public int UniversityId { get; set; }
+        public string Dean { get; set; }
+        public int StudentCount { get; set; }
+        public int FacultyCount { get; set; }
+        public string Description { get; set; }
+        public string Location { get; set; } 
+        public bool IsActive { get; set; } 
+        public int CourseCount { get; set; }
+        public int ProgramCount { get; set; } 
+        public int ResearchProjectCount { get; set; } 
+        public decimal SuccessRate { get; set; } 
         public University University { get; set; }
         public virtual ICollection<Student> Students { get; set; }
         public virtual ICollection<Course> Courses { get; set; }
@@ -26,16 +36,6 @@
         public DateTime ModifiedAt { get ; set ; }
         public string ModifiedBy { get ; set ; }
         public string DeletedBy { get ; set ; }
-
-        public string Dean { get; set; }
-
-        public int StudentCount { get; set; }
-
-        public int FacultyCount { get; set; }
-
-        public string Description { get; set; }
-
-        // Navigation Properties
         public virtual ICollection<StudentPayment> StudentPayments { get; set; }
         public virtual ICollection<EmployeeSalary>  EmployeeSalaries { get; set; }
         public virtual ICollection<FinancialReport> FinancialReports { get; set; }

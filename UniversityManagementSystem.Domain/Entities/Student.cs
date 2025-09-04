@@ -13,6 +13,9 @@ namespace UniversityManagementSystem.Domain.Entities
             StudentAttendances = new HashSet<StudentAttendance>();
         }
         public int Id { get; set; }
+        public string ProfilePicture { get; set; }
+        public decimal AttendancePercentage { get; set; }
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName { get; set; }
@@ -74,6 +77,8 @@ namespace UniversityManagementSystem.Domain.Entities
         public virtual ICollection<StudentApplication> StudentApplications { get; set; }
         public virtual ICollection<StudentPayment> StudentPayments { get; set; }
         public virtual ICollection<StudentAttendance> StudentAttendances { get; set; }
+        public virtual ICollection<Enrollment> Enrollments { get; set; }
+
         public DateTime DeletedAt { get ; set ; }
         public DateTime ModifiedAt { get ; set ; }
         public string ModifiedBy { get ; set ; }

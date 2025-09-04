@@ -13,5 +13,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public string Status { get; set; } 
         public string Notes { get; set; }
         public int StudentId { get; set; }
+        public bool IsPresent { get; set; }
+
     }
 }

@@ -14,6 +14,9 @@ namespace UniversityManagementSystem.Application.DTOs
         public string Phone { get; set; }
         public int DepartmentId { get; set; }
         public string DepartmentName { get; set; }
+        public string ProfileImageUrl { get; set; }
+        public decimal Salary { get; set; }
+        public string AcademicDegree { get; set; }
         public AcademicRank Rank { get; set; }
         public string Specialization { get; set; }
         public DateTime HireDate { get; set; }

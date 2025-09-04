@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
+    <Content Remove="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <Content Remove="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
   </ItemGroup>
 
@@ -31,15 +33,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
+    <None Include="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <None Include="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\assets2\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
   </ItemGroup>
 
 </Project>

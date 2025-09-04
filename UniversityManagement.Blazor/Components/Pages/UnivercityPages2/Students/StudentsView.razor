@@ -1,720 +1,1871 @@
 ﻿@page "/studentsview"
 @attribute [Authorize(Roles = "Admin")]
+@inject IStudentServices StudentService
+@inject IDepartmentServices DepartmentService
+@inject NavigationManager Navigation
+@inject IToastService ToastService
+@rendermode InteractiveServer
 
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الطلاب</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #f57c00;
-            --dark-color: #121820;
-            --light-color: #ffffff;
-            --gray-color: #f5f5f5;
-            --text-color: #333333;
-        }
+<style>
+    /* أنماط CSS من ملف النص */
+    *, *:before, *:after {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+    }
 
-        body {
-            font-family: 'Sora', sans-serif;
-            color: var(--text-color);
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
+    html, body {
+        padding: 0;
+        margin: 0;
+        font-family: "Sora", sans-serif;
+        font-size: 15px;
+        font-weight: 400;
+        color: rgba(18, 24, 32, 0.7);
+        line-height: 170%;
+        background-color: #f9f9f9;
+    }
 
-        .faculty-dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: "Sora", sans-serif;
+        color: rgb(18, 24, 32);
+        font-weight: 600;
+        line-height: 140%;
+    }
 
-        .sidebar {
-            width: 280px;
-            background: var(--dark-color);
-            color: white;
-            padding: 20px 0;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
+    h1 {
+        font-size: 42px;
+    }
 
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    h2 {
+        font-size: 36px;
+    }
 
-            .sidebar-header h3 {
-                color: white;
-                margin: 10px 0;
-                font-size: 18px;
-            }
+    h3 {
+        font-size: 28px;
+    }
 
-        .sidebar-menu {
-            padding: 20px 0;
-        }
+    h4 {
+        font-size: 22px;
+    }
 
-            .sidebar-menu ul {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
+    h5 {
+        font-size: 18px;
+    }
 
-            .sidebar-menu li {
-                margin-bottom: 5px;
-            }
+    h6 {
+        font-size: 16px;
+    }
 
-            .sidebar-menu a {
-                display: flex;
-                align-items: center;
-                padding: 12px 20px;
-                color: rgba(255, 255, 255, 0.7);
-                text-decoration: none;
-                transition: all 0.3s;
-            }
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
 
-                .sidebar-menu a:hover, .sidebar-menu a.active {
-                    background: rgba(255, 255, 255, 0.1);
-                    color: white;
-                    border-right: 3px solid var(--primary-color);
-                }
+    .mil-accent {
+        color: rgb(245, 124, 0);
+    }
 
-            .sidebar-menu i {
-                margin-left: 10px;
-                font-size: 18px;
-            }
+    .mil-bold {
+        font-weight: 500;
+    }
 
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            background: var(--gray-color);
-        }
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
+    .mil-section {
+        padding: 80px 0;
+    }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-        }
+    .mil-section-title {
+        text-align: center;
+        margin-bottom: 60px;
+    }
 
-            .user-profile img {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                margin-left: 10px;
-            }
-
-        .search-box {
-            display: flex;
-            align-items: center;
-        }
-
-            .search-box input {
-                padding: 8px 15px;
-                border: 1px solid #ddd;
-                border-radius: 5px 0 0 5px;
-                outline: none;
-            }
-
-            .search-box button {
-                padding: 8px 15px;
-                border: 1px solid #ddd;
-                border-radius: 0 5px 5px 0;
-                background: #f5f5f5;
-                cursor: pointer;
-            }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-            .page-header h1 {
-                margin: 0;
-                font-size: 24px;
-            }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-        }
-
-            .btn i {
-                margin-left: 5px;
-            }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-            .btn-primary:hover {
-                background: #e57100;
-            }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #ddd;
-            color: #777;
-        }
-
-            .btn-outline:hover {
-                background: #f5f5f5;
-            }
-
-        .students-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .student-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-            .student-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            }
-
-        .student-header {
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(135deg, var(--primary-color), #ff9800);
-            color: white;
-        }
-
-        .student-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid white;
-            margin: 0 auto 15px;
-            overflow: hidden;
-        }
-
-            .student-avatar img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-        .student-header h3 {
-            margin: 0 0 5px;
-            font-size: 18px;
-        }
-
-        .student-id {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        .student-body {
-            padding: 20px;
-        }
-
-        .student-info {
+        .mil-section-title h2 {
+            font-size: 36px;
             margin-bottom: 15px;
         }
 
-            .student-info p {
-                margin: 8px 0;
-                display: flex;
-                align-items: center;
-            }
-
-            .student-info i {
-                margin-left: 10px;
-                color: var(--primary-color);
-                width: 20px;
-                text-align: center;
-            }
-
-        .student-stats {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+        .mil-section-title p {
+            color: rgba(18, 24, 32, 0.5);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .stat-item {
+    .mil-flex {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+    }
+
+    .mil-flex-center {
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+    }
+
+    .mil-mb-30 {
+        margin-bottom: 30px;
+    }
+
+    .mil-mb-60 {
+        margin-bottom: 60px;
+    }
+
+    .mil-mb-90 {
+        margin-bottom: 90px;
+    }
+
+    .mil-mt-30 {
+        margin-top: 30px;
+    }
+
+    .mil-mt-60 {
+        margin-top: 60px;
+    }
+
+    .mil-mt-90 {
+        margin-top: 90px;
+    }
+
+    .mil-center {
+        text-align: center;
+    }
+
+    .mil-button {
+        cursor: pointer;
+        height: 60px;
+        padding: 0 40px;
+        font-family: "Sora", sans-serif;
+        font-size: 16px;
+        color: rgb(18, 24, 32);
+        font-weight: 500;
+        white-space: nowrap;
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        text-align: center;
+        border: none;
+        border-radius: 40px;
+        background-color: rgb(245, 124, 0);
+        color: white;
+        -webkit-transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+        transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
+    }
+
+        .mil-button:hover {
+            -webkit-transform: translateY(-5px);
+            transform: translateY(-5px);
+            -webkit-box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+            box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+        }
+
+        .mil-button.mil-button-sm {
+            height: 50px;
+            padding: 0 30px;
+            font-size: 14px;
+        }
+
+    .mil-top-panel {
+        padding: 0 10px;
+        height: 80px;
+        background-color: rgb(255, 255, 255);
+        width: 100%;
+        z-index: 999;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+        box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .mil-logo img {
+        height: 50px;
+    }
+
+    .mil-navigation nav ul {
+        list-style: none;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+    }
+
+        .mil-navigation nav ul li {
+            margin: 0 15px;
+            position: relative;
+        }
+
+            .mil-navigation nav ul li a {
+                font-family: "Sora", sans-serif;
+                text-decoration: none;
+                color: rgb(18, 24, 32);
+                font-weight: 400;
+                white-space: nowrap;
+                -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+                transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+            }
+
+                .mil-navigation nav ul li a:hover {
+                    color: rgb(245, 124, 0);
+                }
+
+    .mil-menu-btn {
+        display: none;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+    }
+
+        .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: rgb(18, 24, 32);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transition: inherit;
+            transition: inherit;
+        }
+
+        .mil-menu-btn span {
+            position: relative;
+        }
+
+            .mil-menu-btn span:before {
+                top: -8px;
+            }
+
+            .mil-menu-btn span:after {
+                top: 8px;
+            }
+
+        .mil-menu-btn.mil-active span {
+            background: transparent;
+        }
+
+            .mil-menu-btn.mil-active span:before {
+                top: 0;
+                -webkit-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .mil-menu-btn.mil-active span:after {
+                top: 0;
+                -webkit-transform: rotate(-45deg);
+                transform: rotate(-45deg);
+            }
+
+    /* أنماط إضافية للوحة الطلاب */
+    :root {
+        --primary-color: #f57c00;
+        --dark-color: #121820;
+        --light-color: #ffffff;
+        --gray-color: #f5f5f5;
+        --text-color: #333333;
+    }
+
+    body {
+        font-family: 'Sora', sans-serif;
+        color: var(--text-color);
+        background-color: #f9f9f9;
+        padding-top: 80px;
+    }
+
+    .students-dashboard {
+        display: flex;
+        min-height: calc(100vh - 80px);
+    }
+
+    .sidebar {
+        width: 280px;
+        background: var(--dark-color);
+        color: white;
+        padding: 20px 0;
+        transition: all 0.3s ease;
+        position: fixed;
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+        .sidebar-header h3 {
+            color: white;
+            margin: 10px 0;
+        }
+
+    .sidebar-menu {
+        padding: 20px 0;
+    }
+
+        .sidebar-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+            .sidebar-menu a:hover, .sidebar-menu a.active {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border-right: 3px solid var(--primary-color);
+            }
+
+        .sidebar-menu i {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+
+    .main-content {
+        flex: 1;
+        padding: 20px;
+        background: var(--gray-color);
+        margin-right: 280px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .students-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .students-header h2 {
+            margin: 0;
+        }
+
+    .students-nav {
+        display: flex;
+        gap: 10px;
+    }
+
+        .students-nav button {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+            .students-nav button:hover {
+                background: #f5f5f5;
+            }
+
+    .students-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .student-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .student-header {
+        padding: 20px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-color), #ff9800);
+        color: white;
+    }
+
+    .student-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid white;
+        margin: 0 auto 15px;
+        overflow: hidden;
+    }
+
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .student-header h3 {
+        margin: 0 0 5px;
+        font-size: 18px;
+    }
+
+    .student-id {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .student-body {
+        padding: 20px;
+    }
+
+    .student-info {
+        margin-bottom: 15px;
+    }
+
+        .student-info p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .student-info i {
+            margin-left: 10px;
+            color: var(--primary-color);
+            width: 20px;
             text-align: center;
         }
 
-            .stat-item .number {
-                font-size: 18px;
-                font-weight: 600;
-                color: var(--primary-color);
-            }
+    .student-stats {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
 
-            .stat-item .label {
-                font-size: 12px;
-                color: #777;
-            }
+    .stat-item {
+        text-align: center;
+    }
 
-        .student-footer {
-            padding: 15px 20px;
-            background: #f9f9f9;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .badge-success {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
-        }
-
-        .badge-warning {
-            background: rgba(255, 152, 0, 0.1);
-            color: #ff9800;
-        }
-
-        .badge-primary {
-            background: rgba(245, 124, 0, 0.1);
+        .stat-item .number {
+            font-size: 18px;
+            font-weight: 600;
             color: var(--primary-color);
         }
 
-        .badge-danger {
-            background: rgba(244, 67, 54, 0.1);
-            color: #f44336;
+        .stat-item .label {
+            font-size: 12px;
+            color: #777;
         }
 
-        @@media (max-width: 992px) {
-            .sidebar {
-                width: 70px;
+    .student-footer {
+        padding: 15px 20px;
+        background: #f9f9f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-success {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .badge-warning {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .badge-primary {
+        background: rgba(245, 124, 0, 0.1);
+        color: var(--primary-color);
+    }
+
+    .badge-danger {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #ddd;
+        color: #777;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Sora', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .btn-outline:hover {
+            background: #f5f5f5;
+        }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+        .loading i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            animation: spin 1s linear infinite;
+        }
+
+    .no-students {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+        .no-students i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* أنماط المودال المحسّنة */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        animation: modalSlideIn 0.3s ease-out;
+        position: relative;
+    }
+
+    .modal-header {
+        padding: 20px 25px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, var(--primary-color), #ff9800);
+        color: white;
+        border-radius: 12px 12px 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s;
+    }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+            font-size: 14px;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Sora', sans-serif;
+        font-size: 15px;
+        transition: all 0.3s;
+        box-sizing: border-box;
+        background-color: #fafafa;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(245, 124, 0, 0.15);
+            background-color: white;
+        }
+
+        .form-control:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+        padding-right: 45px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin: 30px 0 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid rgba(245, 124, 0, 0.2);
+        position: relative;
+    }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 25px 0;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+        .form-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+
+        .form-check label {
+            margin: 0;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+    .modal-footer {
+        padding: 20px 25px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        background: #fafafa;
+        border-radius: 0 0 12px 12px;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: 'Sora', sans-serif;
+        font-weight: 500;
+        font-size: 15px;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 6px rgba(245, 124, 0, 0.2);
+    }
+
+        .btn-primary:hover {
+            background: #e65100;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(245, 124, 0, 0.3);
+        }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+    .required-field::after {
+        content: '*';
+        color: #e53935;
+        margin-right: 4px;
+    }
+
+    .error-message {
+        color: #e53935;
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .success-message {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #c8e6c9;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        border-radius: 12px;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(245, 124, 0, 0.3);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    @@media (max-width: 992px) {
+        .sidebar {
+            width: 70px;
+        }
+
+        .sidebar-header h3, .sidebar-menu span {
+            display: none;
+        }
+
+        .sidebar-menu a {
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .sidebar-menu i {
+            margin-left: 0;
+        }
+
+        .main-content {
+            margin-left: 70px;
+        }
+
+        .students-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .students-dashboard {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            overflow-x: auto;
+        }
+
+            .sidebar-menu ul {
+                display: flex;
             }
 
-            .sidebar-header h3, .sidebar-menu span {
-                display: none;
+            .sidebar-menu li {
+                margin-bottom: 0;
+                margin-left: 5px;
             }
 
             .sidebar-menu a {
-                justify-content: center;
-                padding: 15px;
+                border-radius: 5px;
+                border-right: none !important;
+                border-bottom: 3px solid transparent;
             }
 
-            .sidebar-menu i {
-                margin-left: 0;
-            }
+                .sidebar-menu a:hover, .sidebar-menu a.active {
+                    border-right: none;
+                    border-bottom: 3px solid var(--primary-color);
+                }
 
-            .students-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
+        .main-content {
+            margin-left: 0;
+            padding: 10px;
         }
 
-        @@media (max-width: 768px) {
-            .faculty-dashboard {
-                flex-direction: column;
-            }
+        .top-bar {
+            flex-direction: column;
+            gap: 15px;
+        }
 
-            .sidebar {
+        .students-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .student-footer {
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 10px;
+            max-height: 95vh;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+        }
+
+            .modal-footer button {
                 width: 100%;
-                height: auto;
+                justify-content: center;
             }
+    }
 
-            .sidebar-menu {
-                display: flex;
-                overflow-x: auto;
-            }
-
-                .sidebar-menu ul {
-                    display: flex;
-                }
-
-                .sidebar-menu li {
-                    margin-bottom: 0;
-                    margin-left: 5px;
-                }
-
-                .sidebar-menu a {
-                    border-radius: 5px;
-                    border-right: none !important;
-                    border-bottom: 3px solid transparent;
-                }
-
-                    .sidebar-menu a:hover, .sidebar-menu a.active {
-                        border-right: none;
-                        border-bottom: 3px solid var(--primary-color);
-                    }
-
-            .students-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .top-bar {
-                flex-direction: column;
-                gap: 15px;
-            }
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
         }
-    </style>
-</head>
-<body>
-    <div class="faculty-dashboard">
-        <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <img src="https://via.placeholder.com/50" alt="Logo">
-                <h3>النظام الاداري</h3>
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<!-- Top Panel -->
+<div class="mil-top-panel">
+    <div class="mil-logo">
+        <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
+    </div>
+    <div class="mil-navigation">
+        <nav>
+            <ul>
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#about">عن الجامعة</a></li>
+                <li><a href="#departments">الأقسام</a></li>
+                <li><a href="#admissions">القبول</a></li>
+                <li><a href="#contact">اتصل بنا</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="mil-menu-btn">
+        <span></span>
+    </div>
+</div>
+<div class="students-dashboard">
+    <!-- الشريط الجانبي -->
+    <NavMenu2 />
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="search-box">
+                <input type="text" placeholder="بحث في الطلاب..." @bind="searchTerm" />
+                <button class="mil-button mil-button-sm" @onclick="SearchStudents"><i class="fas fa-search"></i></button>
             </div>
-            <div class="sidebar-menu">
-                <ul>
-                    <li><a href="/techers"><i class="fas fa-home"></i> <span>الرئيسية</span></a></li>
-                    <li><a href="/coursesview"><i class="fas fa-book"></i> <span>المقررات</span></a></li>
-                    <li><a href="/calendarview"><i class="fas fa-calendar-alt"></i> <span>الجدول الدراسي</span></a></li>
-                    <li><a href="/studentsview"><i class="fas fa-users"></i> <span>الطلاب</span></a></li>
-                    <li><a href="/assessments"><i class="fas fa-clipboard-list"></i> <span>التقييمات</span></a></li>
-                    <li><a href="/reportsview"><i class="fas fa-chart-bar"></i> <span>التقارير</span></a></li>
-                    <li><a href="/departmentsview"><i class="fas fa-building"></i> <span>الأقسام</span></a></li>
-                    <li><a href="/careers"><i class="fas fa-briefcase"></i> <span>التوظيف</span></a></li>
-                    <li><a href="/tuitionview"><i class="fas fa-money-bill-wave"></i> <span>الرسوم الدراسية</span></a></li>
-                    <li><a href="/eventview"><i class="fas fa-calendar-day"></i> <span>الفعاليات</span></a></li>
-                    <li><a href="/archiveview"><i class="fas fa-archive"></i> <span>الأرشيف</span></a></li>
-                    <li><a href="/student-projects"><i class="fas fa-laptop-code"></i> <span>المشاريع الطلابية</span></a></li>
-                    <li><a href="/acceptance"><i class="fas fa-user-check"></i> <span>طلبات القبول</span></a></li>
-                    <li><a href="/official-books"><i class="fas fa-book-open"></i> <span>الكتب الرسمية</span></a></li>
-                    <li><a href="/settingsview"><i class="fas fa-cog"></i> <span>الإعدادات</span></a></li>
-                    <li><a href="/logoutview"><i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span></a></li>
-                </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <h4>د. أحمد محمد</h4>
+                    <p>أستاذ مساعد - قسم علوم الحاسب</p>
+                </div>
+                <img src="https://via.placeholder.com/40" alt="User" style="width: 40px; height: 40px; border-radius: 50%; margin-left: 10px;">
             </div>
         </div>
-
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <!-- الشريط العلوي -->
-            <div class="top-bar">
-                <div class="search-box">
-                    <input type="text" placeholder="بحث في الطلاب...">
-                    <button class="btn btn-outline"><i class="fas fa-search"></i></button>
-                </div>
-                <div class="user-profile">
-                    <div class="user-info">
-                        <h4>د. أحمد محمد</h4>
-                        <p>أستاذ مساعد - قسم علوم الحاسب</p>
-                    </div>
-                    <img src="https://via.placeholder.com/40" alt="User">
-                </div>
+        <div class="page-header">
+            <h2><i class="fas fa-book"></i> المقررات الدراسية</h2>
+            <div style="display: flex; gap: 10px;">
+                <button @onclick="RefreshStudents"><i class="fas fa-sync"></i> تحديث</button>
+                <button class="mil-button" @onclick="GoToAdmissions"><i class="fas fa-user-plus"></i> طلبات القبول</button>
+                <button class="mil-button" @onclick="ShowAddStudentModal"><i class="fas fa-plus"></i> إضافة طالب جديد</button>
             </div>
-
-            <!-- رأس الصفحة -->
-            <div class="page-header">
-                <h1><i class="fas fa-users"></i> الطلاب</h1>
-                <button class="btn btn-primary"><i class="fas fa-plus"></i> إضافة طالب جديد</button>
+        </div>
+        <!-- عرض التحميل -->
+        @if (isLoading)
+        {
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>جاري تحميل بيانات الطلاب...</p>
             </div>
-
+        }
+        else if (students == null || !students.Any())
+        {
+            <div class="no-students">
+                <i class="fas fa-users"></i>
+                <p>لا توجد بيانات طلاب حالياً.</p>
+                <button class="mil-button" @onclick="ShowAddStudentModal"><i class="fas fa-plus"></i> إضافة طالب جديد</button>
+            </div>
+        }
+        else
+        {
             <!-- بطاقات الطلاب -->
             <div class="students-grid">
-                <!-- طالب 1 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
-                        </div>
-                        <h3>محمد أحمد علي</h3>
-                        <span class="student-id">2023001</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> علوم الحاسب</p>
-                            <p><i class="fas fa-envelope"></i> mohamed@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234567</p>
-                            <p><i class="fas fa-calendar"></i> السنة الثالثة</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">3.7</div>
-                                <div class="label">المعدل</div>
+                @foreach (var student in students)
+                {
+                    <div class="student-card">
+                        <div class="student-header">
+                            <div class="student-avatar">
+                                <img src="@(string.IsNullOrEmpty(student.ProfilePicture) ? "https://via.placeholder.com/80" : student.ProfilePicture)" alt="طالب">
                             </div>
-                            <div class="stat-item">
-                                <div class="number">85%</div>
-                                <div class="label">الحضور</div>
+                            <h3>@student.FullName</h3>
+                            <span class="student-id">@student.StudentId</span>
+                        </div>
+                        <div class="student-body">
+                            <div class="student-info">
+                                <p><i class="fas fa-graduation-cap"></i> @student.Department?.Name</p>
+                                <p><i class="fas fa-envelope"></i> @student.Email</p>
+                                <p><i class="fas fa-phone"></i> @student.Phone</p>
+                                <p><i class="fas fa-calendar"></i> السنة @student.AcademicYear</p>
+                            </div>
+                            <div class="student-stats">
+                                <div class="stat-item">
+                                    <div class="number">@student.GPA.ToString("F1")</div>
+                                    <div class="label">المعدل</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="number">@student.AttendancePercentage.ToString("F0")%</div>
+                                    <div class="label">الحضور</div>
+                                </div>
                             </div>
                         </div>
+                        <div class="student-footer">
+                            <span class="badge @(GetStatusBadgeClass(student.Status))">@GetStatusText(student.Status)</span>
+                            <button class="btn-outline" @onclick="() => ShowStudentDetailsModal(student)"><i class="fas fa-eye"></i> تفاصيل</button>
+                            <button class="btn-outline" @onclick="() => ShowEditStudentModal(student)"><i class="fas fa-edit"></i> تعديل</button>
+                        </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-success">نشط</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
-                    </div>
-                </div>
+                }
+            </div>
+        }
+    </div>
+</div>
 
-                <!-- طالب 2 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
-                        </div>
-                        <h3>فاطمة خالد عبدالله</h3>
-                        <span class="student-id">2023002</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> علوم الحاسب</p>
-                            <p><i class="fas fa-envelope"></i> fatima@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234568</p>
-                            <p><i class="fas fa-calendar"></i> السنة الثانية</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">3.9</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">92%</div>
-                                <div class="label">الحضور</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <span class="badge badge-success">نشط</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
-                    </div>
+<!-- مودال إضافة/تعديل الطالب -->
+@if (showStudentModal)
+{
+  <div class="modal-overlay" @onclick="CloseStudentModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            @if (isSubmitting)
+            {
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
                 </div>
+            }
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> إضافة طالب جديد</h3>
+                <button class="modal-close" @onclick="CloseStudentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="success-message">
+                        @successMessage
+                    </div>
+                }
+                <form @onsubmit:preventDefault="true">
+                    <!-- المعلومات الأساسية -->
+                    <h4 class="section-title">المعلومات الأساسية</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">الاسم الأول *</label>
+                            <input type="text" id="firstName" class="form-control" @bind="newStudent.FirstName" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">اسم العائلة *</label>
+                            <input type="text" id="lastName" class="form-control" @bind="newStudent.LastName" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">البريد الإلكتروني *</label>
+                            <input type="email" id="email" class="form-control" @bind="newStudent.Email" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">رقم الهاتف *</label>
+                            <input type="text" id="phone" class="form-control" @bind="newStudent.Phone" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentId">رقم الطالب *</label>
+                            <input type="text" id="studentId" class="form-control" @bind="newStudent.StudentId" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="departmentId">القسم *</label>
+                            @if (departmentsLoading)
+                            {
+                                <div class="loading">جاري تحميل الأقسام...</div>
+                            }
+                            else
+                            {
+                                <select id="departmentId" class="form-control" @bind="newStudent.DepartmentId" required>
+                                    <option value="">اختر القسم</option>
+                                    @foreach (var dept in departments)
+                                    {
+                                        <option value="@dept.Id">@dept.Name</option>
+                                    }
+                                </select>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label for="academicYear">السنة الدراسية</label>
+                            <input type="text" id="academicYear" class="form-control" @bind="currentStudent.AcademicYear" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="registrationDate">تاريخ التسجيل</label>
+                            <input type="date" id="registrationDate" class="form-control" @bind="currentStudent.RegistrationDate" />
+                        </div>
+                        <div class="form-group">
+                            <label for="status">الحالة *</label>
+                            <select id="status" class="form-control" @bind="currentStudent.Status" required>
+                                <option value="@StudentStatus.New">جديد</option>
+                                <option value="@StudentStatus.Active">نشط</option>
+                                <option value="@StudentStatus.Inactive">غير نشط</option>
+                                <option value="@StudentStatus.Suspended">موقف دراسي</option>
+                                <option value="@StudentStatus.Warrning">تحذير أكاديمي</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gpa">المعدل التراكمي</label>
+                            <input type="number" step="0.01" id="gpa" class="form-control" @bind="currentStudent.GPA" />
+                        </div>
+                        <div class="form-group">
+                            <label for="attendancePercentage">نسبة الحضور (%)</label>
+                            <input type="number" step="0.01" id="attendancePercentage" class="form-control" @bind="currentStudent.AttendancePercentage" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountBalance">رصيد الحساب</label>
+                            <input type="number" step="0.01" id="accountBalance" class="form-control" @bind="currentStudent.AccountBalance" />
+                        </div>
+                        <div class="form-group">
+                            <label for="registraionCompleted">اكتمل التسجيل</label>
+                            <select id="registraionCompleted" class="form-control" @bind="currentStudent.RegistraionCompleted">
+                                <option value="true">نعم</option>
+                                <option value="false">لا</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <!-- طالب 3 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
+                    <!-- معلومات السكن والعنوان -->
+                    <h4 class="section-title">معلومات السكن والعنوان</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="homeAddress">العنوان *</label>
+                            <input type="text" id="homeAddress" class="form-control" @bind="currentStudent.HomeAddress" required />
                         </div>
-                        <h3>أحمد سعيد محمد</h3>
-                        <span class="student-id">2023003</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> الهندسة المدنية</p>
-                            <p><i class="fas fa-envelope"></i> ahmeds@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234569</p>
-                            <p><i class="fas fa-calendar"></i> السنة الرابعة</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">3.2</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">78%</div>
-                                <div class="label">الحضور</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="fullAddress">العنوان الكامل</label>
+                            <input type="text" id="fullAddress" class="form-control" @bind="currentStudent.FullAddress" />
                         </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-warning">تحذير أكاديمي</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="homeNumber">رقم المنزل</label>
+                            <input type="number" id="homeNumber" class="form-control" @bind="currentStudent.HomeNumber" />
+                        </div>
+                        <div class="form-group">
+                            <label for="workAddress">عنوان العمل</label>
+                            <input type="text" id="workAddress" class="form-control" @bind="currentStudent.WorkAddress" />
+                        </div>
                     </div>
-                </div>
 
-                <!-- طالب 4 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
+                    <!-- المعلومات الشخصية -->
+                    <h4 class="section-title">المعلومات الشخصية</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="birthOfDate">تاريخ الميلاد *</label>
+                            <input type="date" id="birthOfDate" class="form-control" @bind="currentStudent.BirthOfDate" required />
                         </div>
-                        <h3>نورهان عبدالله علي</h3>
-                        <span class="student-id">2023004</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> الطب العام</p>
-                            <p><i class="fas fa-envelope"></i> nourhan@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234570</p>
-                            <p><i class="fas fa-calendar"></i> السنة الخامسة</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">4.0</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">95%</div>
-                                <div class="label">الحضور</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="sexual">الجنس *</label>
+                            <select id="sexual" class="form-control" @bind="currentStudent.Sexual" required>
+                                <option value="true">ذكر</option>
+                                <option value="false">أنثى</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-success">نشط</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="religion">الديانة</label>
+                            <input type="text" id="religion" class="form-control" @bind="currentStudent.Religion" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nationalityName">الجنسية</label>
+                            <input type="text" id="nationalityName" class="form-control" @bind="currentStudent.NationalityName" />
+                        </div>
                     </div>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="politicalNationalism">الانتماء السياسي</label>
+                            <input type="text" id="politicalNationalism" class="form-control" @bind="currentStudent.PoliticalNationalism" />
+                        </div>
+                        <div class="form-group">
+                            <label for="trueIsEmployee">هل هو موظف</label>
+                            <select id="trueIsEmployee" class="form-control" @bind="currentStudent.TrueIsEmployee">
+                                <option value="true">نعم</option>
+                                <option value="false">لا</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <!-- طالب 5 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
+                    <!-- معلومات الهوية والشهادات -->
+                    <h4 class="section-title">معلومات الهوية والشهادات</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="civilstatusIDNumberAndNationalCard">رقم الهوية المدنية *</label>
+                            <input type="text" id="civilstatusIDNumberAndNationalCard" class="form-control" @bind="currentStudent.CivilstatusIDNumberAndNationalCard" required />
                         </div>
-                        <h3>يوسف إبراهيم حسن</h3>
-                        <span class="student-id">2023005</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> الاقتصاد والإدارة</p>
-                            <p><i class="fas fa-envelope"></i> yusuf@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234571</p>
-                            <p><i class="fas fa-calendar"></i> السنة الأولى</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">3.5</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">88%</div>
-                                <div class="label">الحضور</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="civilstatusIDNumberAndNationalCardFrom">جهة إصدار الهوية</label>
+                            <input type="text" id="civilstatusIDNumberAndNationalCardFrom" class="form-control" @bind="currentStudent.CivilstatusIDNumberAndNationalCardFrom" />
                         </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-success">نشط</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="civilstatusIDNumberAndNationalCardDate">تاريخ إصدار الهوية</label>
+                            <input type="date" id="civilstatusIDNumberAndNationalCardDate" class="form-control" @bind="currentStudent.CivilstatusIDNumberAndNationalCardDate" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nationalityCertificateNumber">رقم شهادة الجنسية</label>
+                            <input type="number" id="nationalityCertificateNumber" class="form-control" @bind="currentStudent.NationalityCertificateNumber" />
+                        </div>
                     </div>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nationalityCertificateNumberFrom">جهة إصدار شهادة الجنسية</label>
+                            <input type="text" id="nationalityCertificateNumberFrom" class="form-control" @bind="currentStudent.NationalityCertificateNumberFrom" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nationalityCertificateNumberDate">تاريخ إصدار شهادة الجنسية</label>
+                            <input type="date" id="nationalityCertificateNumberDate" class="form-control" @bind="currentStudent.NationalityCertificateNumberDate" />
+                        </div>
+                    </div>
 
-                <!-- طالب 6 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
+                    <!-- معلومات المدرسة -->
+                    <h4 class="section-title">معلومات المدرسة</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="schoolName">اسم المدرسة</label>
+                            <input type="text" id="schoolName" class="form-control" @bind="currentStudent.SchoolName" />
                         </div>
-                        <h3>سارة محمد عبدالله</h3>
-                        <span class="student-id">2023006</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> اللغة الإنجليزية</p>
-                            <p><i class="fas fa-envelope"></i> sara@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234572</p>
-                            <p><i class="fas fa-calendar"></i> السنة الثانية</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">3.8</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">90%</div>
-                                <div class="label">الحضور</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="branch">التخصص</label>
+                            <input type="text" id="branch" class="form-control" @bind="currentStudent.Branch" />
                         </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-success">نشط</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateOfSchoolGraduate">تاريخ التخرج</label>
+                            <input type="date" id="dateOfSchoolGraduate" class="form-control" @bind="currentStudent.DateOfSchoolGraduate" />
+                        </div>
+                        <div class="form-group">
+                            <label for="examNumber">رقم الامتحان</label>
+                            <input type="number" id="examNumber" class="form-control" @bind="currentStudent.ExamNumber" />
+                        </div>
                     </div>
-                </div>
 
-                <!-- طالب 7 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
+                    <!-- معلومات الموقع والتطبيق -->
+                    <h4 class="section-title">معلومات الموقع والتطبيق</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userNameOnSite">اسم المستخدم على الموقع</label>
+                            <input type="text" id="userNameOnSite" class="form-control" @bind="currentStudent.UserNameOnSite" />
                         </div>
-                        <h3>خالد علي أحمد</h3>
-                        <span class="student-id">2023007</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> علوم الحاسب</p>
-                            <p><i class="fas fa-envelope"></i> khaled@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234573</p>
-                            <p><i class="fas fa-calendar"></i> السنة الثالثة</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">2.9</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">70%</div>
-                                <div class="label">الحضور</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="passwordOnSite">كلمة المرور على الموقع</label>
+                            <input type="password" id="passwordOnSite" class="form-control" @bind="currentStudent.PasswordOnSite" />
                         </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-danger">موقف دراسي</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="statusOnSite">حالة الحساب على الموقع</label>
+                            <input type="text" id="statusOnSite" class="form-control" @bind="currentStudent.StatusOnSite" />
+                        </div>
+                        <div class="form-group">
+                            <label for="secretNumber">الرقم السري</label>
+                            <input type="number" id="secretNumber" class="form-control" @bind="currentStudent.SecretNumber" />
+                        </div>
                     </div>
-                </div>
 
-                <!-- طالب 8 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <img src="https://via.placeholder.com/80" alt="طالب">
+                    <!-- معلومات القبول والانفاق -->
+                    <h4 class="section-title">معلومات القبول والانفاق</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="applyTunnel">هل قدم عبر نفق</label>
+                            <select id="applyTunnel" class="form-control" @bind="currentStudent.ApplyTunnel">
+                                <option value="true">نعم</option>
+                                <option value="false">لا</option>
+                            </select>
                         </div>
-                        <h3>منى سعيد عبدالله</h3>
-                        <span class="student-id">2023008</span>
-                    </div>
-                    <div class="student-body">
-                        <div class="student-info">
-                            <p><i class="fas fa-graduation-cap"></i> الطب العام</p>
-                            <p><i class="fas fa-envelope"></i> manal@example.com</p>
-                            <p><i class="fas fa-phone"></i> 0501234574</p>
-                            <p><i class="fas fa-calendar"></i> السنة الرابعة</p>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="number">3.9</div>
-                                <div class="label">المعدل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">93%</div>
-                                <div class="label">الحضور</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="tunnelId">معرف النفق</label>
+                            <input type="number" id="tunnelId" class="form-control" @bind="currentStudent.TunnelId" />
                         </div>
                     </div>
-                    <div class="student-footer">
-                        <span class="badge badge-success">نشط</span>
-                        <button class="btn btn-outline">عرض التفاصيل</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tunnelDepartment">قسم النفق</label>
+                            <input type="text" id="tunnelDepartment" class="form-control" @bind="currentStudent.TunnelDepartment" />
+                        </div>
+                        <div class="form-group">
+                            <label for="submissionDepartment">قسم التقديم</label>
+                            <input type="text" id="submissionDepartment" class="form-control" @bind="currentStudent.SubmissionDepartment" />
+                        </div>
                     </div>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="submissionIsCompleted">اكتمل التقديم</label>
+                            <select id="submissionIsCompleted" class="form-control" @bind="currentStudent.SubmissionIsCompleted">
+                                <option value="true">نعم</option>
+                                <option value="false">لا</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="eRegistrationCompleted">اكتمل التسجيل الإلكتروني</label>
+                            <select id="eRegistrationCompleted" class="form-control" @bind="currentStudent.ERegistrationCompleted">
+                                <option value="true">نعم</option>
+                                <option value="false">لا</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountsReceiptNumber">رقم إيصال الحسابات</label>
+                            <input type="number" id="accountsReceiptNumber" class="form-control" @bind="currentStudent.AccountsReceiptNumber" />
+                        </div>
+                        <div class="form-group">
+                            <label for="studentTotalWithoutAdditions">إجمالي الطالب بدون إضافات</label>
+                            <input type="number" id="studentTotalWithoutAdditions" class="form-control" @bind="currentStudent.StudentTotalWithoutAdditions" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentTotalWithAdditions">إجمالي الطالب مع إضافات</label>
+                            <input type="number" id="studentTotalWithAdditions" class="form-control" @bind="currentStudent.StudentTotalWithAdditions" />
+                        </div>
+                        <div class="form-group">
+                            <label for="studentGPAWithoutAdditions">معدل الطالب بدون إضافات</label>
+                            <input type="number" id="studentGPAWithoutAdditions" class="form-control" @bind="currentStudent.StudentGPAWithoutAdditions" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentGPAWithAdditions">معدل الطالب مع إضافات</label>
+                            <input type="number" id="studentGPAWithAdditions" class="form-control" @bind="currentStudent.StudentGPAWithAdditions" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nationalityId">معرف الجنسية</label>
+                            <input type="number" id="nationalityId" class="form-control" @bind="currentStudent.NationalityId" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" @onclick="CloseStudentModal">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button class="btn-primary" @onclick="SaveStudent">
+                    <i class="fas @(isEditMode ? "fa-save" : "fa-plus")"></i> @(isEditMode ? "حفظ التغييرات" : "إضافة الطالب")
+                </button>
             </div>
         </div>
     </div>
+}
 
-    <script>
-        // تفعيل القائمة الجانبية
-        document.querySelectorAll('.sidebar-menu a').forEach(item => {
-            item.addEventListener('click', function (e) {
-                // منع الانتقال الافتراضي للرابط للسماح بتشغيل النص البرمجي
-                // e.preventDefault();
+<!-- مودال تفاصيل الطالب -->
+@if (showDetailsModal && selectedStudent != null)
+{
+    <div class="modal-overlay" @onclick="CloseDetailsModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3><i class="fas fa-user"></i> تفاصيل الطالب</h3>
+                <button class="modal-close" @onclick="CloseDetailsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                    <div class="student-avatar" style="width: 100px; height: 100px;">
+                        <img src="@(string.IsNullOrEmpty(selectedStudent.ProfilePicture) ? "https://via.placeholder.com/100" : selectedStudent.ProfilePicture)" alt="طالب">
+                    </div>
+                    <h3 style="margin: 15px 0 5px;">@selectedStudent.FullName</h3>
+                    <span class="student-id">@selectedStudent.StudentId</span>
+                    <span class="badge @(GetStatusBadgeClass(selectedStudent.Status))" style="margin-top: 10px;">@GetStatusText(selectedStudent.Status)</span>
+                </div>
 
-                document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                    link.classList.remove('active');
-                });
-                this.classList.add('active');
-            });
-        });
-    </script>
-</body>
-</html>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>البريد الإلكتروني:</label>
+                        <div class="form-control">@selectedStudent.Email</div>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف:</label>
+                        <div class="form-control">@selectedStudent.Phone</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>القسم:</label>
+                        <div class="form-control">@selectedStudent.Department?.Name</div>
+                    </div>
+                    <div class="form-group">
+                        <label>السنة الدراسية:</label>
+                        <div class="form-control">@selectedStudent.AcademicYear</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المعدل التراكمي:</label>
+                        <div class="form-control">@selectedStudent.GPA.ToString("F2")</div>
+                    </div>
+                    <div class="form-group">
+                        <label>نسبة الحضور:</label>
+                        <div class="form-control">@selectedStudent.AttendancePercentage.ToString("F0")%</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تاريخ التسجيل:</label>
+                        <div class="form-control">@selectedStudent.RegistrationDate.ToString("yyyy/MM/dd")</div>
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ الميلاد:</label>
+                        <div class="form-control">@selectedStudent.BirthOfDate.ToString("yyyy/MM/dd")</div>
+                    </div>
+                </div>
+
+                <h4 class="section-title">معلومات السكن</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>العنوان:</label>
+                        <div class="form-control">@selectedStudent.HomeAddress</div>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم المنزل:</label>
+                        <div class="form-control">@selectedStudent.HomeNumber</div>
+                    </div>
+                </div>
+
+                <h4 class="section-title">معلومات شخصية</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الديانة:</label>
+                        <div class="form-control">@selectedStudent.Religion</div>
+                    </div>
+                    <div class="form-group">
+                        <label>الجنسية:</label>
+                        <div class="form-control">@selectedStudent.NationalityName</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>رقم الهوية:</label>
+                        <div class="form-control">@selectedStudent.CivilstatusIDNumberAndNationalCard</div>
+                    </div>
+                    <div class="form-group">
+                        <label>الانتماء السياسي:</label>
+                        <div class="form-control">@selectedStudent.PoliticalNationalism</div>
+                    </div>
+                </div>
+
+                <h4 class="section-title">معلومات المدرسة</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اسم المدرسة:</label>
+                        <div class="form-control">@selectedStudent.SchoolName</div>
+                    </div>
+                    <div class="form-group">
+                        <label>التخصص:</label>
+                        <div class="form-control">@selectedStudent.Branch</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تاريخ التخرج:</label>
+                        <div class="form-control">@selectedStudent.DateOfSchoolGraduate.ToString("yyyy/MM/dd")</div>
+                    </div>
+                    <div class="form-group">
+                        <label>المعدل التراكمي:</label>
+                        <div class="form-control">@selectedStudent.GPA</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" @onclick="CloseDetailsModal">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+                <button class="btn-primary" @onclick="() => ShowEditStudentModal(selectedStudent)">
+                    <i class="fas fa-edit"></i> تعديل
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<StudentDto> students = new();
+    private string searchTerm = "";
+    private bool isLoading = true;
+
+    // متغيرات المودال
+    private bool showStudentModal = false;
+    private bool showDetailsModal = false;
+    private bool isSubmitting = false;
+    private bool isEditMode = false;
+    private string successMessage = "";
+    private List<DepartmentDto> departments = new();
+    private bool departmentsLoading = false;
+    // كائنات الطالب
+    private StudentDto currentStudent = new StudentDto();
+    private StudentDto selectedStudent = new StudentDto();
+    private StudentDto newStudent = new StudentDto
+        {
+            BirthOfDate = DateTime.Now.AddYears(-18),
+            DateOfSchoolGraduate = DateTime.Now,
+            RegistrationDate = DateTime.Now,
+            CreatedAt = DateTime.Now,
+            Status = StudentStatus.New,
+            GPA = 0.0,
+            AttendancePercentage = 0,
+            AccountBalance = 0,
+            RegistraionCompleted = false
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudents();
+        await LoadDepartments();
+    }
+    private async Task LoadDepartments()
+    {
+        try
+        {
+            departmentsLoading = true;
+            StateHasChanged();
+            var result = await DepartmentService.GetAllDepartmentsAsync(); // استدعاء خدمة الأقسام
+            departments = result ?? new List<DepartmentDto>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading departments: {ex.Message}");
+            departments = new List<DepartmentDto>();
+        }
+        finally
+        {
+            departmentsLoading = false;
+            StateHasChanged();
+        }
+    }
+    private async Task LoadStudents()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+            var result = await StudentService.GetAllStudentsAsync();
+            students = result ?? new List<StudentDto>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading students: {ex.Message}");
+            students = new List<StudentDto>();
+            ToastService.ShowError("حدث خطأ أثناء تحميل بيانات الطلاب", "خطأ");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchStudents()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var result = await StudentService.GetStudentsAsync(searchTerm);
+                students = result ?? new List<StudentDto>();
+            }
+            else
+            {
+                await LoadStudents();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching students: {ex.Message}");
+            students = new List<StudentDto>();
+            ToastService.ShowError("حدث خطأ أثناء البحث في بيانات الطلاب", "خطأ");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshStudents()
+    {
+        searchTerm = "";
+        await LoadStudents();
+    }
+
+    private string GetStatusBadgeClass(StudentStatus status)
+    {
+        return status switch
+        {
+            StudentStatus.New or StudentStatus.Active => "badge-success",
+            StudentStatus.Inactive => "badge-warning",
+            StudentStatus.Suspended => "badge-danger",
+            _ => "badge-primary"
+        };
+    }
+
+    private string GetStatusText(StudentStatus status)
+    {
+        return status switch
+        {
+            StudentStatus.Active => "نشط",
+            StudentStatus.Inactive => "غير نشط",
+            StudentStatus.Suspended => "موقف دراسي",
+            StudentStatus.New => "جديد",
+            StudentStatus.Warrning => "تحذير أكاديمي",
+            _ => "غير محدد"
+        };
+    }
+
+    // دوال المودال الموحد للإضافة والتعديل
+    private void ShowAddStudentModal()
+    {
+        isEditMode = false;
+        currentStudent = new StudentDto
+            {
+                BirthOfDate = DateTime.Now.AddYears(-18),
+                DateOfSchoolGraduate = DateTime.Now,
+                RegistrationDate = DateTime.Now,
+                CreatedAt = DateTime.Now,
+                Status = StudentStatus.New,
+                GPA = 0.0,
+                AttendancePercentage = 0,
+                AccountBalance = 0,
+                RegistraionCompleted = false
+            };
+        showStudentModal = true;
+        successMessage = "";
+    }
+
+    private void ShowEditStudentModal(StudentDto student)
+    {
+        isEditMode = true;
+        currentStudent = new StudentDto
+            {
+                Id = student.Id,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                FullName = student.FullName,
+                Email = student.Email,
+                Phone = student.Phone,
+                StudentId = student.StudentId,
+                DepartmentId = student.DepartmentId,
+                BirthOfDate = student.BirthOfDate,
+                Sexual = student.Sexual,
+                HomeAddress = student.HomeAddress,
+                HomeNumber = student.HomeNumber,
+                Religion = student.Religion,
+                NationalityName = student.NationalityName,
+                PoliticalNationalism = student.PoliticalNationalism,
+                CivilstatusIDNumberAndNationalCard = student.CivilstatusIDNumberAndNationalCard,
+                SchoolName = student.SchoolName,
+                Branch = student.Branch,
+                DateOfSchoolGraduate = student.DateOfSchoolGraduate,
+                GPA = student.GPA,
+                AcademicYear = student.AcademicYear,
+                Status = student.Status,
+                RegistrationDate = student.RegistrationDate,
+                CreatedAt = student.CreatedAt,
+                ProfilePicture = student.ProfilePicture,
+                AttendancePercentage = student.AttendancePercentage,
+                AccountBalance = student.AccountBalance,
+                RegistraionCompleted = student.RegistraionCompleted
+            };
+        showStudentModal = true;
+        successMessage = "";
+    }
+
+    private void CloseStudentModal()
+    {
+        showStudentModal = false;
+        currentStudent = new StudentDto();
+        successMessage = "";
+    }
+
+    private async Task SaveStudent()
+    {
+        try
+        {
+            isSubmitting = true;
+            StateHasChanged();
+
+            // تعيين القيم المحسوبة
+            currentStudent.FullName = $"{currentStudent.FirstName} {currentStudent.LastName}";
+
+            if (isEditMode)
+            {     
+              
+                await StudentService.UpdateStudentAsync(currentStudent.Id,currentStudent);
+                ToastService.ShowSuccess("تم تحديث بيانات الطالب بنجاح", "نجاح");                  
+                await LoadStudents(); 
+                
+                CloseStudentModal();                
+            }
+            else
+            {
+                // إضافة طالب جديد
+                currentStudent.RegistrationDate = DateTime.Now;
+                currentStudent.CreatedAt = DateTime.Now;
+                var result = await StudentService.CreateStudentAsync(currentStudent);
+                if (result != null)
+                {
+                    ToastService.ShowSuccess("تم إضافة الطالب بنجاح", "نجاح");
+                    await LoadStudents(); // إعادة تحميل قائمة الطلاب
+                    CloseStudentModal();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving student: {ex.Message}");
+            ToastService.ShowError("حدث خطأ أثناء حفظ بيانات الطالب", "خطأ");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    // دوال مودال التفاصيل
+    private void ShowStudentDetailsModal(StudentDto student)
+    {
+        selectedStudent = student;
+        showDetailsModal = true;
+    }
+
+    private void CloseDetailsModal()
+    {
+        showDetailsModal = false;
+        selectedStudent = new StudentDto();
+    }
+
+    // التنقل إلى صفحة القبول
+    private void GoToAdmissions()
+    {
+        Navigation.NavigateTo("/apply");
+    }
+
+    private void ViewStudentCourses(int studentId)
+    {
+        // التنقل إلى صفحة تفاصيل الطالب
+        Navigation.NavigateTo($"/student/{studentId}/registrations");
+    }
+}

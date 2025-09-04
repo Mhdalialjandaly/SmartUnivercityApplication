@@ -8,7 +8,9 @@ namespace UniversityManagementSystem.Application.Interfaces
     public interface IStudentServices
     {
         Task<PaginatedResult<Student>> GetStudentsPagedAsync(int pageNumber, int pageSize,string term,int? departmentId,StudentStatus status);
+
         Task<StudentDto> GetStudentByIdAsync(int studentId);
+        Task<List<StudentDto>> GetStudentsAsync(string term);
         Task<List<StudentDto>> GetAllStudentsAsync();
         Task<StudentDto> CreateStudentAsync(StudentDto studentDto);
         Task UpdateStudentAsync(int studentId, StudentDto studentDto);

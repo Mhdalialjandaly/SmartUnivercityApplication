@@ -5,8 +5,8 @@ namespace UniversityManagementSystem.Application.Services
 {
     public class ToastService : IToastService
     {
-        public event Action<string, ToastLevel, string, int> OnShow;
-        public event Action OnHideAll;
+        public event Action<string, ToastLevel, string, int> OnShow = delegate { };
+        public event Action OnHideAll = delegate { };
 
         public void ShowInfo(string message, string heading = null, int durationSeconds = 5)
         {
@@ -30,12 +30,12 @@ namespace UniversityManagementSystem.Application.Services
 
         public void ShowToast(ToastLevel level, string message, string heading = null, int durationSeconds = 5)
         {
-            OnShow.Invoke(message, level, heading, durationSeconds);
+            OnShow(message, level, heading ?? string.Empty, durationSeconds);
         }
 
         public void HideAll()
         {
-            OnHideAll.Invoke();
+            OnHideAll();
         }
     }
 }

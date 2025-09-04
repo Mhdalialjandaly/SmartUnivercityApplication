@@ -1,14 +1,6 @@
 ﻿@page "/techeringmempership"
 @attribute [Authorize(Roles = "Admin")]
 
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الجامعي الذكي - أعضاء هيئة التدريس</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* أنماط CSS من ملف النص */
         *,*:before,*:after {
@@ -607,8 +599,6 @@
             }
         }
     </style>
-</head>
-<body>
     <!-- Top Panel -->
     <div class="mil-top-panel">
         <div class="mil-logo">
@@ -632,32 +622,7 @@
 
     <div class="faculty-dashboard">
         <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <img src="https://via.placeholder.com/50" alt="Logo">
-                <h3>النظام الاداري</h3>
-            </div>
-            <div class="sidebar-menu">
-                <ul>
-                    <li><a href="/techers"><i class="fas fa-home"></i> <span>الرئيسية</span></a></li>
-                    <li><a href="/coursesview"><i class="fas fa-book"></i> <span>المقررات</span></a></li>
-                    <li><a href="/calendarview"><i class="fas fa-calendar-alt"></i> <span>الجدول الدراسي</span></a></li>
-                    <li><a href="/studentsview"><i class="fas fa-users"></i> <span>الطلاب</span></a></li>
-                    <li><a href="/assessments"><i class="fas fa-clipboard-list"></i> <span>التقييمات</span></a></li>
-                    <li><a href="/reportsview"><i class="fas fa-chart-bar"></i> <span>التقارير</span></a></li>
-                    <li><a href="/departmentsview"><i class="fas fa-building"></i> <span>الأقسام</span></a></li>
-                    <li><a href="/careers"><i class="fas fa-briefcase"></i> <span>التوظيف</span></a></li>
-                    <li><a href="/tuitionview"><i class="fas fa-money-bill-wave"></i> <span>الرسوم الدراسية</span></a></li>
-                    <li><a href="/eventview"><i class="fas fa-calendar-day"></i> <span>الفعاليات</span></a></li>
-                    <li><a href="/archiveview"><i class="fas fa-archive"></i> <span>الأرشيف</span></a></li>
-                    <li><a href="/student-projects"><i class="fas fa-laptop-code"></i> <span>المشاريع الطلابية</span></a></li>
-                    <li><a href="/acceptance"><i class="fas fa-user-check"></i> <span>طلبات القبول</span></a></li>
-                    <li><a href="/official-books"><i class="fas fa-book-open"></i> <span>الكتب الرسمية</span></a></li>
-                    <li><a href="/settingsview"><i class="fas fa-cog"></i> <span>الإعدادات</span></a></li>
-                    <li><a href="/logoutview"><i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span></a></li>
-                </ul>
-            </div>
-        </div>
+       <NavMenu2/>
 
         <!-- المحتوى الرئيسي -->
         <div class="main-content">
@@ -894,5 +859,3 @@
             });
         });
     </script>
-</body>
-</html>

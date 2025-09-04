@@ -1,23 +1,19 @@
 ﻿@page "/calendarview"
 @attribute [Authorize(Roles = "Admin")]
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الجامعي الذكي - التقويم الدراسي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+@using UniversityManagementSystem.Application.DTOs
+@inject IAcademicCalendarServices AcademicCalendarService
+@rendermode InteractiveServer
+
     <style>
         /* أنماط CSS من ملف النص */
-        *,*:before,*:after {
+        *, *:before, *:after {
             -webkit-box-sizing: border-box;
             box-sizing: border-box;
             padding: 0;
             margin: 0;
         }
 
-        html,body {
+        html, body {
             padding: 0;
             margin: 0;
             font-family: "Sora", sans-serif;
@@ -28,7 +24,7 @@
             background-color: #f9f9f9;
         }
 
-        h1,h2,h3,h4,h5,h6 {
+        h1, h2, h3, h4, h5, h6 {
             font-family: "Sora", sans-serif;
             color: rgb(18, 24, 32);
             font-weight: 600;
@@ -88,16 +84,16 @@
             margin-bottom: 60px;
         }
 
-        .mil-section-title h2 {
-            font-size: 36px;
-            margin-bottom: 15px;
-        }
+            .mil-section-title h2 {
+                font-size: 36px;
+                margin-bottom: 15px;
+            }
 
-        .mil-section-title p {
-            color: rgba(18, 24, 32, 0.5);
-            max-width: 600px;
-            margin: 0 auto;
-        }
+            .mil-section-title p {
+                color: rgba(18, 24, 32, 0.5);
+                max-width: 600px;
+                margin: 0 auto;
+            }
 
         .mil-flex {
             display: -webkit-box;
@@ -169,18 +165,18 @@
             transition: 0.4s cubic-bezier(0, 0, 0.3642, 1);
         }
 
-        .mil-button:hover {
-            -webkit-transform: translateY(-5px);
-            transform: translateY(-5px);
-            -webkit-box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
-            box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
-        }
+            .mil-button:hover {
+                -webkit-transform: translateY(-5px);
+                transform: translateY(-5px);
+                -webkit-box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+                box-shadow: 0px 10px 20px 0px rgba(245, 124, 0, 0.3);
+            }
 
-        .mil-button.mil-button-sm {
-            height: 50px;
-            padding: 0 30px;
-            font-size: 14px;
-        }
+            .mil-button.mil-button-sm {
+                height: 50px;
+                padding: 0 30px;
+                font-size: 14px;
+            }
 
         .mil-top-panel {
             padding: 0 10px;
@@ -215,24 +211,24 @@
             display: flex;
         }
 
-        .mil-navigation nav ul li {
-            margin: 0 15px;
-            position: relative;
-        }
+            .mil-navigation nav ul li {
+                margin: 0 15px;
+                position: relative;
+            }
 
-        .mil-navigation nav ul li a {
-            font-family: "Sora", sans-serif;
-            text-decoration: none;
-            color: rgb(18, 24, 32);
-            font-weight: 400;
-            white-space: nowrap;
-            -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
-            transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
-        }
+                .mil-navigation nav ul li a {
+                    font-family: "Sora", sans-serif;
+                    text-decoration: none;
+                    color: rgb(18, 24, 32);
+                    font-weight: 400;
+                    white-space: nowrap;
+                    -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+                    transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+                }
 
-        .mil-navigation nav ul li a:hover {
-            color: rgb(245, 124, 0);
-        }
+                    .mil-navigation nav ul li a:hover {
+                        color: rgb(245, 124, 0);
+                    }
 
         .mil-menu-btn {
             display: none;
@@ -251,45 +247,45 @@
             align-items: center;
         }
 
-        .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
-            content: "";
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: rgb(18, 24, 32);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transition: inherit;
-            transition: inherit;
-        }
+            .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
+                content: "";
+                display: block;
+                width: 24px;
+                height: 2px;
+                background: rgb(18, 24, 32);
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+                -webkit-transition: inherit;
+                transition: inherit;
+            }
 
-        .mil-menu-btn span {
-            position: relative;
-        }
+            .mil-menu-btn span {
+                position: relative;
+            }
 
-        .mil-menu-btn span:before {
-            top: -8px;
-        }
+                .mil-menu-btn span:before {
+                    top: -8px;
+                }
 
-        .mil-menu-btn span:after {
-            top: 8px;
-        }
+                .mil-menu-btn span:after {
+                    top: 8px;
+                }
 
-        .mil-menu-btn.mil-active span {
-            background: transparent;
-        }
+            .mil-menu-btn.mil-active span {
+                background: transparent;
+            }
 
-        .mil-menu-btn.mil-active span:before {
-            top: 0;
-            -webkit-transform: rotate(45deg);
-            transform: rotate(45deg);
-        }
+                .mil-menu-btn.mil-active span:before {
+                    top: 0;
+                    -webkit-transform: rotate(45deg);
+                    transform: rotate(45deg);
+                }
 
-        .mil-menu-btn.mil-active span:after {
-            top: 0;
-            -webkit-transform: rotate(-45deg);
-            transform: rotate(-45deg);
-        }
+                .mil-menu-btn.mil-active span:after {
+                    top: 0;
+                    -webkit-transform: rotate(-45deg);
+                    transform: rotate(-45deg);
+                }
 
         /* أنماط إضافية للوحة التقويم */
         :root {
@@ -299,19 +295,19 @@
             --gray-color: #f5f5f5;
             --text-color: #333333;
         }
-        
+
         body {
             font-family: 'Sora', sans-serif;
             color: var(--text-color);
             background-color: #f9f9f9;
             padding-top: 80px;
         }
-        
+
         .calendar-dashboard {
             display: flex;
             min-height: calc(100vh - 80px);
         }
-        
+
         .sidebar {
             width: 280px;
             background: var(--dark-color);
@@ -319,58 +315,58 @@
             padding: 20px 0;
             transition: all 0.3s ease;
         }
-        
+
         .sidebar-header {
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .sidebar-header h3 {
-            color: white;
-            margin: 10px 0;
-        }
-        
+
+            .sidebar-header h3 {
+                color: white;
+                margin: 10px 0;
+            }
+
         .sidebar-menu {
             padding: 20px 0;
         }
-        
-        .sidebar-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-menu li {
-            margin-bottom: 5px;
-        }
-        
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-right: 3px solid var(--primary-color);
-        }
-        
-        .sidebar-menu i {
-            margin-left: 10px;
-            font-size: 18px;
-        }
-        
+
+            .sidebar-menu ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .sidebar-menu li {
+                margin-bottom: 5px;
+            }
+
+            .sidebar-menu a {
+                display: flex;
+                align-items: center;
+                padding: 12px 20px;
+                color: rgba(255, 255, 255, 0.7);
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+                .sidebar-menu a:hover, .sidebar-menu a.active {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    border-right: 3px solid var(--primary-color);
+                }
+
+            .sidebar-menu i {
+                margin-left: 10px;
+                font-size: 18px;
+            }
+
         .main-content {
             flex: 1;
             padding: 20px;
             background: var(--gray-color);
         }
-        
+
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -381,38 +377,38 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
         }
-        
+
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        
-        .calendar-header h2 {
-            margin: 0;
-        }
-        
+
+            .calendar-header h2 {
+                margin: 0;
+            }
+
         .calendar-nav {
             display: flex;
             gap: 10px;
         }
-        
-        .calendar-nav button {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 8px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .calendar-nav button:hover {
-            background: #f5f5f5;
-        }
-        
+
+            .calendar-nav button {
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 8px 15px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+                .calendar-nav button:hover {
+                    background: #f5f5f5;
+                }
+
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -422,7 +418,7 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        
+
         .calendar-day-header {
             background: white;
             padding: 15px;
@@ -430,24 +426,24 @@
             font-weight: 600;
             border-bottom: 1px solid #eee;
         }
-        
+
         .calendar-day {
             background: white;
             min-height: 120px;
             padding: 10px;
             position: relative;
         }
-        
-        .calendar-day.other-month {
-            background: #f9f9f9;
-            color: #aaa;
-        }
-        
+
+            .calendar-day.other-month {
+                background: #f9f9f9;
+                color: #aaa;
+            }
+
         .calendar-day-number {
             font-weight: 600;
             margin-bottom: 5px;
         }
-        
+
         .calendar-event {
             background: rgba(245, 124, 0, 0.1);
             border-left: 3px solid var(--primary-color);
@@ -457,17 +453,17 @@
             font-size: 13px;
             cursor: pointer;
         }
-        
-        .calendar-event.exam {
-            background: rgba(220, 53, 69, 0.1);
-            border-left: 3px solid #dc3545;
-        }
-        
-        .calendar-event.holiday {
-            background: rgba(40, 167, 69, 0.1);
-            border-left: 3px solid #28a745;
-        }
-        
+
+            .calendar-event.exam {
+                background: rgba(220, 53, 69, 0.1);
+                border-left: 3px solid #dc3545;
+            }
+
+            .calendar-event.holiday {
+                background: rgba(40, 167, 69, 0.1);
+                border-left: 3px solid #28a745;
+            }
+
         .event-modal {
             display: none;
             position: fixed;
@@ -480,7 +476,7 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .modal-content {
             background: white;
             border-radius: 10px;
@@ -489,14 +485,14 @@
             max-width: 500px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        
+
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        
+
         .close-modal {
             background: none;
             border: none;
@@ -504,111 +500,109 @@
             cursor: pointer;
             color: #777;
         }
-        
+
         .event-details h3 {
             margin-top: 0;
             color: var(--primary-color);
         }
-        
+
         .event-details p {
             margin: 10px 0;
         }
-        
+
         .filter-options {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        
+
         .filter-option {
             display: flex;
             align-items: center;
             gap: 5px;
         }
-        
-        .filter-option input {
-            margin: 0;
-        }
-        
+
+            .filter-option input {
+                margin: 0;
+            }
+
         @@media (max-width: 992px) {
             .sidebar {
                 width: 70px;
             }
-            
+
             .sidebar-header h3, .sidebar-menu span {
                 display: none;
             }
-            
+
             .sidebar-menu a {
                 justify-content: center;
                 padding: 15px;
             }
-            
+
             .sidebar-menu i {
                 margin-left: 0;
             }
-            
+
             .calendar-grid {
                 grid-template-columns: repeat(7, 1fr);
             }
         }
-        
+
         @@media (max-width: 768px) {
             .calendar-dashboard {
                 flex-direction: column;
             }
-            
+
             .sidebar {
                 width: 100%;
                 height: auto;
             }
-            
+
             .sidebar-menu {
                 display: flex;
                 overflow-x: auto;
             }
-            
-            .sidebar-menu ul {
-                display: flex;
-            }
-            
-            .sidebar-menu li {
-                margin-bottom: 0;
-                margin-left: 5px;
-            }
-            
-            .sidebar-menu a {
-                border-radius: 5px;
-                border-right: none !important;
-                border-bottom: 3px solid transparent;
-            }
-            
-            .sidebar-menu a:hover, .sidebar-menu a.active {
-                border-right: none;
-                border-bottom: 3px solid var(--primary-color);
-            }
-            
+
+                .sidebar-menu ul {
+                    display: flex;
+                }
+
+                .sidebar-menu li {
+                    margin-bottom: 0;
+                    margin-left: 5px;
+                }
+
+                .sidebar-menu a {
+                    border-radius: 5px;
+                    border-right: none !important;
+                    border-bottom: 3px solid transparent;
+                }
+
+                    .sidebar-menu a:hover, .sidebar-menu a.active {
+                        border-right: none;
+                        border-bottom: 3px solid var(--primary-color);
+                    }
+
             .top-bar {
                 flex-direction: column;
                 gap: 15px;
             }
-            
+
             .calendar-grid {
                 grid-template-columns: repeat(1, 1fr);
             }
-            
+
             .calendar-day-header {
                 display: none;
             }
-            
+
             .calendar-day {
                 border-bottom: 1px solid #eee;
             }
         }
     </style>
-</head>
-<body>
     <!-- Top Panel -->
     <div class="mil-top-panel">
         <div class="mil-logo">
@@ -632,36 +626,10 @@
 
     <div class="calendar-dashboard">
         <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <img src="https://via.placeholder.com/50" alt="Logo">
-                <h3>النظام الاداري</h3>
-            </div>
-            <div class="sidebar-menu">
-                <ul>
-                    <li><a href="/techers"><i class="fas fa-home"></i> <span>الرئيسية</span></a></li>
-                    <li><a href="/coursesview"><i class="fas fa-book"></i> <span>المقررات</span></a></li>
-                    <li><a href="/calendarview" class="active"><i class="fas fa-calendar-alt"></i> <span>الجدول الدراسي</span></a></li>
-                    <li><a href="/studentsview"><i class="fas fa-users"></i> <span>الطلاب</span></a></li>
-                    <li><a href="/assessments"><i class="fas fa-clipboard-list"></i> <span>التقييمات</span></a></li>
-                    <li><a href="/reportsview"><i class="fas fa-chart-bar"></i> <span>التقارير</span></a></li>
-                    <li><a href="/departments"><i class="fas fa-building"></i> <span>الأقسام</span></a></li>
-                    <li><a href="/careers"><i class="fas fa-briefcase"></i> <span>التوظيف</span></a></li>
-                    <li><a href="/tuition"><i class="fas fa-money-bill-wave"></i> <span>الرسوم الدراسية</span></a></li>
-                    <li><a href="/events"><i class="fas fa-calendar-day"></i> <span>الفعاليات</span></a></li>
-                    <li><a href="/archive"><i class="fas fa-archive"></i> <span>الأرشيف</span></a></li>
-                    <li><a href="/student-projects"><i class="fas fa-laptop-code"></i> <span>المشاريع الطلابية</span></a></li>
-                    <li><a href="/acceptance"><i class="fas fa-user-check"></i> <span>طلبات القبول</span></a></li>
-                    <li><a href="/official-books" ><i class="fas fa-book-open"></i> <span>الكتب الرسمية</span></a></li>
-                    <li><a href="/settings"><i class="fas fa-cog"></i> <span>الإعدادات</span></a></li>
-                    <li><a href="/logoutview"><i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span></a></li>
-                </ul>
-            </div>
-        </div>
+        <NavMenu2/>
 
         <!-- المحتوى الرئيسي -->
         <div class="main-content">
-            <!-- الشريط العلوي -->
             <div class="top-bar">
                 <div class="search-box">
                     <input type="text" placeholder="بحث عن حدث...">
@@ -676,33 +644,30 @@
                 </div>
             </div>
 
-            <!-- رأس التقويم -->
             <div class="calendar-header">
-                <h2>تقويم شهر رمضان 1445ه</h2>
+                <h2>@currentMonthYear</h2>
                 <div class="calendar-nav">
-                    <button id="prev-month"><i class="fas fa-chevron-right"></i> الشهر السابق</button>
-                    <button id="today">اليوم</button>
-                    <button id="next-month">الشهر التالي <i class="fas fa-chevron-left"></i></button>
+                    <button @onclick="PreviousMonth"><i class="fas fa-chevron-right"></i> الشهر السابق</button>
+                    <button @onclick="GoToToday">اليوم</button>
+                    <button @onclick="NextMonth">الشهر التالي <i class="fas fa-chevron-left"></i></button>
                 </div>
             </div>
 
-            <!-- خيارات التصفية -->
             <div class="filter-options">
                 <div class="filter-option">
-                    <input type="checkbox" id="show-exams" checked>
+                    <input type="checkbox" id="show-exams" @bind="showExams">
                     <label for="show-exams">عرض الامتحانات</label>
                 </div>
                 <div class="filter-option">
-                    <input type="checkbox" id="show-holidays" checked>
+                    <input type="checkbox" id="show-holidays" @bind="showHolidays">
                     <label for="show-holidays">عرض الإجازات</label>
                 </div>
                 <div class="filter-option">
-                    <input type="checkbox" id="show-classes" checked>
+                    <input type="checkbox" id="show-classes" @bind="showClasses">
                     <label for="show-classes">عرض المحاضرات</label>
                 </div>
             </div>
 
-            <!-- شبكة التقويم -->
             <div class="calendar-grid">
                 <div class="calendar-day-header">الأحد</div>
                 <div class="calendar-day-header">الاثنين</div>
@@ -711,226 +676,161 @@
                 <div class="calendar-day-header">الخميس</div>
                 <div class="calendar-day-header">الجمعة</div>
                 <div class="calendar-day-header">السبت</div>
-                
-                <!-- أيام الشهر السابق -->
-                <div class="calendar-day other-month">
-                    <div class="calendar-day-number">28</div>
-                </div>
-                <div class="calendar-day other-month">
-                    <div class="calendar-day-number">29</div>
-                </div>
-                <div class="calendar-day other-month">
-                    <div class="calendar-day-number">30</div>
-                </div>
-                
-                <!-- أيام شهر رمضان -->
-                <div class="calendar-day">
-                    <div class="calendar-day-number">1</div>
-                    <div class="calendar-event">بداية شهر رمضان</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">2</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">3</div>
-                    <div class="calendar-event">محاضرة هيكلة البيانات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">4</div>
-                    <div class="calendar-event">محاضرة قواعد البيانات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">5</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">6</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">7</div>
-                    <div class="calendar-event">اختبار قصير - برمجة الويب</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">8</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">9</div>
-                    <div class="calendar-event">محاضرة أمن المعلومات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">10</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">11</div>
-                    <div class="calendar-event">محاضرة هيكلة البيانات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">12</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">13</div>
-                    <div class="calendar-event exam">امتحان نصفي - قواعد البيانات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">14</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">15</div>
-                    <div class="calendar-event">محاضرة برمجة الويب</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">16</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">17</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">18</div>
-                    <div class="calendar-event">ورشة عمل - أمن المعلومات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">19</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">20</div>
-                    <div class="calendar-event">محاضرة قواعد البيانات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">21</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">22</div>
-                    <div class="calendar-event holiday">عطلة رسمية</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">23</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">24</div>
-                    <div class="calendar-event">محاضرة أمن المعلومات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">25</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">26</div>
-                    <div class="calendar-event exam">امتحان نصفي - برمجة الويب</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">27</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">28</div>
-                    <div class="calendar-event">محاضرة هيكلة البيانات</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">29</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="calendar-day-number">30</div>
-                </div>
-                
-                <!-- أيام الشهر التالي -->
-                <div class="calendar-day other-month">
-                    <div class="calendar-day-number">1</div>
-                </div>
+
+                @foreach (var day in calendarDays)
+                {
+                    <div class="calendar-day @(day.IsOtherMonth ? "other-month" : "")">
+                        <div class="calendar-day-number">@day.DayNumber</div>
+                        @foreach (var evt in day.Events)
+                        {
+                            <div class="calendar-event @(GetEventClass(evt))" @onclick="() => ShowEventDetails(evt)">
+                                @evt.Title
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
 
     <!-- نافذة تفاصيل الحدث -->
-    <div class="event-modal" id="event-modal">
+    <div class="event-modal" id="event-modal" style="display: @(showModal ? "flex" : "none");">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>تفاصيل الحدث</h3>
-                <button class="close-modal">&times;</button>
+                <button class="close-modal" @onclick="CloseModal">&times;</button>
             </div>
             <div class="event-details">
-                <h3 id="event-title">امتحان نصفي - قواعد البيانات</h3>
-                <p><i class="fas fa-calendar"></i> <span id="event-date">13 رمضان 1445ه</span></p>
-                <p><i class="fas fa-clock"></i> <span id="event-time">10:00 صباحاً - 12:00 ظهراً</span></p>
-                <p><i class="fas fa-map-marker-alt"></i> <span id="event-location">المعمل 3 - قسم علوم الحاسب</span></p>
-                <p><i class="fas fa-book"></i> <span id="event-course">CPIT370 - قواعد البيانات</span></p>
-                <p id="event-description">امتحان نصفي يغطي المواضيع من الأسبوع الأول حتى الخامس. يُرجى إحضار الهوية الجامعية والآلة الحاسبة.</p>
+                @if (selectedEvent != null)
+                {
+                    <h3 id="event-title">@selectedEvent.Title</h3>
+                    <p><i class="fas fa-calendar"></i> <span id="event-date">@selectedEvent.StartDate.ToString("dd MMMM yyyy")</span></p>
+                    <p><i class="fas fa-clock"></i> <span id="event-time">@selectedEvent.StartDate.ToString("hh:mm tt") - @selectedEvent.EndDate.ToString("hh:mm tt")</span></p>
+                    <p><i class="fas fa-book"></i> <span id="event-course">@selectedEvent.Description</span></p>
+                }
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const menuBtn = document.querySelector('.mil-menu-btn');
             const navigation = document.querySelector('.mil-navigation');
 
-            menuBtn.addEventListener('click', function() {
+            menuBtn.addEventListener('click', function () {
                 menuBtn.classList.toggle('mil-active');
                 navigation.style.display = navigation.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Close menu when clicking on a link (for mobile)
-            const navLinks = document.querySelectorAll('.mil-navigation a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) {
-                        menuBtn.classList.remove('mil-active');
-                        navigation.style.display = 'none';
-                    }
-                });
-            });
-
-            // Smooth scrolling for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
                 });
             });
 
-            // تفعيل القائمة الجانبية
             document.querySelectorAll('.sidebar-menu a').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                        link.classList.remove('active');
-                    });
+                item.addEventListener('click', function (e) {
+                    document.querySelectorAll('.sidebar-menu a').forEach(link => link.classList.remove('active'));
                     this.classList.add('active');
-                });
-            });
-
-            // فتح نافذة تفاصيل الحدث
-            const events = document.querySelectorAll('.calendar-event');
-            const modal = document.getElementById('event-modal');
-            const closeModal = document.querySelector('.close-modal');
-
-            events.forEach(event => {
-                event.addEventListener('click', function() {
-                    modal.style.display = 'flex';
-                });
-            });
-
-            closeModal.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-
-            window.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-
-            // تصفية الأحداث
-            const filterCheckboxes = document.querySelectorAll('.filter-option input');
-            filterCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const eventType = this.id.split('-')[1];
-                    const events = document.querySelectorAll(`.calendar-event.${eventType}`);
-                    
-                    events.forEach(event => {
-                        event.style.display = this.checked ? 'block' : 'none';
-                    });
                 });
             });
         });
     </script>
-</body>
-</html>
+
+@code {
+    private DateTime currentDate = DateTime.Now;
+    private string currentMonthYear => currentDate.ToString("MMMM yyyy");
+    private List<CalendarDay> calendarDays = new();
+    private List<AcademicCalendarDto> events = new();
+    private AcademicCalendarDto selectedEvent;
+    private bool showModal = false;
+
+    private bool showExams = true;
+    private bool showHolidays = true;
+    private bool showClasses = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEvents();
+        GenerateCalendar();
+    }
+
+    private async Task LoadEvents()
+    {
+        var start = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+        events = await AcademicCalendarService.GetEventsByDateRangeAsync(start, end);
+    }
+
+    private void GenerateCalendar()
+    {
+        calendarDays.Clear();
+
+        var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+        var startDay = firstDayOfMonth.AddDays(-(int)firstDayOfMonth.DayOfWeek + 1);
+        var endDay = lastDayOfMonth.AddDays(6 - (int)lastDayOfMonth.DayOfWeek);
+
+        for (var day = startDay; day <= endDay; day = day.AddDays(1))
+        {
+            var dayEvents = events.Where(e => e.StartDate.Date == day.Date).ToList();
+            calendarDays.Add(new CalendarDay
+                {
+                    DayNumber = day.Day,
+                    IsOtherMonth = day.Month != currentDate.Month,
+                    Events = dayEvents
+                });
+        }
+    }
+
+    private void PreviousMonth()
+    {
+        currentDate = currentDate.AddMonths(-1);
+        StateHasChanged();
+        LoadEvents().ContinueWith(_ => GenerateCalendar());
+    }
+
+    private void NextMonth()
+    {
+        currentDate = currentDate.AddMonths(1);
+        StateHasChanged();
+        LoadEvents().ContinueWith(_ => GenerateCalendar());
+    }
+
+    private void GoToToday()
+    {
+        currentDate = DateTime.Now;
+        StateHasChanged();
+        LoadEvents().ContinueWith(_ => GenerateCalendar());
+    }
+
+    private void ShowEventDetails(AcademicCalendarDto evt)
+    {
+        selectedEvent = evt;
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        StateHasChanged();
+    }
+
+    private string GetEventClass(AcademicCalendarDto evt)
+    {
+        if (evt.IsHoliday && !showHolidays) return "d-none";
+        if (evt.EventType.ToString().Contains("Exam") && !showExams) return "d-none";
+        if (evt.EventType.ToString().Contains("Class") && !showClasses) return "d-none";
+
+        return evt.IsHoliday ? "holiday" : evt.EventType.ToString().ToLower();
+    }
+
+    public class CalendarDay
+    {
+        public int DayNumber { get; set; }
+        public bool IsOtherMonth { get; set; }
+        public List<AcademicCalendarDto> Events { get; set; } = new();
+    }
+}

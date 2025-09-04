@@ -49,9 +49,9 @@ namespace UniversityManagementSystem.Domain.Entities
         public string Prerequisites { get; set; } 
 
         [StringLength(50)]
-        public string CourseType { get; set; } 
+        public string CourseType { get; set; }
 
-
+        public double PassMark { get; set; }
         public int CreditHours { get; set; }
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
@@ -64,6 +64,8 @@ namespace UniversityManagementSystem.Domain.Entities
         public int Capacity { get; set; }
         public ICollection<Schedule> Schedules { get; set; }
         public virtual ICollection<CourseRegistration> CourseRegistrations { get; set; }
+        public virtual ICollection<CourseEvaluation> CourseEvaluations { get; set; }
+        public virtual ICollection<Enrollment> Enrollments { get; set; }
         public virtual ICollection<Lecture> Lectures { get; set; }
         public virtual ICollection<StudentPayment>StudentPayments { get; set; }
         public virtual ICollection<StudentAttendance> StudentAttendances { get; set; }

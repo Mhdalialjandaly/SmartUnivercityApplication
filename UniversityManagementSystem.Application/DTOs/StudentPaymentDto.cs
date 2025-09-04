@@ -17,6 +17,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public string Notes { get; set; }
         public int DepartmentId { get; set; }
         public string DepartmentName { get; set; }
+        public string PaymentPurpose { get; set; }
     }
 
 }
