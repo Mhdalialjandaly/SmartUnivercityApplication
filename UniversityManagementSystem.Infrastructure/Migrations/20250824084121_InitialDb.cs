@@ -223,9 +223,10 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     SignatureDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SignatureType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     DocumentId = table.Column<int>(type: "int", nullable: false),
+                    SignedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -348,6 +349,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NationalityId = table.Column<int>(type: "int", nullable: true),
                     Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastLoginDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -886,6 +888,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     StudentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TemporaryPassword = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NationalityId = table.Column<int>(type: "int", nullable: false),
+                    Religion = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -1121,7 +1124,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CheckOutTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -1130,7 +1133,6 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     StudentId = table.Column<int>(type: "int", nullable: false),
                     LectureId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -1141,10 +1143,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Attendances", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Attendances_AspNetUsers_EmployeeId1",
-                        column: x => x.EmployeeId1,
+                        name: "FK_Attendances_AspNetUsers_EmployeeId",
+                        column: x => x.EmployeeId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Attendances_Lectures_LectureId",
                         column: x => x.LectureId,
@@ -1199,8 +1202,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "Avatar", "ConcurrencyStamp", "CreatedAt", "DeletedAt", "DeletedBy", "Discriminator", "Email", "EmailConfirmed", "FirstName", "IsActive", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedAt", "ModifiedBy", "NationalityId", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "PhotoUrl", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "2d2441b2-5d61-4682-bd50-b695ef3677d8", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAEMVQ7PAIvugiN4inZGXyfkQAHWFTI8MfYCb9cx5kK5OjL5VIHwWzOF9rlMe2MrKCiQ==", null, false, null, null, "bfbebf84-3d6c-4a0e-9daa-344e4f516f2f", false, "admin@12345.com" });
+                columns: new[] { "Id", "AccessFailedCount", "Avatar", "ConcurrencyStamp", "CreatedAt", "DeletedAt", "DeletedBy", "Discriminator", "Email", "EmailConfirmed", "FirstName", "IsActive", "LastLoginDate", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedAt", "ModifiedBy", "NationalityId", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "PhotoUrl", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "91c1135d-b674-43cb-b797-d45c4ae606bd", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAEFefYWV57duh02RXNhGjp6hL67JxP/X27pZ1Roq3LkIyQR6DDLTwasxQrTIAhFzsjw==", null, false, null, null, "8d201f13-302c-4c10-8e47-00a73be07710", false, "admin@12345.com" });
 
             migrationBuilder.InsertData(
                 table: "Departments",
@@ -1287,9 +1290,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attendances_EmployeeId1",
+                name: "IX_Attendances_EmployeeId",
                 table: "Attendances",
-                column: "EmployeeId1");
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_LectureId",

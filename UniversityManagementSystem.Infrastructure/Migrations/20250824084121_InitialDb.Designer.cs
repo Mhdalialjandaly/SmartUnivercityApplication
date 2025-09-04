@@ -12,8 +12,8 @@ using UniversityManagementSystem.Infrastructure.Data;
 namespace UniversityManagementSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    [Migration("20250819144746_AddChatTables")]
-    partial class AddChatTables
+    [Migration("20250824084121_InitialDb")]
+    partial class InitialDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -347,10 +347,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EmployeeId1")
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("HoursWorked")
@@ -378,7 +376,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId1");
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("LectureId");
 
@@ -2222,6 +2220,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
@@ -2296,7 +2297,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         {
                             Id = "51586e47-b125-4534-bba4-9bc6fd3dfbc8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "f14a3272-cd12-4a8b-b4b4-6083c4e78ebc",
+                            ConcurrencyStamp = "91c1135d-b674-43cb-b797-d45c4ae606bd",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@university.com",
@@ -2309,9 +2310,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             NationalityId = 1,
                             NormalizedEmail = "ADMIN@UNIVERSITY.COM",
                             NormalizedUserName = "ADMIN@12345.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEA1A9I/MANYokVILdGA4WyI/brQyowpEGp6w2JMaVYV19CY2wNImc6gixhitGd/Srw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFefYWV57duh02RXNhGjp6hL67JxP/X27pZ1Roq3LkIyQR6DDLTwasxQrTIAhFzsjw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "0b8e28a5-677d-44dc-8776-adeda64ed75d",
+                            SecurityStamp = "8d201f13-302c-4c10-8e47-00a73be07710",
                             TwoFactorEnabled = false,
                             UserName = "admin@12345.com"
                         });
@@ -2417,7 +2418,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 {
                     b.HasOne("UniversityManagementSystem.Domain.Entities.User", "Employee")
                         .WithMany()
-                        .HasForeignKey("EmployeeId1");
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("UniversityManagementSystem.Domain.Entities.Lecture", "Lecture")
                         .WithMany("Attendances")

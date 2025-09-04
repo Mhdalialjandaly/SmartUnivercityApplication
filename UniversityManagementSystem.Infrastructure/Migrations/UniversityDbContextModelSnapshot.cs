@@ -2217,6 +2217,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
@@ -2291,7 +2294,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         {
                             Id = "51586e47-b125-4534-bba4-9bc6fd3dfbc8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4bc490bd-92e5-4c90-b57d-c18a2b343f31",
+                            ConcurrencyStamp = "91c1135d-b674-43cb-b797-d45c4ae606bd",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@university.com",
@@ -2304,9 +2307,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             NationalityId = 1,
                             NormalizedEmail = "ADMIN@UNIVERSITY.COM",
                             NormalizedUserName = "ADMIN@12345.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEO4auMtmE74z+p8qHsUqSRNeSPjhpH1KXPr2r2/hB2sdXShN1kF5otBYQMTu8CCSaA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFefYWV57duh02RXNhGjp6hL67JxP/X27pZ1Roq3LkIyQR6DDLTwasxQrTIAhFzsjw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "4b4c8e9f-5fc4-49bf-ae06-6a7cada8f1f2",
+                            SecurityStamp = "8d201f13-302c-4c10-8e47-00a73be07710",
                             TwoFactorEnabled = false,
                             UserName = "admin@12345.com"
                         });
