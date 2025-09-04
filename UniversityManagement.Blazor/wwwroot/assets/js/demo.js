@@ -15,19 +15,7 @@ Circles.create({
 	styleText:    true
 })
 
-//Notify
-$.notify({
-	icon: 'flaticon-alarm-1',
-	title: 'مرحبا',
-	message: 'اهلا بكم في نظام الجامعة',
-},{
-	type: 'info',
-	placement: {
-		from: "bottom",
-		align: "right"
-	},
-	time: 1000,
-});
+
 
 // JQVmap
 $('#map-example').vectorMap(

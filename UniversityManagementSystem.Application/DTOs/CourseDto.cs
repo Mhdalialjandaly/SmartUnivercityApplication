@@ -17,6 +17,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public string Instructor { get; set; }
         public int MaxStudents { get; set; }
         public int CurrentStudents { get; set; }
+        public int CurrentEnrollment { get; set; }
         public bool IsActive { get; set; }
         public string Description { get; set; }
         public int Semester { get; set; }

@@ -348,8 +348,14 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("EnrollmentId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("HoursWorked")
                         .HasColumnType("decimal(5,2)");
+
+                    b.Property<bool>("IsPresent")
+                        .HasColumnType("bit");
 
                     b.Property<int>("LectureId")
                         .HasColumnType("int");
@@ -374,6 +380,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("EnrollmentId");
 
                     b.HasIndex("LectureId");
 
@@ -465,6 +473,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<double>("PassMark")
+                        .HasColumnType("float");
+
                     b.Property<string>("Prerequisites")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -508,6 +519,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             MaxStudents = 0,
                             ModifiedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Introduction to Programming",
+                            PassMark = 0.0,
                             ProfessorId = 1,
                             Semester = 0
                         },
@@ -532,6 +544,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             MaxStudents = 0,
                             ModifiedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Data Structures",
+                            PassMark = 0.0,
                             ProfessorId = 1,
                             Semester = 0
                         },
@@ -556,9 +569,60 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             MaxStudents = 0,
                             ModifiedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Algorithms",
+                            PassMark = 0.0,
                             ProfessorId = 1,
                             Semester = 0
                         });
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.CourseEvaluation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EvaluationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("CourseEvaluation");
                 });
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.CourseRegistration", b =>
@@ -928,6 +992,191 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.HasIndex("EmployeeId1");
 
                     b.ToTable("EmployeeSalaries");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Enrollment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CourseFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EnrollmentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("ExamScore")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("FinalGrade")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("MidtermGrade")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Enrollment");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Exam", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExamDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExamType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalMarks")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Exam");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.ExamResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EnrollmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Grade")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPassed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnrollmentId");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ExamResult");
                 });
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.FinanceRecord", b =>
@@ -1337,6 +1586,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Rank")
                         .HasColumnType("int");
 
@@ -1499,6 +1751,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<bool>("ApplyTunnel")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("AttendancePercentage")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("BirthOfDate")
                         .HasColumnType("datetime2");
 
@@ -1593,6 +1848,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PoliticalNationalism")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfilePicture")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("RegistraionCompleted")
@@ -2217,6 +2475,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
@@ -2291,7 +2552,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         {
                             Id = "51586e47-b125-4534-bba4-9bc6fd3dfbc8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4bc490bd-92e5-4c90-b57d-c18a2b343f31",
+                            ConcurrencyStamp = "5ac67809-5efe-4e4c-9d14-e650080cf006",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@university.com",
@@ -2304,9 +2565,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             NationalityId = 1,
                             NormalizedEmail = "ADMIN@UNIVERSITY.COM",
                             NormalizedUserName = "ADMIN@12345.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEO4auMtmE74z+p8qHsUqSRNeSPjhpH1KXPr2r2/hB2sdXShN1kF5otBYQMTu8CCSaA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEE6FKfHRLR0dPxB1eA/5Za8KhMBD68OgjRDGPw/GGSzO83bZoq5KG7vWWwJG6Iv7pQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "4b4c8e9f-5fc4-49bf-ae06-6a7cada8f1f2",
+                            SecurityStamp = "66ff7bd5-2069-42aa-b13d-d9015cc351b8",
                             TwoFactorEnabled = false,
                             UserName = "admin@12345.com"
                         });
@@ -2416,6 +2677,10 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Enrollment", null)
+                        .WithMany("Attendances")
+                        .HasForeignKey("EnrollmentId");
+
                     b.HasOne("UniversityManagementSystem.Domain.Entities.Lecture", "Lecture")
                         .WithMany("Attendances")
                         .HasForeignKey("LectureId")
@@ -2452,6 +2717,25 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Professor");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.CourseEvaluation", b =>
+                {
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Course", "Course")
+                        .WithMany("CourseEvaluations")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.CourseRegistration", b =>
@@ -2532,6 +2816,63 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Enrollment", b =>
+                {
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Course", "Course")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Exam", null)
+                        .WithMany("Enrollments")
+                        .HasForeignKey("ExamId");
+
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Student", "Student")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Exam", b =>
+                {
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.ExamResult", b =>
+                {
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Enrollment", null)
+                        .WithMany("ExamResults")
+                        .HasForeignKey("EnrollmentId");
+
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Exam", "Exam")
+                        .WithMany("ExamResults")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniversityManagementSystem.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.FinanceRecord", b =>
@@ -2734,7 +3075,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Course", b =>
                 {
+                    b.Navigation("CourseEvaluations");
+
                     b.Navigation("CourseRegistrations");
+
+                    b.Navigation("Enrollments");
 
                     b.Navigation("Lectures");
 
@@ -2770,6 +3115,20 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Navigation("Students");
                 });
 
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Enrollment", b =>
+                {
+                    b.Navigation("Attendances");
+
+                    b.Navigation("ExamResults");
+                });
+
+            modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.Exam", b =>
+                {
+                    b.Navigation("Enrollments");
+
+                    b.Navigation("ExamResults");
+                });
+
             modelBuilder.Entity("UniversityManagementSystem.Domain.Entities.LeaveType", b =>
                 {
                     b.Navigation("Leaves");
@@ -2795,6 +3154,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     b.Navigation("Attendances");
 
                     b.Navigation("CourseRegistrations");
+
+                    b.Navigation("Enrollments");
 
                     b.Navigation("StudentApplications");
 

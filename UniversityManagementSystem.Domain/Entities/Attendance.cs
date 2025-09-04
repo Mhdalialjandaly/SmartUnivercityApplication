@@ -27,6 +27,7 @@ namespace UniversityManagementSystem.Domain.Entities
         public string Notes { get; set; }
         public int StudentId { get; set; }
         public int LectureId { get; set; }
+        public bool IsPresent { get; set; }
         // العلاقات
         public  User Employee { get; set; }
         public Student Student { get; set; }

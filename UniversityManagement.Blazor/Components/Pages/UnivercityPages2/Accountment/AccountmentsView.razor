@@ -2,14 +2,6 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام المالي - الجامعة الذكية</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* أنماط CSS من ملف النص */
         *,*:before,*:after {
@@ -676,8 +668,6 @@
             }
         }
     </style>
-</head>
-<body>
     <!-- Top Panel -->
     <div class="mil-top-panel">
         <div class="mil-logo">
@@ -708,7 +698,7 @@
             </div>
             <div class="sidebar-menu">
                 <ul>
-                    <li><a href="/techers"><i class="fas fa-home"></i> <span>الرئيسية</span></a></li>
+                    <li><a href="/teachers"><i class="fas fa-home active" active></i> <span>الرئيسية</span></a></li>
                     <li><a href="/coursesview"><i class="fas fa-book"></i> <span>المقررات</span></a></li>
                     <li><a href="/calendarview"><i class="fas fa-calendar-alt"></i> <span>الجدول الدراسي</span></a></li>
                     <li><a href="/studentsview"><i class="fas fa-users"></i> <span>الطلاب</span></a></li>
@@ -1185,5 +1175,3 @@
             });
         });
     </script>
-</body>
-</html>
