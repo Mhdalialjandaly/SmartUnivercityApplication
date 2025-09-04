@@ -1,592 +1,1666 @@
 ﻿@page "/official-books"
-    <style>
-        /* أنماط CSS من ملف ITSulu */
-        @@import url("https://fonts.googleapis.com/css2?family=Satisfy&family=Sora:wght@100;200;300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap");
-        
-        :root {
-            --primary-color: #f57c00;
-            --dark-color: #121820;
-            --light-color: #ffffff;
-            --gray-color: #f5f5f5;
-            --text-color: #333333;
+@attribute [Authorize(Roles = "Admin")]
+@inject IJSRuntime JS
+@inject IDocumentServices DocumentService
+@rendermode InteractiveServer
+
+<style>
+    /* أنماط CSS المحدثة لتتوافق مع التصميم العام */
+    :root {
+        --primary-color: #f57c00;
+        --dark-color: #121820;
+        --light-color: #ffffff;
+        --gray-color: #f5f5f5;
+        --text-color: #333333;
+        --success-color: #4caf50;
+        --warning-color: #ff9800;
+        --info-color: #2196f3;
+        --danger-color: #f44336;
+    }
+
+    *, *:before, *:after {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+    }
+
+    html, body {
+        padding: 0;
+        margin: 0;
+        font-family: "Sora", sans-serif;
+        font-size: 15px;
+        font-weight: 400;
+        color: var(--text-color);
+        line-height: 170%;
+        background-color: #f9f9f9;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: "Sora", sans-serif;
+        color: var(--dark-color);
+        font-weight: 600;
+        line-height: 140%;
+    }
+
+    h1 { font-size: 42px; }
+    h2 { font-size: 36px; }
+    h3 { font-size: 28px; }
+    h4 { font-size: 22px; }
+    h5 { font-size: 18px; }
+    h6 { font-size: 16px; }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .documents-management-container {
+        display: flex;
+        min-height: 100vh;
+        font-family: 'Sora', sans-serif;
+        background-color: var(--gray-color);
+        padding-top: 80px; /* لمراعاة الشريط العلوي الثابت */
+    }
+
+    /* الشريط العلوي */
+    .mil-top-panel {
+        padding: 0 10px;
+        height: 80px;
+        background-color: rgb(255, 255, 255);
+        width: 100%;
+        z-index: 999;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+        box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .mil-logo img {
+        height: 50px;
+    }
+
+    .mil-navigation nav ul {
+        list-style: none;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+    }
+
+    .mil-navigation nav ul li {
+        margin: 0 15px;
+        position: relative;
+    }
+
+    .mil-navigation nav ul li a {
+        font-family: "Sora", sans-serif;
+        text-decoration: none;
+        color: rgb(18, 24, 32);
+        font-weight: 400;
+        white-space: nowrap;
+        -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+        transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
+    }
+
+    .mil-navigation nav ul li a:hover {
+        color: var(--primary-color);
+    }
+
+    .mil-menu-btn {
+        display: none;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+    }
+
+    .mil-menu-btn span, .mil-menu-btn span:after, .mil-menu-btn span:before {
+        content: "";
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: rgb(18, 24, 32);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-transition: inherit;
+        transition: inherit;
+    }
+
+    .mil-menu-btn span {
+        position: relative;
+    }
+
+    .mil-menu-btn span:before {
+        top: -8px;
+    }
+
+    .mil-menu-btn span:after {
+        top: 8px;
+    }
+
+    .mil-menu-btn.mil-active span {
+        background: transparent;
+    }
+
+    .mil-menu-btn.mil-active span:before {
+        top: 0;
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+
+    .mil-menu-btn.mil-active span:after {
+        top: 0;
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+    }
+
+    /* الشريط الجانبي */
+    .sidebar {
+        width: 280px;
+        background: var(--dark-color);
+        color: white;
+        padding: 20px 0;
+        transition: all 0.3s ease;
+        position: fixed;
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h3 {
+        color: white;
+        font-size: 18px;
+    }
+
+    .sidebar-menu {
+        padding: 20px 0;
+    }
+
+    .sidebar-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu li {
+        margin-bottom: 5px;
+    }
+
+    .sidebar-menu a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: all 0.3s;
+        font-family: 'Sora', sans-serif;
+    }
+
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-right: 3px solid var(--primary-color);
+    }
+
+    .sidebar-menu i {
+        margin-left: 10px;
+        font-size: 18px;
+    }
+
+    /* المحتوى الرئيسي */
+    .main-content {
+        flex: 1;
+        padding: 20px;
+        background: var(--gray-color);
+        margin-right: 280px;
+        margin-top: 80px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+    }
+
+    .user-profile img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-left: 10px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-box input {
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px 0 0 5px;
+        outline: none;
+        width: 100%;
+    }
+
+    .search-box button {
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 0 5px 5px 0;
+        background: #f5f5f5;
+        cursor: pointer;
+    }
+
+    /* رأس الصفحة */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--dark-color);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* بطاقات الإحصاءات */
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        background: rgba(245, 124, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+    }
+
+    .stat-icon i {
+        color: var(--primary-color);
+        font-size: 24px;
+    }
+
+    .stat-info h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .stat-info p {
+        margin: 5px 0 0;
+        color: #777;
+    }
+
+    /* لوحة التحكم */
+    .card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h4 {
+        margin: 0;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* تبويبات التنقل */
+    .nav-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .nav-tab {
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+        background: #f5f5f5;
+        border: none;
+        font-family: 'Sora', sans-serif;
+    }
+
+    .nav-tab:hover {
+        background: #e0e0e0;
+    }
+
+    .nav-tab.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* عناصر التحكم */
+    .control-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: 'Sora', sans-serif;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Sora', sans-serif;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #e57100;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 124, 0, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #449d44;
+        transform: translateY(-2px);
+    }
+
+    .btn-warning {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #ec971f;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #d43f3a;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #ddd;
+        color: #777;
+    }
+
+    .btn-outline:hover {
+        background: #f5f5f5;
+    }
+
+    /* جدول الوثائق */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th, .table td {
+        padding: 12px 15px;
+        text-align: right;
+        border-bottom: 1px solid #eee;
+    }
+
+    .table th {
+        background: #f9f9f9;
+        font-weight: 600;
+    }
+
+    .document-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(245, 124, 0, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        margin-left: 10px;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-draft {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .badge-issued {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .badge-signed {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+
+    .dropdown-toggle:hover {
+        background: #f5f5f5;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+        z-index: 1000;
+        display: none;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s;
+        font-size: 14px;
+    }
+
+    .dropdown-item:hover {
+        background: #f5f5f5;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: #eee;
+        margin: 5px 0;
+    }
+
+    /* الترقيم */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 5px;
+    }
+
+    .page-item {
+        list-style: none;
+    }
+
+    .page-link {
+        display: block;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .page-link:hover {
+        background: #f5f5f5;
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* المودالات */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        animation: modalSlideIn 0.3s ease-out;
+        position: relative;
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
         }
-        
-        body {
-            font-family: "Sora", sans-serif;
-            color: var(--text-color);
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            line-height: 170%;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        .faculty-dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
-        
+    }
+
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, var(--primary-color), #ff9800);
+        color: white;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .modal-header h5 {
+        margin: 0;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.3s;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        background: #f9f9f9;
+        border-radius: 0 0 15px 15px;
+    }
+
+    /* حالات خاصة */
+    .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 18px;
+        color: #777;
+    }
+
+    .loading i {
+        font-size: 48px;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .no-documents {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .no-documents i {
+        font-size: 48px;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+
+    /* تصميم متجاوب */
+    @@media (max-width: 992px) {
         .sidebar {
-            width: 280px;
-            background: var(--dark-color);
-            color: white;
-            padding: 20px 0;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
+            width: 70px;
         }
-        
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .sidebar-header h3, .sidebar-menu span {
+            display: none;
         }
-        
-        .sidebar-header h3 {
-            color: white;
-            margin: 10px 0;
-            font-size: 18px;
-            font-family: "Syne", sans-serif;
-            font-weight: 600;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .sidebar-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-menu li {
-            margin-bottom: 5px;
-        }
-        
+
         .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: all 0.3s;
-            font-weight: 400;
+            justify-content: center;
+            padding: 15px;
         }
-        
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-right: 3px solid var(--primary-color);
-        }
-        
+
         .sidebar-menu i {
-            margin-left: 10px;
-            font-size: 18px;
+            margin-left: 0;
         }
-        
+
         .main-content {
-            flex: 1;
-            padding: 20px;
-            background: var(--gray-color);
+            margin-right: 70px;
         }
-        
-        .top-bar {
+
+        .control-bar {
+            flex-direction: column;
+        }
+
+        .form-group {
+            min-width: 100%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .documents-management-container {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+            margin-top: 0;
+        }
+
+        .sidebar-menu {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
+            overflow-x: auto;
         }
-        
-        .user-profile {
+
+        .sidebar-menu ul {
             display: flex;
-            align-items: center;
         }
-        
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-        
-        .search-box {
-            display: flex;
-            align-items: center;
-        }
-        
-        .search-box input {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px 0 0 5px;
-            outline: none;
-            font-family: "Sora", sans-serif;
-        }
-        
-        .search-box button {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 0 5px 5px 0;
-            background: #f5f5f5;
-            cursor: pointer;
-            font-family: "Sora", sans-serif;
-        }
-        
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .page-header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-family: "Syne", sans-serif;
-            font-weight: 600;
-            color: #121820;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            font-family: "Sora", sans-serif;
-        }
-        
-        .btn i {
+
+        .sidebar-menu li {
+            margin-bottom: 0;
             margin-left: 5px;
         }
-        
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
+
+        .sidebar-menu a {
+            border-radius: 5px;
+            border-right: none !important;
+            border-bottom: 3px solid transparent;
         }
-        
-        .btn-primary:hover {
-            background: #e57100;
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            border-right: none;
+            border-bottom: 3px solid var(--primary-color);
         }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #ddd;
-            color: #777;
+
+        .main-content {
+            margin-right: 0;
+            padding: 10px;
+            margin-top: 80px;
         }
-        
-        .btn-outline:hover {
-            background: #f5f5f5;
+
+        .top-bar {
+            flex-direction: column;
+            gap: 15px;
         }
-        
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
         }
-        
-        .book-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
+
+        .header-actions {
+            width: 100%;
+            justify-content: flex-end;
         }
-        
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+        .search-box {
+            max-width: 100%;
+            width: 100%;
         }
-        
-        .book-cover {
-            height: 200px;
-            background: linear-gradient(135deg, var(--primary-color), #ff9800);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 50px;
+
+        .stats-cards {
+            grid-template-columns: 1fr;
         }
-        
-        .book-info {
-            padding: 20px;
+
+        .modal-content {
+            width: 95%;
+            max-width: none;
+            margin: 10px;
+            max-height: 95vh;
         }
-        
-        .book-info h3 {
-            margin: 0 0 10px;
-            font-size: 18px;
-            font-family: "Syne", sans-serif;
-            font-weight: 600;
-            color: #121820;
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
         }
-        
-        .book-meta {
-            margin-bottom: 15px;
+
+        .modal-footer {
+            flex-direction: column;
         }
-        
-        .book-meta p {
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
+
+        .modal-footer button {
+            width: 100%;
         }
-        
-        .book-meta i {
-            margin-left: 10px;
-            color: var(--primary-color);
-            width: 20px;
+
+        .pagination-container {
+            flex-direction: column;
+            gap: 15px;
             text-align: center;
         }
-        
-        .book-stats {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-item .number {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-        
-        .stat-item .label {
-            font-size: 12px;
-            color: #777;
-        }
-        
-        .book-footer {
-            padding: 15px 20px;
-            background: #f9f9f9;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .badge-success {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
-        }
-        
-        .badge-warning {
-            background: rgba(255, 152, 0, 0.1);
-            color: #ff9800;
-        }
-        
-        .badge-primary {
-            background: rgba(245, 124, 0, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .badge-danger {
-            background: rgba(244, 67, 54, 0.1);
-            color: #f44336;
-        }
-        
-        @@media (max-width: 992px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar-header h3, .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu a {
-                justify-content: center;
-                padding: 15px;
-            }
-            
-            .sidebar-menu i {
-                margin-left: 0;
-            }
-            
-            .books-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
-        }
-        
-        @@media (max-width: 768px) {
-            .faculty-dashboard {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-            
-            .sidebar-menu {
-                display: flex;
-                overflow-x: auto;
-            }
-            
-            .sidebar-menu ul {
-                display: flex;
-            }
-            
-            .sidebar-menu li {
-                margin-bottom: 0;
-                margin-left: 5px;
-            }
-            
-            .sidebar-menu a {
-                border-radius: 5px;
-                border-right: none !important;
-                border-bottom: 3px solid transparent;
-            }
-            
-            .sidebar-menu a:hover, .sidebar-menu a.active {
-                border-right: none;
-                border-bottom: 3px solid var(--primary-color);
-            }
-            
-            .books-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .top-bar {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-    </style>
-    <div class="faculty-dashboard">
-        <!-- الشريط الجانبي -->
-       <NavMenu2/>
+    }
+</style>
 
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <!-- الشريط العلوي -->
-            <div class="top-bar">
-                <div class="search-box">
-                    <input type="text" placeholder="بحث في الكتب الرسمية...">
-                    <button class="btn btn-outline"><i class="fas fa-search"></i></button>
-                </div>
-                <div class="user-profile">
-                    <div class="user-info">
-                        <h4>د. أحمد محمد</h4>
-                        <p>أستاذ مساعد - قسم علوم الحاسب</p>
-                    </div>
-                    <img src="https://via.placeholder.com/40" alt="User">
-                </div>
-            </div>
-
-            <!-- رأس الصفحة -->
-            <div class="page-header">
-                <h1><i class="fas fa-book-open"></i> الكتب الرسمية</h1>
-                <button class="btn btn-primary"><i class="fas fa-plus"></i> إضافة كتاب جديد</button>
-            </div>
-
-            <!-- بطاقات الكتب -->
-            <div class="books-grid">
-                <!-- كتاب 1 -->
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="book-info">
-                        <h3>دليل السياسات الأكاديمية 2023</h3>
-                        <div class="book-meta">
-                            <p><i class="fas fa-building"></i> العمادة الأكاديمية</p>
-                            <p><i class="fas fa-calendar"></i> تاريخ النشر: 15 يناير 2023</p>
-                            <p><i class="fas fa-file-alt"></i> عدد الصفحات: 120</p>
-                            <p><i class="fas fa-tags"></i> التصنيف: سياسات</p>
-                        </div>
-                        <div class="book-stats">
-                            <div class="stat-item">
-                                <div class="number">1,250</div>
-                                <div class="label">تحميل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">85%</div>
-                                <div class="label">مراجعة</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="book-footer">
-                        <span class="badge badge-success">محدث</span>
-                        <button class="btn btn-outline">عرض الكتاب</button>
-                    </div>
-                </div>
-
-                <!-- كتاب 2 -->
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <div class="book-info">
-                        <h3>الإجراءات الطلابية واللوائح</h3>
-                        <div class="book-meta">
-                            <p><i class="fas fa-building"></i> شؤون الطلاب</p>
-                            <p><i class="fas fa-calendar"></i> تاريخ النشر: 10 مارس 2023</p>
-                            <p><i class="fas fa-file-alt"></i> عدد الصفحات: 95</p>
-                            <p><i class="fas fa-tags"></i> التصنيف: إجراءات</p>
-                        </div>
-                        <div class="book-stats">
-                            <div class="stat-item">
-                                <div class="number">980</div>
-                                <div class="label">تحميل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">75%</div>
-                                <div class="label">مراجعة</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="book-footer">
-                        <span class="badge badge-warning">قيد المراجعة</span>
-                        <button class="btn btn-outline">عرض الكتاب</button>
-                    </div>
-                </div>
-
-                <!-- كتاب 3 -->
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <div class="book-info">
-                        <h3>دليل أعضاء هيئة التدريس</h3>
-                        <div class="book-meta">
-                            <p><i class="fas fa-building"></i> العمادة الأكاديمية</p>
-                            <p><i class="fas fa-calendar"></i> تاريخ النشر: 5 فبراير 2023</p>
-                            <p><i class="fas fa-file-alt"></i> عدد الصفحات: 150</p>
-                            <p><i class="fas fa-tags"></i> التصنيف: تدريس</p>
-                        </div>
-                        <div class="book-stats">
-                            <div class="stat-item">
-                                <div class="number">720</div>
-                                <div class="label">تحميل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">90%</div>
-                                <div class="label">مراجعة</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="book-footer">
-                        <span class="badge badge-success">محدث</span>
-                        <button class="btn btn-outline">عرض الكتاب</button>
-                    </div>
-                </div>
-
-                <!-- كتاب 4 -->
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="book-info">
-                        <h3>اللوائح المالية والمحاسبية</h3>
-                        <div class="book-meta">
-                            <p><i class="fas fa-building"></i> الإدارة المالية</p>
-                            <p><i class="fas fa-calendar"></i> تاريخ النشر: 20 أبريل 2023</p>
-                            <p><i class="fas fa-file-alt"></i> عدد الصفحات: 80</p>
-                            <p><i class="fas fa-tags"></i> التصنيف: مالي</p>
-                        </div>
-                        <div class="book-stats">
-                            <div class="stat-item">
-                                <div class="number">540</div>
-                                <div class="label">تحميل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">65%</div>
-                                <div class="label">مراجعة</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="book-footer">
-                        <span class="badge badge-primary">جديد</span>
-                        <button class="btn btn-outline">عرض الكتاب</button>
-                    </div>
-                </div>
-
-                <!-- كتاب 5 -->
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="book-info">
-                        <h3>سياسات الأمان والخصوصية</h3>
-                        <div class="book-meta">
-                            <p><i class="fas fa-building"></i> تقنية المعلومات</p>
-                            <p><i class="fas fa-calendar"></i> تاريخ النشر: 1 مارس 2023</p>
-                            <p><i class="fas fa-file-alt"></i> عدد الصفحات: 65</p>
-                            <p><i class="fas fa-tags"></i> التصنيف: أمان</p>
-                        </div>
-                        <div class="book-stats">
-                            <div class="stat-item">
-                                <div class="number">680</div>
-                                <div class="label">تحميل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">80%</div>
-                                <div class="label">مراجعة</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="book-footer">
-                        <span class="badge badge-success">محدث</span>
-                        <button class="btn btn-outline">عرض الكتاب</button>
-                    </div>
-                </div>
-
-                <!-- كتاب 6 -->
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="book-info">
-                        <h3>دليل الأبنية والمرافق الجامعية</h3>
-                        <div class="book-meta">
-                            <p><i class="fas fa-building"></i> الخدمات العامة</p>
-                            <p><i class="fas fa-calendar"></i> تاريخ النشر: 28 فبراير 2023</p>
-                            <p><i class="fas fa-file-alt"></i> عدد الصفحات: 110</p>
-                            <p><i class="fas fa-tags"></i> التصنيف: مرافق</p>
-                        </div>
-                        <div class="book-stats">
-                            <div class="stat-item">
-                                <div class="number">420</div>
-                                <div class="label">تحميل</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="number">70%</div>
-                                <div class="label">مراجعة</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="book-footer">
-                        <span class="badge badge-danger">قديم</span>
-                        <button class="btn btn-outline">عرض الكتاب</button>
-                    </div>
-                </div>
-            </div>
+<div class="documents-management-container">
+    <!-- الشريط العلوي -->
+    <div class="mil-top-panel">
+        <div class="mil-logo">
+            <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
+        </div>
+        <div class="mil-navigation">
+            <nav>
+                <ul>
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#about">عن الجامعة</a></li>
+                    <li><a href="#departments">الأقسام</a></li>
+                    <li><a href="#admissions">القبول</a></li>
+                    <li><a href="#contact">اتصل بنا</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="mil-menu-btn">
+            <span></span>
         </div>
     </div>
 
-    <script>
-        // تفعيل القائمة الجانبية
-        document.querySelectorAll('.sidebar-menu a').forEach(item => {
-            item.addEventListener('click', function(e) {
-                document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                    link.classList.remove('active');
-                });
-                this.classList.add('active');
-            });
-        });
-    </script>
+    <!-- الشريط الجانبي -->
+    <NavMenu2 />
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        <!-- الشريط العلوي -->
+        <div class="top-bar">
+            <div class="search-box">
+                <input type="text" placeholder="بحث في الوثائق..." @bind="searchTerm" @oninput="SearchDocuments">
+                <button class="btn btn-outline"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <h4>د. أحمد محمد</h4>
+                    <p>مدير النظام</p>
+                </div>
+                <img src="https://via.placeholder.com/40" alt="User">
+            </div>
+        </div>
+
+        <!-- رأس الصفحة -->
+        <div class="page-header">
+            <h1><i class="fas fa-file-alt"></i> إدارة الوثائق الرسمية</h1>
+            <div class="header-actions">
+                <button class="btn btn-outline" @onclick="RefreshDocuments">
+                    <i class="fas fa-sync"></i> تحديث
+                </button>
+                <button class="btn btn-primary" @onclick="ShowCreateModal">
+                    <i class="fas fa-plus"></i> وثيقة جديدة
+                </button>
+            </div>
+        </div>
+
+        <!-- بطاقات الإحصاءات -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h2>@totalDocuments</h2>
+                    <p>إجمالي الوثائق</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <div class="stat-info">
+                    <h2>@issuedDocuments</h2>
+                    <p>الصادرة</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="stat-info">
+                    <h2>@draftDocuments</h2>
+                    <p>المسودات</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-signature"></i>
+                </div>
+                <div class="stat-info">
+                    <h2>@signedDocuments</h2>
+                    <p>الموقعة إلكترونياً</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم -->
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-list"></i> قائمة الوثائق</h4>
+                <div class="header-actions">
+                    <button class="btn btn-outline" @onclick="() => LoadDocuments(DocumentStatus.All)">
+                        <i class="fas fa-list"></i> جميع الوثائق
+                    </button>
+                    <button class="btn btn-outline" @onclick="() => LoadDocuments(DocumentStatus.Issued)">
+                        <i class="fas fa-file-export"></i> الصادرة
+                    </button>
+                    <button class="btn btn-outline" @onclick="() => LoadDocuments(DocumentStatus.Draft)">
+                        <i class="fas fa-edit"></i> المسودات
+                    </button>
+                    <button class="btn btn-outline" @onclick="() => LoadDocuments(DocumentStatus.Signed)">
+                        <i class="fas fa-signature"></i> الموقعة
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- شريط التحكم -->
+                <div class="control-bar">
+                    <div class="form-group">
+                        <label>نوع الوثيقة</label>
+                        <select class="form-control" @onchange="FilterByType">
+                            <option value="">كل الأنواع</option>
+                            <option value="شهادة">الشهادات</option>
+                            <option value="قرار">القرارات</option>
+                            <option value="خطاب">الخطابات</option>
+                            <option value="عقد">العقود</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- عرض التحميل -->
+                @if (isLoading)
+                {
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>جاري تحميل الوثائق...</p>
+                    </div>
+                }
+                else
+                {
+                    <!-- جدول الوثائق -->
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>الوثيقة</th>
+                                    <th>النوع</th>
+                                    <th>رقم الوثيقة</th>
+                                    <th>التاريخ</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (documents.Any())
+                                {
+                                    @for (int i = 0; i < documents.Count; i++)
+                                    {
+                                        var doc = documents[i];
+                                        <tr>
+                                            <td>@((currentPage - 1) * pageSize + i + 1)</td>
+                                            <td>
+                                                <div style="display: flex; align-items: center;">
+                                                    <div class="document-icon">
+                                                        <i class="fas fa-file-alt"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="d-block font-weight-bold">@doc.Title</span>
+                                                        <small class="text-muted">المستلم: @doc.IssuedTo</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-primary">
+                                                    @doc.DocumentType
+                                                </span>
+                                            </td>
+                                            <td>@doc.DocumentNumber</td>
+                                            <td>@doc.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                            <td>
+                                                <span class="badge @GetStatusClass(doc.Status)">
+                                                    @GetStatusText(doc.Status)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="dropdown-toggle">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="#" @onclick="() => ViewDocument(doc)">
+                                                            <i class="fas fa-eye"></i> عرض
+                                                        </a>
+                                                        @if (doc.Status == "مسودة")
+                                                        {
+                                                            <a class="dropdown-item" href="#" @onclick="() => EditDocument(doc)">
+                                                                <i class="fas fa-edit"></i> تعديل
+                                                            </a>
+                                                            <a class="dropdown-item" href="#" @onclick="() => IssueDocument(doc)">
+                                                                <i class="fas fa-paper-plane"></i> إصدار
+                                                            </a>
+                                                        }
+                                                        <a class="dropdown-item" href="#" @onclick="() => ShowSignModal(doc)">
+                                                            <i class="fas fa-signature"></i> توقيع إلكتروني
+                                                        </a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item" href="#" @onclick="() => DeleteDocument(doc.Id)">
+                                                            <i class="fas fa-trash"></i> حذف
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="no-documents">
+                                                <i class="fas fa-file-alt"></i>
+                                                <p>لا توجد وثائق متاحة</p>
+                                                <button class="btn btn-primary" @onclick="ShowCreateModal">
+                                                    <i class="fas fa-plus"></i> إنشاء وثيقة جديدة
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- الترقيم -->
+                    @if (totalPages > 1)
+                    {
+                        <div class="pagination-container">
+                            <div class="text-muted">
+                                عرض @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalDocuments) من @totalDocuments
+                            </div>
+                            <ul class="pagination">
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(1)">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage - 1)">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link" href="#" @onclick="() => GoToPage(i)">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(currentPage + 1)">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="#" @onclick="() => GoToPage(totalPages)">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إنشاء/تعديل وثيقة -->
+@if (showDocumentModal)
+{
+    <div class="modal-overlay" @onclick="CloseDocumentModal">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h5>
+                    <i class="fas fa-file-alt"></i> @(isEditMode ? "تعديل الوثيقة" : "وثيقة جديدة")
+                </h5>
+                <button class="modal-close" @onclick="CloseDocumentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>عنوان الوثيقة <span style="color: red;">*</span></label>
+                            <input type="text" class="form-control" placeholder="أدخل عنوان الوثيقة" @bind="newDocument.Title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الوثيقة <span style="color: red;">*</span></label>
+                            <select class="form-control" @bind="newDocument.DocumentType">
+                                <option value="">اختر نوع الوثيقة</option>
+                                <option value="شهادة">شهادة</option>
+                                <option value="قرار">قرار</option>
+                                <option value="خطاب">خطاب</option>
+                                <option value="عقد">عقد</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>قالب الوثيقة</label>
+                            <select class="form-control" @onchange="LoadTemplateContent">
+                                <option value="0">بدون قالب</option>
+                                @foreach (var template in templates)
+                                {
+                                    <option value="@template.Id">@template.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الجهة/الشخص المستلم</label>
+                            <input type="text" class="form-control" placeholder="أدخل اسم الجهة أو الشخص" @bind="newDocument.IssuedTo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>محتوى الوثيقة <span style="color: red;">*</span></label>
+                        <textarea class="form-control" rows="10" @bind="newDocument.Content" placeholder="أدخل محتوى الوثيقة"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseDocumentModal">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="SaveDocument">
+                    <i class="fas fa-save"></i> حفظ الوثيقة
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- مودال عرض الوثيقة -->
+@if (showViewModal && selectedDocument != null)
+{
+    <div class="modal-overlay" @onclick="CloseViewModal">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h5>
+                    <i class="fas fa-file-alt"></i> عرض الوثيقة
+                </h5>
+                <button class="modal-close" @onclick="CloseViewModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="document-preview">
+                    <h4 class="preview-title">@selectedDocument.Title</h4>
+                    <div class="preview-meta" style="margin-bottom: 15px;">
+                        <span class="badge badge-primary">@selectedDocument.DocumentType</span>
+                        <span class="text-muted" style="margin-left: 10px;">رقم الوثيقة: @selectedDocument.DocumentNumber</span>
+                        <span class="text-muted" style="margin-left: 10px;">التاريخ: @selectedDocument.CreatedDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="preview-content">
+                        @((MarkupString)selectedDocument.Content)
+                    </div>
+                    <div class="preview-footer" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                        <p style="margin-bottom: 5px;"><strong>المستلم:</strong> @selectedDocument.IssuedTo</p>
+                        <p style="margin-bottom: 5px;"><strong>الحالة:</strong> 
+                            <span class="badge @GetStatusClass(selectedDocument.Status)">
+                                @GetStatusText(selectedDocument.Status)
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseViewModal">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+                <button type="button" class="btn btn-success" @onclick="PrintDocument">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- مودال التوقيع الإلكتروني -->
+@if (showSignModal && documentToSign != null)
+{
+    <div class="modal-overlay" @onclick="CloseSignModal">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white;">
+                <h5>
+                    <i class="fas fa-signature"></i> توقيع الوثيقة إلكترونياً
+                </h5>
+                <button class="modal-close" @onclick="CloseSignModal" style="color: white;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>الاسم <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" placeholder="أدخل اسمك الكامل" @bind="signerName" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>المنصب <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" placeholder="أدخل منصبك" @bind="signerPosition" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>كلمة المرور <span style="color: red;">*</span></label>
+                    <input type="password" class="form-control" placeholder="أدخل كلمة المرور للتوقيع" @bind="signaturePassword" required>
+                </div>
+                <div class="alert" style="background: rgba(52, 152, 219, 0.1); color: #3498db; padding: 15px; border-radius: 5px;">
+                    <i class="fas fa-info-circle"></i>
+                    سيتم توقيع هذه الوثيقة إلكترونياً بشكل آمن باستخدام الشهادة الرقمية.
+                    <br>
+                    <small>الاسم: <strong>@signerName</strong></small>
+                    <br>
+                    <small>المنصب: <strong>@signerPosition</strong></small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseSignModal">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);" @onclick="SignDocument" disabled="@(string.IsNullOrEmpty(signerName) || string.IsNullOrEmpty(signerPosition) || string.IsNullOrEmpty(signaturePassword))">
+                    <i class="fas fa-signature"></i> توقيع الوثيقة
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<OfficialDocumentDto> documents = new();
+    private List<DocumentTemplateDto> templates = new();
+    private OfficialDocumentDto newDocument = new();
+    private OfficialDocumentDto selectedDocument;
+    private OfficialDocumentDto documentToSign;
+    private string searchTerm = "";
+    private string signerName = "";
+    private string signerPosition = "";
+    private string selectedDocumentType = "";
+    private string signaturePassword = "";
+    private bool isEditMode = false;
+    private bool showDocumentModal = false;
+    private bool showViewModal = false;
+    private bool showSignModal = false;
+    private bool isLoading = true;
+    
+    // إحصائيات
+    private int totalDocuments = 0;
+    private int issuedDocuments = 0;
+    private int draftDocuments = 0;
+    private int signedDocuments = 0;
+    
+    // ترقيم الصفحات
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageSize = 10;
+    
+    // الفلاتر
+    private DocumentStatus currentStatus = DocumentStatus.All;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTemplates();
+        await LoadStatistics();
+        await LoadDocuments(DocumentStatus.All);
+    }
+    
+    private async Task LoadTemplates()
+    {
+        try
+        {
+            templates = await DocumentService.GetAllTemplatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading templates: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            totalDocuments = await DocumentService.GetTotalDocumentsCountAsync();
+            issuedDocuments = await DocumentService.GetIssuedDocumentsCountAsync();
+            draftDocuments = await DocumentService.GetDraftDocumentsCountAsync();
+            signedDocuments = await DocumentService.GetSignedDocumentsCountAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadDocuments(DocumentStatus status)
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+            
+            currentStatus = status;
+            var result = await DocumentService.GetDocumentsPagedAsync(
+                currentPage,
+                pageSize,
+                searchTerm,
+                selectedDocumentType,
+                status);
+            documents = result.Data.ToList();
+            totalPages = result.TotalPages;
+            totalDocuments = result.TotalRecords;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading documents: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task RefreshDocuments()
+    {
+        await LoadStatistics();
+        await LoadDocuments(currentStatus);
+    }
+    
+    private async Task SearchDocuments(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadDocuments(currentStatus);
+    }
+    
+    private async Task FilterByType(ChangeEventArgs e)
+    {
+        selectedDocumentType = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadDocuments(currentStatus);
+    }
+    
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            await LoadDocuments(currentStatus);
+        }
+    }
+    
+    // دوال المودالات
+    private void ShowCreateModal()
+    {
+        isEditMode = false;
+        newDocument = new OfficialDocumentDto();
+        showDocumentModal = true;
+    }
+    
+    private void EditDocument(OfficialDocumentDto document)
+    {
+        isEditMode = true;
+        newDocument = document;
+        showDocumentModal = true;
+    }
+    
+    private void CloseDocumentModal()
+    {
+        showDocumentModal = false;
+        newDocument = new OfficialDocumentDto();
+    }
+    
+    private void ViewDocument(OfficialDocumentDto document)
+    {
+        selectedDocument = document;
+        showViewModal = true;
+    }
+    
+    private void CloseViewModal()
+    {
+        showViewModal = false;
+        selectedDocument = null;
+    }
+    
+    private void ShowSignModal(OfficialDocumentDto document)
+    {
+        documentToSign = document;
+        signaturePassword = "";
+        signerName = "";
+        signerPosition = "";
+        showSignModal = true;
+    }
+    
+    private void CloseSignModal()
+    {
+        showSignModal = false;
+        documentToSign = null;
+        signaturePassword = "";
+        signerName = "";
+        signerPosition = "";
+    }
+    
+    // دوال الحفظ والإجراءات
+    private async Task SaveDocument()
+    {
+        try
+        {
+            if (isEditMode)
+            {
+                await DocumentService.UpdateDocumentAsync(newDocument);
+            }
+            else
+            {
+                await DocumentService.CreateDocumentAsync(newDocument);
+            }
+            await LoadStatistics();
+            await LoadDocuments(currentStatus);
+            CloseDocumentModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving document: {ex.Message}");
+        }
+    }
+    
+    private async Task PrintDocument()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("window.print");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error printing document: {ex.Message}");
+        }
+    }
+    
+    private async Task SignDocument()
+    {
+        if (documentToSign != null && !string.IsNullOrEmpty(signaturePassword) && !string.IsNullOrEmpty(signerName))
+        {
+            try
+            {
+                var success = await DocumentService.SignDocumentAsync(documentToSign.Id, signaturePassword, signerName, signerPosition);
+                if (success)
+                {
+                    CloseSignModal();
+                    await RefreshDocuments();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error signing document: {ex.Message}");
+            }
+        }
+    }
+    
+    private async Task IssueDocument(OfficialDocumentDto document)
+    {
+        try
+        {
+            var success = await DocumentService.IssueDocumentAsync(document.Id);
+            if (success)
+            {
+                await RefreshDocuments();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error issuing document: {ex.Message}");
+        }
+    }
+    
+    private async Task DeleteDocument(int documentId)
+    {
+        try
+        {
+            await DocumentService.DeleteDocumentAsync(documentId);
+            await LoadStatistics();
+            await LoadDocuments(currentStatus);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting document: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadTemplateContent(ChangeEventArgs e)
+    {
+        var templateId = int.Parse(e.Value?.ToString() ?? "0");
+        if (templateId > 0)
+        {
+            try
+            {
+                var template = await DocumentService.GetTemplateByIdAsync(templateId);
+                newDocument.Content = template?.HtmlContent ?? "";
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading template content: {ex.Message}");
+            }
+        }
+    }
+    
+    // دوال المساعد
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "مسودة" => "badge-draft",
+            "صادرة" => "badge-issued",
+            "موقعة" => "badge-signed",
+            _ => "badge-draft"
+        };
+    }
+    
+    private string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "مسودة" => "مسودة",
+            "صادرة" => "صادرة",
+            "موقعة" => "موقعة",
+            _ => status
+        };
+    }
+}

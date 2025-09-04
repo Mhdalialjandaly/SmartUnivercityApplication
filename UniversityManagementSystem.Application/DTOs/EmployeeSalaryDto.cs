@@ -19,5 +19,7 @@ namespace UniversityManagementSystem.Application.DTOs
         public string PaymentMethod { get; set; }
         public int DepartmentId { get; set; }
         public string DepartmentName { get; set; }
+        public decimal Amount { get; set; }
+        public string SalaryPurpose { get; set; }
     }
 }

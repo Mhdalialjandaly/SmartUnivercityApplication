@@ -1,6 +1,4 @@
 ﻿
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 using UniversityManagementSystem.Domain.Entities;
 
 namespace UniversityManagementSystem.Application.DTOs
@@ -10,6 +8,8 @@ namespace UniversityManagementSystem.Application.DTOs
         public int Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
+        public int StudentCount { get; set; }
+        public decimal Revenue { get; set; }
         public int Credits { get; set; }
         public decimal Fee { get; set; }
         public int DepartmentId { get; set; }
