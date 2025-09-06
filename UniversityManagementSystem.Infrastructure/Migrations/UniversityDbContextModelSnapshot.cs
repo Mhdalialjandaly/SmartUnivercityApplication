@@ -2736,7 +2736,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             NormalizedUserName = "ADMIN@12345.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEHUNwpN941KCt/eTN6388sGGlKnPqE44skYFhYyHQsTJAnYWjAmrVHKx+89xj8LC0Q==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "088d7494-1509-4719-a8b6-61d66b2147d8",
+                            SecurityStamp = "e17479fd-35a4-418b-841e-ec645bcb1399",
                             TwoFactorEnabled = false,
                             UserName = "admin@12345.com"
                         });
