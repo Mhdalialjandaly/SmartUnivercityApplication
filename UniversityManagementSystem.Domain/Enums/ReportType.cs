@@ -6,6 +6,8 @@ namespace UniversityManagementSystem.Domain.Enums
         Monthly,
         Quarterly,
         Annual,
-        Custom
+        Custom,
+        Academic,
+        Attendance
     }
 }

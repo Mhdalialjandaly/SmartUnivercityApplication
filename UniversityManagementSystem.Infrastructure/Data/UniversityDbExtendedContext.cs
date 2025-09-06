@@ -10,7 +10,7 @@ namespace UniversityManagementSystem.Infrastructure.Data
      
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=10.10.114.2,1433\\SQLEXPRESS;Database=SmartUniverCityDataBase;User Id=sa;Password=Asd123zxc;TrustServerCertificate=true;");
+            optionsBuilder.UseSqlServer("Server=IT2;Database=SmartUniverCityDataBase;User Id=sa;Password=Asd123zxc;TrustServerCertificate=true;");
         }
     }
 }

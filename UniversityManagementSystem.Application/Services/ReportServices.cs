@@ -548,5 +548,20 @@ namespace UniversityManagementSystem.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public Task<ReportDto> CreateReportAsync(ReportDto dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateReportAsync(int id, ReportDto dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteReportAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
