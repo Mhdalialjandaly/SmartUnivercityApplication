@@ -1063,7 +1063,9 @@
         <div class="page-header">
             <h2><i class="fas fa-book"></i> المقررات الدراسية</h2>
             <div style="display: flex; gap: 10px;">
-                <button @onclick="RefreshStudents"><i class="fas fa-sync"></i> تحديث</button>
+                <button class="btn-outline" @onclick="RefreshStudents">
+                    <i class="fas fa-sync"></i> تحديث
+                </button>
                 <button class="mil-button" @onclick="GoToAdmissions"><i class="fas fa-user-plus"></i> طلبات القبول</button>
                 <button class="mil-button" @onclick="ShowAddStudentModal"><i class="fas fa-plus"></i> إضافة طالب جديد</button>
             </div>
