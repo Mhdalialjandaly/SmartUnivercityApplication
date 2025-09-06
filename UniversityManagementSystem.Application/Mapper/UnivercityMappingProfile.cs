@@ -80,6 +80,12 @@ namespace UniversityManagementSystem.Application.Mapper
             
             CreateMap<MessageDto, Message>().ReverseMap().PreserveReferences();
             CreateMap<Message, MessageDto>().ReverseMap();
+
+            CreateMap<AssessmentDto, Assessment>().ReverseMap().PreserveReferences();
+            CreateMap<Assessment, AssessmentDto>().ReverseMap();
+            
+            CreateMap<StudentAssessmentDto, StudentAssessment>().ReverseMap().PreserveReferences();
+            CreateMap<StudentAssessment, StudentAssessmentDto>().ReverseMap();
         }
     }
 }

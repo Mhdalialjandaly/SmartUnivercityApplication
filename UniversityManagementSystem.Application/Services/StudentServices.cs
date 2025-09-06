@@ -34,8 +34,22 @@ namespace UniversityManagementSystem.Application.Services
         
         public async Task<List<StudentDto>> GetStudentsAsync(string term)
         {
+            StudentStatus state = new StudentStatus();
             var student = await _studentRepository.GetAllAsync();
-            return _mapper.Map<List<StudentDto>>(student.Where(e=>e.FirstName.Contains(term) && e.LastName.Contains(term)));
+            switch (term)
+            {
+                case "active":
+                    state = StudentStatus.Active;
+                    break;
+                case "notactive":
+                    state = StudentStatus.Inactive;
+                    break;
+                default:
+                    state = StudentStatus.All;
+                    break;
+            }
+            var withFilterStudents = student.Where(e => e.FullName.Contains(term) || e.Status == state);
+            return _mapper.Map<List<StudentDto>>(withFilterStudents);
         }
 
         public async Task<List<StudentDto>> GetAllStudentsAsync()

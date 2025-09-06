@@ -6,6 +6,9 @@ namespace UniversityManagementSystem.Application.Interfaces
     {
         Task<ReportSummaryDto> GetReportSummaryAsync();
         Task<List<CoursePerformanceDto>> GetCoursePerformanceAsync();
+        Task<ReportDto> CreateReportAsync(ReportDto dto);
+        Task UpdateReportAsync(int id, ReportDto dto);
+        Task DeleteReportAsync(int id);
         Task<List<CourseDetailDto>> GetCourseDetailsAsync();
         Task<List<AttendanceReportDto>> GetAttendanceReportsAsync();
         Task<List<StudentPerformanceDto>> GetTopPerformingStudentsAsync(int count = 10);

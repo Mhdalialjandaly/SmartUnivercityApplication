@@ -6,6 +6,8 @@ namespace UniversityManagementSystem.Domain.Enums
         Generated,
         Pending,
         Scheduled,
-        Archived
+        Archived,
+        Draft,
+        Published
     }
 }
