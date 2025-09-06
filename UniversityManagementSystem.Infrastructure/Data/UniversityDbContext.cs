@@ -13,7 +13,10 @@ namespace UniversityManagementSystem.Infrastructure.Data
         public UniversityDbContext(DbContextOptions<UniversityDbContext> options)
             : base(options) { }
 
-        public DbSet<AcademicCalendar>AcademicCalendars { get; set; }
+
+        public DbSet<AcademicCalendar> AcademicCalendars { get; set; }
+        public DbSet<Assessment> Assessments { get; set; }
+        public DbSet<StudentAssessment> StudentAssessments { get; set; }
         public DbSet<ArchiveItem> ArchiveItems { get; set; }
         public DbSet<CourseRevenue> CourseRevenues { get; set; }
         public DbSet<Employee> Employees { get; set; }
