@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UniversityManagementSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDb : Migration
+    public partial class InitialDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -250,15 +250,21 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UniversityId = table.Column<int>(type: "int", nullable: false),
+                    Dean = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StudentCount = table.Column<int>(type: "int", nullable: false),
+                    FacultyCount = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CourseCount = table.Column<int>(type: "int", nullable: false),
+                    ProgramCount = table.Column<int>(type: "int", nullable: false),
+                    ResearchProjectCount = table.Column<int>(type: "int", nullable: false),
+                    SuccessRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Dean = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StudentCount = table.Column<int>(type: "int", nullable: false),
-                    FacultyCount = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -314,13 +320,24 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FileSize = table.Column<long>(type: "bigint", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DocumentType = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    DepartmentName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DepartmentId = table.Column<int>(type: "int", nullable: true),
-                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Size = table.Column<long>(type: "bigint", nullable: false),
+                    FileCount = table.Column<int>(type: "int", nullable: false),
+                    DepartmentCount = table.Column<int>(type: "int", nullable: false),
+                    PageCount = table.Column<int>(type: "int", nullable: false),
+                    UnitType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -334,7 +351,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         name: "FK_ArchiveItems_Departments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -502,6 +520,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    ProfileImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rank = table.Column<int>(type: "int", nullable: false),
                     Specialization = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -561,6 +580,8 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ProfilePicture = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AttendancePercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -835,6 +856,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Prerequisites = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CourseType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassMark = table.Column<double>(type: "float", nullable: false),
                     CreditHours = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     EnrolledStudentsCount = table.Column<int>(type: "int", nullable: false),
@@ -937,6 +959,41 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CourseEvaluation",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EvaluationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseEvaluation", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseEvaluation_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseEvaluation_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CourseRegistrations",
                 columns: table => new
                 {
@@ -971,6 +1028,38 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         name: "FK_CourseRegistrations_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Exam",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    ExamDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Duration = table.Column<int>(type: "int", nullable: false),
+                    TotalMarks = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ExamType = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Exam", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Exam_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1119,6 +1208,51 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Enrollment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    MidtermGrade = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    FinalGrade = table.Column<double>(type: "float", nullable: true),
+                    ExamScore = table.Column<double>(type: "float", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    EnrollmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CourseFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsPaid = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExamId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Enrollment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Enrollment_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Enrollment_Exam_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exam",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Enrollment_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Attendances",
                 columns: table => new
                 {
@@ -1133,11 +1267,13 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     StudentId = table.Column<int>(type: "int", nullable: false),
                     LectureId = table.Column<int>(type: "int", nullable: false),
+                    IsPresent = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EnrollmentId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1149,6 +1285,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Attendances_Enrollment_EnrollmentId",
+                        column: x => x.EnrollmentId,
+                        principalTable: "Enrollment",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Attendances_Lectures_LectureId",
                         column: x => x.LectureId,
                         principalTable: "Lectures",
@@ -1156,6 +1297,49 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Attendances_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExamResult",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ExamId = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    Score = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Percentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Grade = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsPassed = table.Column<bool>(type: "bit", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EnrollmentId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExamResult", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExamResult_Enrollment_EnrollmentId",
+                        column: x => x.EnrollmentId,
+                        principalTable: "Enrollment",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ExamResult_Exam_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exam",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ExamResult_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "Id",
@@ -1203,12 +1387,12 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "Avatar", "ConcurrencyStamp", "CreatedAt", "DeletedAt", "DeletedBy", "Discriminator", "Email", "EmailConfirmed", "FirstName", "IsActive", "LastLoginDate", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedAt", "ModifiedBy", "NationalityId", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "PhotoUrl", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "91c1135d-b674-43cb-b797-d45c4ae606bd", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAEFefYWV57duh02RXNhGjp6hL67JxP/X27pZ1Roq3LkIyQR6DDLTwasxQrTIAhFzsjw==", null, false, null, null, "8d201f13-302c-4c10-8e47-00a73be07710", false, "admin@12345.com" });
+                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "b05ceac6-37d6-46a1-b981-1e9ff51e8e55", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAEEDOlIT5qoDwQ+QJX9sz4wxDuXTMKXhOGCmx402X4QLtEpR+HRuxFgKkGpcdMprC+Q==", null, false, null, null, "ce6c2694-7cde-414a-bcf5-322dce9ca3eb", false, "admin@12345.com" });
 
             migrationBuilder.InsertData(
                 table: "Departments",
-                columns: new[] { "Id", "Code", "CreatedAt", "Dean", "DeletedAt", "DeletedBy", "Description", "FacultyCount", "ModifiedAt", "ModifiedBy", "Name", "StudentCount", "UniversityId" },
-                values: new object[] { 1, "CS", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Computer Science", 0, 1 });
+                columns: new[] { "Id", "Code", "CourseCount", "CreatedAt", "Dean", "DeletedAt", "DeletedBy", "Description", "FacultyCount", "IsActive", "Location", "ModifiedAt", "ModifiedBy", "Name", "ProgramCount", "ResearchProjectCount", "StudentCount", "SuccessRate", "UniversityId" },
+                values: new object[] { 1, "CS", 0, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, 0, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Computer Science", 0, 0, 0, 0m, 1 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
@@ -1217,17 +1401,17 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Professors",
-                columns: new[] { "Id", "CreatedAt", "DeletedAt", "DeletedBy", "DepartmentId", "Email", "EmployeeId", "FirstName", "HireDate", "LastName", "ModifiedAt", "ModifiedBy", "Phone", "Rank", "Specialization", "Status" },
-                values: new object[] { 1, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "mahammad@gmail.com", "51586e47-b125-4534-bba4-9bc6fd3dfbc8", "mahammad ali", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "aljandaly", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, 0, "مهندس برمجيات", 1 });
+                columns: new[] { "Id", "CreatedAt", "DeletedAt", "DeletedBy", "DepartmentId", "Email", "EmployeeId", "FirstName", "HireDate", "LastName", "ModifiedAt", "ModifiedBy", "Phone", "ProfileImageUrl", "Rank", "Specialization", "Status" },
+                values: new object[] { 1, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "mahammad@gmail.com", "51586e47-b125-4534-bba4-9bc6fd3dfbc8", "mahammad ali", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "aljandaly", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null, 0, "مهندس برمجيات", 1 });
 
             migrationBuilder.InsertData(
                 table: "Courses",
-                columns: new[] { "Id", "AcademicYear", "Capacity", "Code", "CourseType", "CreatedAt", "CreatedDate", "CreditHours", "Credits", "CurrentStudents", "DeletedAt", "DeletedBy", "DepartmentId", "Description", "EnrolledStudentsCount", "EnrollmentPercentage", "Fee", "GPA", "Instructor", "IsActive", "MaxStudents", "ModifiedAt", "ModifiedBy", "Name", "Prerequisites", "ProfessorId", "Semester", "SemesterName" },
+                columns: new[] { "Id", "AcademicYear", "Capacity", "Code", "CourseType", "CreatedAt", "CreatedDate", "CreditHours", "Credits", "CurrentStudents", "DeletedAt", "DeletedBy", "DepartmentId", "Description", "EnrolledStudentsCount", "EnrollmentPercentage", "Fee", "GPA", "Instructor", "IsActive", "MaxStudents", "ModifiedAt", "ModifiedBy", "Name", "PassMark", "Prerequisites", "ProfessorId", "Semester", "SemesterName" },
                 values: new object[,]
                 {
-                    { 1, 0, 0, "CS101", null, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, null, 0, 0.0, 0m, 0, null, false, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Introduction to Programming", null, 1, 0, null },
-                    { 2, 0, 0, "CS201", null, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, null, 0, 0.0, 0m, 0, null, false, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Data Structures", null, 1, 0, null },
-                    { 3, 0, 0, "CS301", null, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, null, 0, 0.0, 0m, 0, null, false, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Algorithms", null, 1, 0, null }
+                    { 1, 0, 0, "CS101", null, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, null, 0, 0.0, 0m, 0, null, false, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Introduction to Programming", 0.0, null, 1, 0, null },
+                    { 2, 0, 0, "CS201", null, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, null, 0, 0.0, 0m, 0, null, false, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Data Structures", 0.0, null, 1, 0, null },
+                    { 3, 0, 0, "CS301", null, new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, 0, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, null, 0, 0.0, 0m, 0, null, false, 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Algorithms", 0.0, null, 1, 0, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1295,6 +1479,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attendances_EnrollmentId",
+                table: "Attendances",
+                column: "EnrollmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Attendances_LectureId",
                 table: "Attendances",
                 column: "LectureId");
@@ -1302,6 +1491,16 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_StudentId",
                 table: "Attendances",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseEvaluation_CourseId",
+                table: "CourseEvaluation",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseEvaluation_StudentId",
+                table: "CourseEvaluation",
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
@@ -1353,6 +1552,41 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 name: "IX_EmployeeSalaries_EmployeeId1",
                 table: "EmployeeSalaries",
                 column: "EmployeeId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enrollment_CourseId",
+                table: "Enrollment",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enrollment_ExamId",
+                table: "Enrollment",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enrollment_StudentId",
+                table: "Enrollment",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Exam_CourseId",
+                table: "Exam",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamResult_EnrollmentId",
+                table: "ExamResult",
+                column: "EnrollmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamResult_ExamId",
+                table: "ExamResult",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamResult_StudentId",
+                table: "ExamResult",
+                column: "StudentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FinanceRecord_DepartmentId",
@@ -1483,6 +1717,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 name: "Attendances");
 
             migrationBuilder.DropTable(
+                name: "CourseEvaluation");
+
+            migrationBuilder.DropTable(
                 name: "CourseRegistrations");
 
             migrationBuilder.DropTable(
@@ -1499,6 +1736,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "EmployeeSalaries");
+
+            migrationBuilder.DropTable(
+                name: "ExamResult");
 
             migrationBuilder.DropTable(
                 name: "FinanceRecord");
@@ -1537,10 +1777,16 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 name: "OfficialDocuments");
 
             migrationBuilder.DropTable(
+                name: "Enrollment");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "LeaveTypes");
+
+            migrationBuilder.DropTable(
+                name: "Exam");
 
             migrationBuilder.DropTable(
                 name: "Students");
