@@ -49,6 +49,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\assets2\" />
+    <Folder Include="wwwroot\bootstrap\" />
   </ItemGroup>
 
   <ItemGroup>

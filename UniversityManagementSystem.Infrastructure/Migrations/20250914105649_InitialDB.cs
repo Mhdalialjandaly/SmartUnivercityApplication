@@ -24,6 +24,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                     EntryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AccountCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -1478,7 +1479,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "Avatar", "ConcurrencyStamp", "CreatedAt", "DeletedAt", "DeletedBy", "Discriminator", "Email", "EmailConfirmed", "FirstName", "IsActive", "LastLoginDate", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedAt", "ModifiedBy", "NationalityId", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "PhotoUrl", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "bf8d90dc-dc0a-4146-a7f7-aacc4392bc45", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAELhCnsmNPea658KaGEPrKwElcHhpnTdQdKCeXlXoyAxhwe/R3PqR2Bl1TIJL0DPjjQ==", null, false, null, null, "5ff8d095-0a12-4027-8aeb-bbec038a0365", false, "admin@12345.com" });
+                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "4d991422-7271-4e44-9cb5-f00f3f43caf4", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAEFO/jIKc9Fwz3E5/MQU/DHzQNX7iYG450lei71nPFunCUDmpd7dm0GBTan7FoO3rmA==", null, false, null, null, "9f69ba86-b995-4fbb-8216-b37fa6d7bec0", false, "admin@12345.com" });
 
             migrationBuilder.InsertData(
                 table: "Departments",
