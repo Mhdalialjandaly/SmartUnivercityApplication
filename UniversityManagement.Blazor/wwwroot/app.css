@@ -10,11 +10,6 @@
     --info-color: #2196f3;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 body {
     font-family: "Sora", sans-serif;
@@ -114,7 +109,6 @@ body {
 .main-content {
     flex: 1;
     margin-right: 260px;
-    padding: 20px;
     overflow-y: auto;
     height: 100vh;
     position: relative;
@@ -824,3 +818,5 @@ h1 {
         grid-template-columns: 1fr;
     }
 }
+
+

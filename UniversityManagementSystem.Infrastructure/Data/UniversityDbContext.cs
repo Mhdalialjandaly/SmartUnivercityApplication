@@ -15,6 +15,7 @@ namespace UniversityManagementSystem.Infrastructure.Data
 
 
         public DbSet<AcademicCalendar> AcademicCalendars { get; set; }
+        public DbSet<AccountingEntry> AccountingEntries { get; set; }
         public DbSet<Assessment> Assessments { get; set; }
         public DbSet<StudentAssessment> StudentAssessments { get; set; }
         public DbSet<ArchiveItem> ArchiveItems { get; set; }

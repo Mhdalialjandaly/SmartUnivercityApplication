@@ -14,6 +14,29 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AccountingEntries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EntryNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EntryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountingEntries", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -408,6 +431,39 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         name: "FK_AspNetUsers_Nationalities_NationalityId",
                         column: x => x.NationalityId,
                         principalTable: "Nationalities",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Assessments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Duration = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assessments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Assessments_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
                         principalColumn: "Id");
                 });
 
@@ -935,6 +991,41 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentAssessments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AssessmentId = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    Score = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Feedback = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AssessorName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentAssessments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentAssessments_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalTable: "Assessments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentAssessments_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StudentDocuments",
                 columns: table => new
                 {
@@ -1387,7 +1478,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "Avatar", "ConcurrencyStamp", "CreatedAt", "DeletedAt", "DeletedBy", "Discriminator", "Email", "EmailConfirmed", "FirstName", "IsActive", "LastLoginDate", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedAt", "ModifiedBy", "NationalityId", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "PhotoUrl", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "b05ceac6-37d6-46a1-b981-1e9ff51e8e55", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAEEDOlIT5qoDwQ+QJX9sz4wxDuXTMKXhOGCmx402X4QLtEpR+HRuxFgKkGpcdMprC+Q==", null, false, null, null, "ce6c2694-7cde-414a-bcf5-322dce9ca3eb", false, "admin@12345.com" });
+                values: new object[] { "51586e47-b125-4534-bba4-9bc6fd3dfbc8", 0, null, "bf8d90dc-dc0a-4146-a7f7-aacc4392bc45", new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "User", "admin@university.com", true, "Admin", false, null, "Administrator", true, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, "ADMIN@UNIVERSITY.COM", "ADMIN@12345.COM", "AQAAAAIAAYagAAAAELhCnsmNPea658KaGEPrKwElcHhpnTdQdKCeXlXoyAxhwe/R3PqR2Bl1TIJL0DPjjQ==", null, false, null, null, "5ff8d095-0a12-4027-8aeb-bbec038a0365", false, "admin@12345.com" });
 
             migrationBuilder.InsertData(
                 table: "Departments",
@@ -1472,6 +1563,11 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_DepartmentId",
+                table: "Assessments",
+                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_EmployeeId",
@@ -1639,6 +1735,16 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 column: "StudentId1");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudentAssessments_AssessmentId",
+                table: "StudentAssessments",
+                column: "AssessmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentAssessments_StudentId",
+                table: "StudentAssessments",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentAttendances_CourseId",
                 table: "StudentAttendances",
                 column: "CourseId");
@@ -1694,6 +1800,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AcademicCalendars");
+
+            migrationBuilder.DropTable(
+                name: "AccountingEntries");
 
             migrationBuilder.DropTable(
                 name: "ArchiveItems");
@@ -1759,6 +1868,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                 name: "StudentApplications");
 
             migrationBuilder.DropTable(
+                name: "StudentAssessments");
+
+            migrationBuilder.DropTable(
                 name: "StudentAttendances");
 
             migrationBuilder.DropTable(
@@ -1784,6 +1896,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "LeaveTypes");
+
+            migrationBuilder.DropTable(
+                name: "Assessments");
 
             migrationBuilder.DropTable(
                 name: "Exam");
