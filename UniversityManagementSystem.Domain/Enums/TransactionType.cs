@@ -5,6 +5,8 @@ namespace UniversityManagementSystem.Domain.Enums
     {
         All,
         Income,
-        Expense
+        Expense,
+        Deposit = 1,      
+        Withdrawal = 2
     }
 }

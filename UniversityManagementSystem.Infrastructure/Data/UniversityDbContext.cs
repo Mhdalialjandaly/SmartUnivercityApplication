@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using System.Reflection.Emit;
 using UniversityManagementSystem.Domain.Entities;
 using UniversityManagementSystem.Domain.Entities.UniversityManagementSystem.Core.Entities;
 
@@ -15,7 +14,18 @@ namespace UniversityManagementSystem.Infrastructure.Data
 
 
         public DbSet<AcademicCalendar> AcademicCalendars { get; set; }
+        public DbSet<InstallmentPayment> InstallmentPayments { get; set; }
+        public DbSet<StudentInstallment> StudentInstallmentPayments { get; set; }
+        public DbSet<AssetMaintenance> AssetMaintenances { get; set; }
+        public DbSet<AssetCategory> AssetCategories { get; set; }
+        public DbSet<FixedAsset> FixedAssets { get; set; }
+        public DbSet<InventoryItem> InventoryItems { get; set; }
+        public DbSet<InventoryMovement> InventoryMovements { get; set; }
+        public DbSet<InventoryCategory> InventoryCategories { get; set; }
         public DbSet<AccountingEntry> AccountingEntries { get; set; }
+        public DbSet<CashFund> CashFunds { get; set; }
+        public DbSet<CashTransaction> CashTransactions { get; set; }
+        public DbSet<Account> Accounts { get; set; }
         public DbSet<Assessment> Assessments { get; set; }
         public DbSet<StudentAssessment> StudentAssessments { get; set; }
         public DbSet<ArchiveItem> ArchiveItems { get; set; }
@@ -44,6 +54,8 @@ namespace UniversityManagementSystem.Infrastructure.Data
         public DbSet<DocumentSignature> DocumentSignatures { get; set; }
         public DbSet<StudentPayment> StudentPayments { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
+        public DbSet<SalaryPayment> SalaryPayments { get; set; }
+        public DbSet<SalaryDeduction> SalaryDeductions { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Leave> Leaves { get; set; }
         public DbSet<LeaveType> LeaveTypes { get; set; }

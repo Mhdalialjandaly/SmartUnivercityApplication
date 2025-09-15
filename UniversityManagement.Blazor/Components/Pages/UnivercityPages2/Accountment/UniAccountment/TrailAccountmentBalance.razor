@@ -1,4 +1,6 @@
-﻿@page "/trial-balance"
+﻿@page "/trailaccountmentbalance"
+
+
 @attribute [Authorize(Roles = "Admin,Accountant")]
 @inject ITrialBalanceService TrialBalanceService
 @inject IToastService ToastService
@@ -243,6 +245,7 @@
         border-radius: 20px;
         font-size: 12px;
         font-weight: 500;
+        color:darkblue;
     }
 
     .badge-success {
@@ -423,6 +426,7 @@
         }
     }
 </style>
+
 
 <div class="faculty-dashboard">
     <!-- الشريط الجانبي -->

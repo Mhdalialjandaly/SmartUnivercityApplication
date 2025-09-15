@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Content Remove="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
-    <Content Remove="Components\Pages\UnivercityPages2\Accountment\UniAccountment\TrialBalanceView.razor" />
+    <Content Remove="Components\Pages\UnivercityPages2\Accountment\UniAccountment\Student-Installments.razor" />
     <Content Remove="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <Content Remove="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
   </ItemGroup>
@@ -35,14 +35,14 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages2\Accountment\UniAccountment\TrialBalanceView.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages2\Accountment\UniAccountment\Student-Installments.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
-    <None Include="Components\Pages\UnivercityPages2\Accountment\UniAccountment\TrialBalanceView.razor" />
+    <None Include="Components\Pages\UnivercityPages2\Accountment\UniAccountment\Student-Installments.razor" />
     <None Include="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <None Include="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
   </ItemGroup>
@@ -60,7 +60,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <UpToDateCheckInput Remove="Components\Pages\UnivercityPages2\Accountment\UniAccountment\TrialBalanceView.razor" />
+    <UpToDateCheckInput Remove="Components\Pages\UnivercityPages2\Accountment\UniAccountment\Student-Installments.razor" />
   </ItemGroup>
 
 </Project>
