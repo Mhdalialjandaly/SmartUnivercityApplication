@@ -1,0 +1,1480 @@
+﻿@page "/fixed-assets"
+@attribute [Authorize(Roles = "Admin,AssetManager")]
+@inject IFixedAssetsService FixedAssetsService
+@inject IToastService ToastService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-color: #f57c00;
+        --dark-color: #121820;
+        --light-color: #ffffff;
+        --gray-color: #f5f5f5;
+        --text-color: #333333;
+        --success-color: #4caf50;
+        --error-color: #f44336;
+        --warning-color: #ff9800;
+        --info-color: #2196f3;
+        --asset-color: #607d8b;
+        --active-color: #4CAF50;
+        --retired-color: #9E9E9E;
+        --maintenance-color: #FF9800;
+    }
+
+    body {
+        font-family: 'Sora', sans-serif;
+        color: var(--text-color);
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .faculty-dashboard {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        width: 280px;
+        background: var(--dark-color);
+        color: white;
+        padding: 20px 0;
+        transition: all 0.3s ease;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .main-content {
+        flex: 1;
+        padding: 20px;
+        background: var(--gray-color);
+        margin-right: 280px;
+        min-height: 100vh;
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-success {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--info-color);
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #ddd;
+        color: #777;
+    }
+
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+    }
+
+        .stat-icon.total {
+            background: rgba(96, 125, 139, 0.1);
+        }
+
+        .stat-icon.active {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .stat-icon.retired {
+            background: rgba(158, 158, 158, 0.1);
+        }
+
+        .stat-icon.maintenance {
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        .stat-icon.value {
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        .stat-icon.depreciation {
+            background: rgba(156, 39, 176, 0.1);
+        }
+
+        .stat-icon i {
+            font-size: 24px;
+        }
+
+        .stat-icon.total i {
+            color: var(--asset-color);
+        }
+
+        .stat-icon.active i {
+            color: var(--active-color);
+        }
+
+        .stat-icon.retired i {
+            color: var(--retired-color);
+        }
+
+        .stat-icon.maintenance i {
+            color: var(--maintenance-color);
+        }
+
+        .stat-icon.value i {
+            color: var(--info-color);
+        }
+
+        .stat-icon.depreciation i {
+            color: #9c27b0;
+        }
+
+    .stat-info h4 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .stat-info p {
+        margin: 5px 0 0;
+        color: #777;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        .table th {
+            background: #f9f9f9;
+            font-weight: 600;
+        }
+
+        .table tr {
+            border-bottom: 1px solid #eee;
+        }
+
+            .table tr:last-child {
+                border-bottom: none;
+            }
+
+    .value-original {
+        color: var(--info-color);
+        font-weight: 600;
+    }
+
+    .value-current {
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    .value-depreciation {
+        color: var(--error-color);
+        font-weight: 600;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-success {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .badge-warning {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .badge-error {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    .badge-info {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+
+    .badge-secondary {
+        background: rgba(158, 158, 158, 0.1);
+        color: #9e9e9e;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 18px;
+        color: #777;
+    }
+
+    .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .error i {
+            font-size: 20px;
+        }
+
+    .export-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .total-row {
+        font-weight: bold;
+        background: #f0f0f0;
+    }
+
+    .section-title {
+        background: #eceff1;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+        font-weight: 600;
+        color: #455a64;
+    }
+
+    .asset-form {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .form-col {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+    .status-active {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .status-retired {
+        background: rgba(158, 158, 158, 0.1);
+        color: #9e9e9e;
+    }
+
+    .status-maintenance {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .maintenance-due {
+        color: var(--error-color);
+        font-weight: 600;
+    }
+
+    .maintenance-soon {
+        color: var(--warning-color);
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .faculty-dashboard {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+
+        .main-content {
+            margin-right: 0;
+            padding: 10px;
+        }
+
+        .dashboard-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .top-bar {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .export-buttons {
+            flex-direction: column;
+        }
+
+        .form-row {
+            flex-direction: column;
+        }
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #777;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+    }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+    .tab-content {
+        display: none;
+    }
+
+        .tab-content.active {
+            display: block;
+        }
+
+    .depreciation-info {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="faculty-dashboard">
+    <!-- الشريط الجانبي -->
+    <NavMenu2 />
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        @if (isLoading)
+        {
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> جاري تحميل بيانات الموجودات الثابتة...
+            </div>
+        }
+        else if (hasError)
+        {
+            <div class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>خطأ!</strong>
+                    <p>حدث خطأ أثناء تحميل بيانات الموجودات الثابتة. يرجى المحاولة مرة أخرى.</p>
+                    <button class="btn btn-primary" @onclick="LoadFixedAssetsData">إعادة المحاولة</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- الشريط العلوي -->
+            <div class="top-bar">
+                <h2><i class="fas fa-building"></i> إدارة الموجودات الثابتة</h2>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <h4>موجودات الجامعة الثابتة</h4>
+                        <p>آخر تحديث: @DateTime.Now.ToString("yyyy/MM/dd HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقات الإحصائيات -->
+            <div class="dashboard-cards">
+                <div class="card stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>@stats.TotalAssets</h4>
+                        <p>إجمالي الأصول</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon active">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="value-current">@stats.ActiveAssets</h4>
+                        <p>الأصول النشطة</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon retired">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="value-depreciation">@stats.RetiredAssets</h4>
+                        <p>الأصول المتقاعدة</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon maintenance">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="maintenance-due">@stats.UnderMaintenanceAssets</h4>
+                        <p>تحت الصيانة</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon value">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="value-original">@stats.TotalOriginalValue.ToString("C")</h4>
+                        <p>القيمة الأصلية</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon depreciation">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="value-depreciation">@stats.TotalDepreciation.ToString("C")</h4>
+                        <p>إجمالي الإهلاك</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم الفلترة -->
+            <div class="filter-section">
+                <h3><i class="fas fa-filter"></i> تصفية الأصول الثابتة</h3>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="searchTerm">البحث</label>
+                        <input type="text" id="searchTerm" @bind="searchTerm" placeholder="البحث باسم الأصل أو الرقم..." />
+                    </div>
+                    <div class="filter-group">
+                        <label for="categoryFilter">التصنيف</label>
+                        <select id="categoryFilter" @bind="categoryFilter">
+                            <option value="">جميع التصنيفات</option>
+                            @foreach (var category in categories)
+                            {
+                                <option value="@category.Name">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="statusFilter">الحالة</label>
+                        <select id="statusFilter" @bind="statusFilter">
+                            <option value="">جميع الحالات</option>
+                            <option value="Active">نشط</option>
+                            <option value="Inactive">غير نشط</option>
+                            <option value="UnderMaintenance">تحت الصيانة</option>
+                            <option value="Retired">متقاعد</option>
+                            <option value="Damaged">تالف</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" @onclick="FilterAssets">
+                            <i class="fas fa-search"></i> بحث
+                        </button>
+                        <button class="btn btn-outline" @onclick="ClearFilters">
+                            <i class="fas fa-times"></i> مسح
+                        </button>
+                    </div>
+                </div>
+
+                <div class="export-buttons">
+                    <button class="btn btn-success" @onclick="()=>ShowAssetModal()">
+                        <i class="fas fa-plus"></i> إضافة أصل ثابت
+                    </button>
+                    <button class="btn btn-info" @onclick="ExportToExcel">
+                        <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                    </button>
+                    <button class="btn btn-warning" @onclick="ExportToPdf">
+                        <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                    </button>
+                    <button class="btn btn-outline" @onclick="PrintAssets">
+                        <i class="fas fa-print"></i> طباعة
+                    </button>
+                </div>
+            </div>
+
+            <!-- علامات التبويب -->
+            <div class="tabs">
+                <div class="tab @(activeTab == "assets" ? "active" : "")" @onclick="()=> SwitchTab(AssetsString)">
+                    <i class="fas fa-list"></i> قائمة الأصول
+                </div>
+                <div class="tab @(activeTab == "maintenance" ? "active" : "")" @onclick="()=> SwitchTab(MaintenanceString)">
+                    <i class="fas fa-tools"></i> صيانة الأصول
+                </div>
+                <div class="tab @(activeTab == "depreciation" ? "active" : "")" @onclick="()=> SwitchTab(DepreciationString)">
+                    <i class="fas fa-chart-line"></i> الإهلاك
+                </div>
+            </div>
+
+            <!-- قائمة الأصول الثابتة -->
+            <div class="tab-content @(activeTab == "assets" ? "active" : "")">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-building"></i> جميع الأصول الثابتة</h3>
+                        <span class="badge badge-info">@filteredAssets.Count أصل</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الأصل</th>
+                                    <th>اسم الأصل</th>
+                                    <th>التصنيف</th>
+                                    <th>القسم</th>
+                                    <th>تاريخ الشراء</th>
+                                    <th class="text-center">القيمة الأصلية</th>
+                                    <th class="text-center">القيمة الحالية</th>
+                                    <th class="text-center">الإهلاك</th>
+                                    <th class="text-center">الحالة</th>
+                                    <th class="text-center">الصيانة التالية</th>
+                                    <th class="text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var asset in filteredAssets)
+                                {
+                                    <tr>
+                                        <td><strong>@asset.AssetNumber</strong></td>
+                                        <td>@asset.Name</td>
+                                        <td><span class="badge badge-info">@asset.Category</span></td>
+                                        <td>@asset.Department</td>
+                                        <td>@asset.PurchaseDate.ToString("yyyy/MM/dd")</td>
+                                        <td class="text-center value-original">@asset.PurchasePrice.ToString("C")</td>
+                                        <td class="text-center value-current">@asset.CurrentValue.ToString("C")</td>
+                                        <td class="text-center value-depreciation">@asset.DepreciationAmount.ToString("C")</td>
+                                        <td class="text-center">
+                                            <span class="badge @(GetStatusBadgeClass(asset.Status))">
+                                                @GetStatusText(asset.Status)
+                                            </span>
+                                        </td>
+                                        <td class="text-center @(GetMaintenanceClass(asset.NextMaintenanceDate))">
+                                            @if (asset.NextMaintenanceDate.HasValue)
+                                            {
+                                                @asset.NextMaintenanceDate.Value.ToString("yyyy/MM/dd")
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline" @onclick="()=> ShowAssetModal(asset)" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-info" @onclick="()=> ShowMaintenanceModal(asset)" title="الصيانة">
+                                                <i class="fas fa-tools"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @onclick="()=> DeleteAsset(asset.Id)" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                                @if (filteredAssets.Any())
+                                {
+                                    <tr class="total-row">
+                                        <td colspan="5"><strong>الإجمالي</strong></td>
+                                        <td class="text-center value-original">
+                                            <strong>@filteredAssets.Sum(a => a.PurchasePrice).ToString("C")</strong>
+                                        </td>
+                                        <td class="text-center value-current">
+                                            <strong>@filteredAssets.Sum(a => a.CurrentValue).ToString("C")</strong>
+                                        </td>
+                                        <td class="text-center value-depreciation">
+                                            <strong>@filteredAssets.Sum(a => a.DepreciationAmount).ToString("C")</strong>
+                                        </td>
+                                        <td colspan="3"></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- صيانة الأصول -->
+            <div class="tab-content @(activeTab == "maintenance" ? "active" : "")">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tools"></i> الأصول المطلوب صيانتها</h3>
+                        <span class="badge badge-warning">@maintenanceAssets.Count أصل</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الأصل</th>
+                                    <th>اسم الأصل</th>
+                                    <th>التصنيف</th>
+                                    <th>القسم</th>
+                                    <th>تاريخ الصيانة الأخيرة</th>
+                                    <th>الصيانة التالية</th>
+                                    <th class="text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var asset in maintenanceAssets)
+                                {
+                                    <tr>
+                                        <td><strong>@asset.AssetNumber</strong></td>
+                                        <td>@asset.Name</td>
+                                        <td><span class="badge badge-info">@asset.Category</span></td>
+                                        <td>@asset.Department</td>
+                                        <td>
+                                            @if (asset.LastMaintenanceDate.HasValue)
+                                            {
+                                                @asset.LastMaintenanceDate.Value.ToString("yyyy/MM/dd")
+                                            }
+                                        </td>
+                                        <td class="@(GetMaintenanceClass(asset.NextMaintenanceDate))">
+                                            @if (asset.NextMaintenanceDate.HasValue)
+                                            {
+                                                @asset.NextMaintenanceDate.Value.ToString("yyyy/MM/dd")
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-success" @onclick="()=> ShowMaintenanceModal(asset)" title="إضافة صيانة">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline" @onclick="()=> ShowAssetModal(asset)" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الإهلاك -->
+            <div class="tab-content @(activeTab == "depreciation" ? "active" : "")">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> الأصول ذات الإهلاك العالي</h3>
+                        <span class="badge badge-error">@depreciatedAssets.Count أصل</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الأصل</th>
+                                    <th>اسم الأصل</th>
+                                    <th>التصنيف</th>
+                                    <th>العمر (سنوات)</th>
+                                    <th class="text-center">القيمة الأصلية</th>
+                                    <th class="text-center">القيمة الحالية</th>
+                                    <th class="text-center">نسبة الإهلاك</th>
+                                    <th class="text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var asset in depreciatedAssets)
+                                {
+                                    <tr>
+                                        <td><strong>@asset.AssetNumber</strong></td>
+                                        <td>@asset.Name</td>
+                                        <td><span class="badge badge-info">@asset.Category</span></td>
+                                        <td>@asset.AgeInYears</td>
+                                        <td class="text-center value-original">@asset.PurchasePrice.ToString("C")</td>
+                                        <td class="text-center value-current">@asset.CurrentValue.ToString("C")</td>
+                                        <td class="text-center value-depreciation">
+                                            @if (asset.PurchasePrice > 0)
+                                            {
+                                                @($"{(asset.DepreciationAmount / asset.PurchasePrice * 100):F1}%")
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline" @onclick="()=> ShowAssetModal(asset)" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-info" @onclick="()=> ShowMaintenanceModal(asset)" title="الصيانة">
+                                                <i class="fas fa-tools"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="depreciation-info">
+                        <h4><i class="fas fa-info-circle"></i> معلومات الإهلاك</h4>
+                        <p><strong>إجمالي الإهلاك:</strong> @stats.TotalDepreciation.ToString("C")</p>
+                        <p><strong>نسبة الإهلاك الإجمالية:</strong> @stats.DepreciationPercentage.ToString("F1")%</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal إضافة/تعديل أصل ثابت -->
+@if (showAssetModal)
+{
+    <div class="modal-overlay" @onclick="CloseAssetModal">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h3>@(isEditMode ? "تعديل أصل ثابت" : "إضافة أصل ثابت جديد")</h3>
+                <button class="modal-close" @onclick="CloseAssetModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form @onsubmit="SaveAsset">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="assetNumber">رقم الأصل الثابت *</label>
+                                <input type="text" id="assetNumber" @bind="currentAsset.AssetNumber" required />
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="name">اسم الأصل الثابت *</label>
+                                <input type="text" id="name" @bind="currentAsset.Name" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">الوصف</label>
+                        <textarea id="description" @bind="currentAsset.Description" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="category">التصنيف *</label>
+                                <select id="category" @bind="currentAsset.Category" required>
+                                    <option value="">اختر التصنيف</option>
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category.Name">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="department">القسم</label>
+                                <input type="text" id="department" @bind="currentAsset.Department" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="location">الموقع</label>
+                                <input type="text" id="location" @bind="currentAsset.Location" />
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="serialNumber">الرقم التسلسلي</label>
+                                <input type="text" id="serialNumber" @bind="currentAsset.SerialNumber" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="purchaseDate">تاريخ الشراء *</label>
+                                <input type="date" id="purchaseDate" @bind="currentAsset.PurchaseDate" required />
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="purchasePrice">سعر الشراء *</label>
+                                <input type="number" id="purchasePrice" @bind="currentAsset.PurchasePrice" step="0.01" min="0" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="depreciationRate">معدل الإهلاك (%) *</label>
+                                <input type="number" id="depreciationRate" @bind="currentAsset.DepreciationRate" step="0.1" min="0" max="100" required />
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="status">الحالة *</label>
+                                <select id="status" @bind="currentAsset.Status" required>
+                                    <option value="Active">نشط</option>
+                                    <option value="Inactive">غير نشط</option>
+                                    <option value="UnderMaintenance">تحت الصيانة</option>
+                                    <option value="Retired">متقاعد</option>
+                                    <option value="Damaged">تالف</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="supplier">المورد</label>
+                                <input type="text" id="supplier" @bind="currentAsset.Supplier" />
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="warrantyExpiryDate">انتهاء الضمان</label>
+                                <input type="date" id="warrantyExpiryDate" @bind="currentAsset.WarrantyExpiryDate" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" @onclick="CloseAssetModal">إلغاء</button>
+                <button class="btn btn-primary" @onclick="SaveAsset" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span><span class="loading-spinner"></span> جاري الحفظ...</span>
+                    }
+                    else
+                    {
+                        <span>@(isEditMode ? "حفظ التغييرات" : "حفظ الأصل")</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal صيانة الأصل -->
+@if (showMaintenanceModal)
+{
+    <div class="modal-overlay" @onclick="CloseMaintenanceModal">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h3>صيانة الأصل: @selectedAsset?.Name</h3>
+                <button class="modal-close" @onclick="CloseMaintenanceModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="section-title">إضافة صيانة جديدة</div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="maintenanceType">نوع الصيانة *</label>
+                            <input type="text" id="maintenanceType" @bind="newMaintenance.MaintenanceType" required />
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="maintenanceCost">التكلفة</label>
+                            <input type="number" id="maintenanceCost" @bind="newMaintenance.Cost" step="0.01" min="0" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceDescription">الوصف</label>
+                    <textarea id="maintenanceDescription" @bind="newMaintenance.Description" rows="2"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="performedBy">أُجريت بواسطة</label>
+                            <input type="text" id="performedBy" @bind="newMaintenance.PerformedBy" />
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="nextMaintenanceDate">الصيانة التالية</label>
+                            <input type="date" id="nextMaintenanceDate" @bind="newMaintenance.NextMaintenanceDate" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceNotes">ملاحظات</label>
+                    <textarea id="maintenanceNotes" @bind="newMaintenance.Notes" rows="2"></textarea>
+                </div>
+                <button class="btn btn-success" @onclick="AddMaintenance">
+                    <i class="fas fa-plus"></i> إضافة صيانة
+                </button>
+
+                <div class="section-title" style="margin-top: 20px;">سجل الصيانة</div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>النوع</th>
+                                <th class="text-center">التكلفة</th>
+                                <th>أُجريت بواسطة</th>
+                                <th>الصيانة التالية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var maintenance in assetMaintenance)
+                            {
+                                <tr>
+                                    <td>@maintenance.MaintenanceDate.ToString("yyyy/MM/dd")</td>
+                                    <td>@maintenance.MaintenanceType</td>
+                                    <td class="text-center">@maintenance.Cost.ToString("C")</td>
+                                    <td>@maintenance.PerformedBy</td>
+                                    <td>
+                                        @if (maintenance.NextMaintenanceDate.HasValue)
+                                        {
+                                            @maintenance.NextMaintenanceDate.Value.ToString("yyyy/MM/dd")
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" @onclick="CloseMaintenanceModal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isLoading = true;
+    private bool hasError = false;
+    private bool showAssetModal = false;
+    private bool showMaintenanceModal = false;
+    private bool isSaving = false;
+    private bool isEditMode = false;
+    private string activeTab = "assets";
+    private string AssetsString = "assets";
+    private string MaintenanceString = "maintenance";
+    private string DepreciationString = "depreciation";
+
+    private FixedAssetsStatsDto stats = new FixedAssetsStatsDto();
+    private List<FixedAssetDto> allAssets = new List<FixedAssetDto>();
+    private List<FixedAssetDto> filteredAssets = new List<FixedAssetDto>();
+    private List<FixedAssetDto> maintenanceAssets = new List<FixedAssetDto>();
+    private List<FixedAssetDto> depreciatedAssets = new List<FixedAssetDto>();
+    private List<AssetCategoryDto> categories = new List<AssetCategoryDto>();
+    private List<AssetMaintenanceDto> assetMaintenance = new List<AssetMaintenanceDto>();
+
+    private FixedAssetDto currentAsset = new FixedAssetDto();
+    private FixedAssetDto selectedAsset = new FixedAssetDto();
+    private AssetMaintenanceDto newMaintenance = new AssetMaintenanceDto();
+
+    // فلاتر
+    private string searchTerm = "";
+    private string categoryFilter = "";
+    private string statusFilter = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFixedAssetsData();
+    }
+
+    private async Task LoadFixedAssetsData()
+    {
+        try
+        {
+            isLoading = true;
+            hasError = false;
+            StateHasChanged();
+
+            stats = await FixedAssetsService.GetFixedAssetsStatsAsync();
+            allAssets = await FixedAssetsService.GetAllFixedAssetsAsync();
+            filteredAssets = allAssets;
+            maintenanceAssets = await FixedAssetsService.GetAssetsNeedingMaintenanceAsync();
+            depreciatedAssets = await FixedAssetsService.GetDepreciatedAssetsAsync();
+            categories = await FixedAssetsService.GetAssetCategoriesAsync();
+
+            ToastService.ShowSuccess("تم تحميل بيانات الموجودات الثابتة بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            ToastService.ShowError($"حدث خطأ أثناء تحميل البيانات: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task FilterAssets()
+    {
+        try
+        {
+            AssetStatus? status = null;
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                status = statusFilter switch
+                {
+                    "Active" => AssetStatus.Active,
+                    "Inactive" => AssetStatus.Inactive,
+                    "UnderMaintenance" => AssetStatus.UnderMaintenance,
+                    "Retired" => AssetStatus.Retired,
+                    "Damaged" => AssetStatus.Damaged,
+                    _ => null
+                };
+            }
+
+            var result = await FixedAssetsService.GetFixedAssetsAsync(1, 1000, searchTerm, categoryFilter, status);
+            filteredAssets = result.Data.ToList();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء التصفية: {ex.Message}", "خطأ");
+        }
+    }
+
+    private void ClearFilters()
+    {
+        searchTerm = "";
+        categoryFilter = "";
+        statusFilter = "";
+        filteredAssets = allAssets;
+    }
+
+    private void SwitchTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    private void ShowAssetModal(FixedAssetDto asset = null)
+    {
+        isEditMode = asset != null;
+
+        if (isEditMode)
+        {
+            currentAsset = new FixedAssetDto
+                {
+                    Id = asset.Id,
+                    AssetNumber = asset.AssetNumber,
+                    Name = asset.Name,
+                    Description = asset.Description,
+                    Category = asset.Category,
+                    Department = asset.Department,
+                    Location = asset.Location,
+                    PurchaseDate = asset.PurchaseDate,
+                    PurchasePrice = asset.PurchasePrice,
+                    CurrentValue = asset.CurrentValue,
+                    DepreciationRate = asset.DepreciationRate,
+                    WarrantyExpiryDate = asset.WarrantyExpiryDate,
+                    LastMaintenanceDate = asset.LastMaintenanceDate,
+                    NextMaintenanceDate = asset.NextMaintenanceDate,
+                    Status = asset.Status,
+                    SerialNumber = asset.SerialNumber,
+                    Supplier = asset.Supplier
+                };
+        }
+        else
+        {
+            currentAsset = new FixedAssetDto
+                {
+                    PurchaseDate = DateTime.Now,
+                    DepreciationRate = 10,
+                    Status = AssetStatus.Active
+                };
+        }
+
+        showAssetModal = true;
+    }
+
+    private void CloseAssetModal()
+    {
+        showAssetModal = false;
+        isSaving = false;
+        isEditMode = false;
+    }
+
+    private async Task SaveAsset()
+    {
+        if (isSaving) return;
+
+        try
+        {
+            isSaving = true;
+            StateHasChanged();
+
+            if (isEditMode)
+            {
+                await FixedAssetsService.UpdateFixedAssetAsync(currentAsset.Id, currentAsset);
+                ToastService.ShowSuccess("تم تحديث الأصل الثابت بنجاح", "نجاح");
+            }
+            else
+            {
+                await FixedAssetsService.AddFixedAssetAsync(currentAsset);
+                ToastService.ShowSuccess("تم إضافة الأصل الثابت بنجاح", "نجاح");
+            }
+
+            CloseAssetModal();
+            await LoadFixedAssetsData();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء الحفظ: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowMaintenanceModal(FixedAssetDto asset)
+    {
+        selectedAsset = asset;
+        newMaintenance = new AssetMaintenanceDto
+            {
+                FixedAssetId = asset.Id,
+                AssetName = asset.Name,
+                MaintenanceDate = DateTime.Now,
+                NextMaintenanceDate = asset.NextMaintenanceDate
+            };
+        showMaintenanceModal = true;
+    }
+
+    private void CloseMaintenanceModal()
+    {
+        showMaintenanceModal = false;
+        selectedAsset = new FixedAssetDto();
+        newMaintenance = new AssetMaintenanceDto();
+        assetMaintenance.Clear();
+    }
+
+    private async Task AddMaintenance()
+    {
+        try
+        {
+            await FixedAssetsService.AddAssetMaintenanceAsync(newMaintenance);
+            ToastService.ShowSuccess("تمت إضافة الصيانة بنجاح", "نجاح");
+
+            // إعادة تحميل سجل الصيانة
+            assetMaintenance = await FixedAssetsService.GetAssetMaintenanceHistoryAsync(selectedAsset.Id);
+
+            // إعادة تحميل البيانات
+            await LoadFixedAssetsData();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء إضافة الصيانة: {ex.Message}", "خطأ");
+        }
+    }
+
+    private async Task DeleteAsset(int assetId)
+    {
+        try
+        {
+            if (await ConfirmDelete())
+            {
+                await FixedAssetsService.DeleteFixedAssetAsync(assetId);
+                ToastService.ShowSuccess("تم حذف الأصل الثابت بنجاح", "نجاح");
+                await LoadFixedAssetsData();
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء الحذف: {ex.Message}", "خطأ");
+        }
+    }
+
+    private async Task<bool> ConfirmDelete()
+    {
+        // هنا يمكنك إضافة مودال تأكيد الحذف
+        return true; // مؤقتاً
+    }
+
+    private async Task ExportToExcel()
+    {
+        try
+        {
+            var excelData = await FixedAssetsService.ExportFixedAssetsToExcelAsync();
+            // هنا يتم تنفيذ التنزيل
+            ToastService.ShowSuccess("تم تصدير الأصول الثابتة إلى Excel بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء التصدير: {ex.Message}", "خطأ");
+        }
+    }
+
+    private async Task ExportToPdf()
+    {
+        try
+        {
+            var pdfData = await FixedAssetsService.ExportFixedAssetsToPdfAsync();
+            // هنا يتم تنفيذ التنزيل
+            ToastService.ShowSuccess("تم تصدير الأصول الثابتة إلى PDF بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء التصدير: {ex.Message}", "خطأ");
+        }
+    }
+
+    private void PrintAssets()
+    {
+        // تنفيذ الطباعة
+        ToastService.ShowInfo("جاري تحضير الطباعة...", "طباعة");
+        // يمكنك إضافة كود الطباعة هنا
+    }
+
+    private string GetStatusBadgeClass(AssetStatus status)
+    {
+        return status switch
+        {
+            AssetStatus.Active => "badge-success",
+            AssetStatus.Inactive => "badge-info",
+            AssetStatus.UnderMaintenance => "badge-warning",
+            AssetStatus.Retired => "badge-secondary",
+            AssetStatus.Damaged => "badge-error",
+            _ => "badge-info"
+        };
+    }
+
+    private string GetStatusText(AssetStatus status)
+    {
+        return status switch
+        {
+            AssetStatus.Active => "نشط",
+            AssetStatus.Inactive => "غير نشط",
+            AssetStatus.UnderMaintenance => "تحت الصيانة",
+            AssetStatus.Retired => "متقاعد",
+            AssetStatus.Damaged => "تالف",
+            _ => "غير محدد"
+        };
+    }
+
+    private string GetMaintenanceClass(DateTime? nextMaintenanceDate)
+    {
+        if (!nextMaintenanceDate.HasValue) return "";
+
+        var days = (nextMaintenanceDate.Value - DateTime.Now).TotalDays;
+        if (days < 0) return "maintenance-due";
+        if (days <= 30) return "maintenance-soon";
+        return "";
+    }
+}

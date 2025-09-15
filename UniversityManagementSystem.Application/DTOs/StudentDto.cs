@@ -22,6 +22,8 @@ namespace UniversityManagementSystem.Application.DTOs
         public string SecoundPhone { get; set; }
         public bool TrueIsEmployee { get; set; }
         public string WorkAddress { get; set; }
+        public string Program { get; set; }
+
         public DateTime BirthOfDate { get; set; }
         public bool Sexual { get; set; }
         public string PoliticalNationalism { get; set; }

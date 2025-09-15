@@ -36,7 +36,7 @@ namespace UniversityManagementSystem.Application.Services
         {
             var accounts = await _accountRepository.GetAllAsync();
             var entries = await _entryRepository.GetAllAsync();
-
+                
             var filteredEntries = entries.Where(e => e.EntryDate >= fromDate && e.EntryDate <= toDate).ToList();
 
             var trialBalanceAccounts = new List<TrialBalanceAccountDto>();

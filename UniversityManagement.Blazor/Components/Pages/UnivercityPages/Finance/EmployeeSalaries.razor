@@ -1,6 +1,6 @@
-﻿@page "/finance/employee-salaries"
-@attribute [Authorize]
-@inject IEmployeeSalaryServices EmployeeSalaryService
+﻿ @page "/finance/employee-salaries"
+@* @attribute [Authorize]
+@inject ISalaryService EmployeeSalaryService
 @inject IUserServices UserService
 @rendermode InteractiveServer
 
@@ -517,4 +517,4 @@
             Console.WriteLine($"Error deleting salary: {ex.Message}");
         }
     }
-}
+} *@

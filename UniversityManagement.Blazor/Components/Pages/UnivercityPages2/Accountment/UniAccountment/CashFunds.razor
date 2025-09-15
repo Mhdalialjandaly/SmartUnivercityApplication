@@ -1,0 +1,1206 @@
+﻿@page "/cash-fund"
+@attribute [Authorize(Roles = "Admin,Accountant,Cashier")]
+@inject ICashFundService CashFundService
+@inject IToastService ToastService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+
+<style>
+    :root {
+        --primary-color: #f57c00;
+        --dark-color: #121820;
+        --light-color: #ffffff;
+        --gray-color: #f5f5f5;
+        --text-color: #333333;
+        --success-color: #4caf50;
+        --error-color: #f44336;
+        --warning-color: #ff9800;
+        --info-color: #2196f3;
+        --cash-color: #009688;
+        --deposit-color: #4CAF50;
+        --withdrawal-color: #F44336;
+    }
+
+    body {
+        font-family: 'Sora', sans-serif;
+        color: var(--text-color);
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .faculty-dashboard {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        width: 280px;
+        background: var(--dark-color);
+        color: white;
+        padding: 20px 0;
+        transition: all 0.3s ease;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .main-content {
+        flex: 1;
+        padding: 20px;
+        background: var(--gray-color);
+        margin-right: 280px;
+        min-height: 100vh;
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-success {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--info-color);
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #ddd;
+        color: #777;
+    }
+
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+    }
+
+        .stat-icon.balance {
+            background: rgba(0, 150, 136, 0.1);
+        }
+
+        .stat-icon.deposit {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .stat-icon.withdrawal {
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .stat-icon.pending {
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        .stat-icon.today {
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        .stat-icon i {
+            font-size: 24px;
+        }
+
+        .stat-icon.balance i {
+            color: var(--cash-color);
+        }
+
+        .stat-icon.deposit i {
+            color: var(--deposit-color);
+        }
+
+        .stat-icon.withdrawal i {
+            color: var(--withdrawal-color);
+        }
+
+        .stat-icon.pending i {
+            color: var(--warning-color);
+        }
+
+        .stat-icon.today i {
+            color: var(--info-color);
+        }
+
+    .stat-info h4 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .stat-info p {
+        margin: 5px 0 0;
+        color: #777;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        .table th {
+            background: #f9f9f9;
+            font-weight: 600;
+        }
+
+        .table tr {
+            border-bottom: 1px solid #eee;
+        }
+
+            .table tr:last-child {
+                border-bottom: none;
+            }
+
+    .amount-positive {
+        color: var(--deposit-color);
+        font-weight: 600;
+    }
+
+    .amount-negative {
+        color: var(--withdrawal-color);
+        font-weight: 600;
+    }
+
+    .balance-positive {
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    .balance-negative {
+        color: var(--error-color);
+        font-weight: 600;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-success {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .badge-warning {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .badge-error {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    .badge-info {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 18px;
+        color: #777;
+    }
+
+    .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .error i {
+            font-size: 20px;
+        }
+
+    .export-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .total-row {
+        font-weight: bold;
+        background: #f0f0f0;
+    }
+
+    .section-title {
+        background: #e0f2f1;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+        font-weight: 600;
+        color: #00695c;
+    }
+
+    .statement-section {
+        margin-bottom: 30px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+    }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+    .tab-content {
+        display: none;
+    }
+
+        .tab-content.active {
+            display: block;
+        }
+
+    .balance-card {
+        background: linear-gradient(135deg, #009688 0%, #4CAF50 100%);
+        color: white;
+        text-align: center;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+        .balance-card h2 {
+            font-size: 36px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .balance-card p {
+            margin: 10px 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+    .transaction-form {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .form-col {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Sora', sans-serif;
+        }
+
+    .status-approved {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .status-pending {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .status-rejected {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    @@media (max-width: 768px) {
+        .faculty-dashboard {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+
+        .main-content {
+            margin-right: 0;
+            padding: 10px;
+        }
+
+        .dashboard-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .top-bar {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .export-buttons {
+            flex-direction: column;
+        }
+
+        .tabs {
+            flex-direction: column;
+        }
+
+        .form-row {
+            flex-direction: column;
+        }
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #777;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+
+<div class="faculty-dashboard">
+    <!-- الشريط الجانبي -->
+    <NavMenu2 />
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        @if (isLoading)
+        {
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> جاري تحميل بيانات الصندوق...
+            </div>
+        }
+        else if (hasError)
+        {
+            <div class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>خطأ!</strong>
+                    <p>حدث خطأ أثناء تحميل بيانات الصندوق. يرجى المحاولة مرة أخرى.</p>
+                    <button class="btn btn-primary" @onclick="LoadCashFundData">إعادة المحاولة</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- الشريط العلوي -->
+            <div class="top-bar">
+                <h2><i class="fas fa-money-bill-wave"></i> إدارة الصندوق</h2>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <h4>صندوق النقد</h4>
+                        <p>آخر تحديث: @cashFund.LastUpdated.ToString("yyyy/MM/dd HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقة الرصيد الحالي -->
+            <div class="balance-card">
+                <h2>@cashFund.CurrentBalance.ToString("C")</h2>
+                <p>الرصيد الحالي للصندوق</p>
+                <span class="badge @(cashFund.IsOverdrawn ? "badge-error" : "badge-success")">
+                    <i class="fas @(cashFund.IsOverdrawn ? "fa-exclamation-triangle" : "fa-check-circle")"></i>
+                    @cashFund.StatusText
+                </span>
+            </div>
+
+            <!-- بطاقات الإحصائيات -->
+            <div class="dashboard-cards">
+                <div class="card stat-card">
+                    <div class="stat-icon deposit">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="amount-positive">@summary.TotalDeposits.ToString("C")</h4>
+                        <p>إجمالي الإيداعات</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon withdrawal">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="amount-negative">@summary.TotalWithdrawals.ToString("C")</h4>
+                        <p>إجمالي السحوبات</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon balance">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 class="@(summary.IsProfitable ? "balance-positive" : "balance-negative")">
+                            @summary.NetChange.ToString("C")
+                        </h4>
+                        <p>الصافي</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>@cashFund.PendingTransactionsCount</h4>
+                        <p>المعاملات المعلقة</p>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="stat-icon today">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>@cashFund.TodayTransactionsCount</h4>
+                        <p>المعاملات اليوم</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم الفلترة -->
+            <div class="filter-section">
+                <h3><i class="fas fa-filter"></i> تصفية المعاملات</h3>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="fromDate">من تاريخ</label>
+                        <input type="date" id="fromDate" @bind="filterFromDate" />
+                    </div>
+                    <div class="filter-group">
+                        <label for="toDate">إلى تاريخ</label>
+                        <input type="date" id="toDate" @bind="filterToDate" />
+                    </div>
+                    <div class="filter-group">
+                        <label for="transactionType">نوع المعاملة</label>
+                        <select id="transactionType" @bind="filterTransactionType">
+                            <option value="">الجميع</option>
+                            <option value="Deposit">إيداع</option>
+                            <option value="Withdrawal">سحب</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" @onclick="FilterTransactions">
+                            <i class="fas fa-filter"></i> تصفية
+                        </button>
+                        <button class="btn btn-outline" @onclick="ClearFilters">
+                            <i class="fas fa-times"></i> مسح
+                        </button>
+                    </div>
+                </div>
+
+                <div class="export-buttons">
+                    <button class="btn btn-success" @onclick="ShowTransactionModal">
+                        <i class="fas fa-plus"></i> إضافة معاملة
+                    </button>
+                    <button class="btn btn-info" @onclick="ExportToExcel">
+                        <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                    </button>
+                    <button class="btn btn-warning" @onclick="ExportToPdf">
+                        <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                    </button>
+                    <button class="btn btn-outline" @onclick="PrintTransactions">
+                        <i class="fas fa-print"></i> طباعة
+                    </button>
+                </div>
+            </div>
+
+            <!-- نموذج إضافة معاملة -->
+            @if (showTransactionModal)
+            {
+                <div class="transaction-form">
+                    <h3><i class="fas fa-plus-circle"></i> إضافة معاملة جديدة</h3>
+                    <form @onsubmit="AddTransaction">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="transactionType">نوع المعاملة *</label>
+                                    <select id="transactionType" @bind="newTransaction.Type" required>
+                                        <option value="@TransactionType.Deposit">إيداع</option>
+                                        <option value="@TransactionType.Withdrawal">سحب</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="amount">المبلغ *</label>
+                                    <input type="number" id="amount" @bind="newTransaction.Amount" step="0.01" min="0.01" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">الوصف *</label>
+                            <textarea id="description" @bind="newTransaction.Description" rows="2" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="beneficiary">المستفيد</label>
+                                    <input type="text" id="beneficiary" @bind="newTransaction.Beneficiary" />
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="referenceNumber">رقم المرجع</label>
+                                    <input type="text" id="referenceNumber" @bind="newTransaction.ReferenceNumber" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionDate">تاريخ المعاملة *</label>
+                            <input type="date" id="transactionDate" @bind="newTransaction.TransactionDate" required />
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" @onclick="CloseTransactionModal">إلغاء</button>
+                            <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                @if (isSaving)
+                                {
+                                    <span><span class="loading-spinner"></span> جاري الحفظ...</span>
+                                }
+                                else
+                                {
+                                    <span><i class="fas fa-save"></i> حفظ المعاملة</span>
+                                }
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            }
+
+            <!-- جدول المعاملات -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> قائمة المعاملات</h3>
+                    <span class="badge badge-info">@filteredTransactions.Count معاملة</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>رقم المعاملة</th>
+                                <th>التاريخ</th>
+                                <th>الوصف</th>
+                                <th>المستفيد</th>
+                                <th class="text-center">الإيداع</th>
+                                <th class="text-center">السحب</th>
+                                <th class="text-center">الحالة</th>
+                                <th class="text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in filteredTransactions)
+                            {
+                                <tr>
+                                    <td><strong>@transaction.TransactionNumber</strong></td>
+                                    <td>@transaction.TransactionDate.ToString("yyyy/MM/dd")</td>
+                                    <td>@transaction.Description</td>
+                                    <td>@transaction.Beneficiary</td>
+                                    <td class="text-center">
+                                        @if (transaction.Type == TransactionType.Deposit)
+                                        {
+                                            <span class="amount-positive">@transaction.Amount.ToString("C")</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (transaction.Type == TransactionType.Withdrawal)
+                                        {
+                                            <span class="amount-negative">@transaction.Amount.ToString("C")</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge @(GetStatusBadgeClass(transaction.Status))">
+                                            @GetStatusText(transaction.Status)
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (transaction.Status == TransactionStatus.Pending)
+                                        {
+                                            <button class="btn btn-sm btn-success" @onclick="()=> ApproveTransaction(transaction.Id)" title="موافقة">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @onclick="()=> DeleteTransaction(transaction.Id)" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline" @onclick="()=> ShowEditModal(transaction)" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            @if (filteredTransactions.Any())
+                            {
+                                <tr class="total-row">
+                                    <td colspan="4"><strong>الإجمالي</strong></td>
+                                    <td class="text-center amount-positive"><strong>@filteredTransactions.Where(t => t.Type == TransactionType.Deposit).Sum(t => t.Amount).ToString("C")</strong></td>
+                                    <td class="text-center amount-negative"><strong>@filteredTransactions.Where(t => t.Type == TransactionType.Withdrawal).Sum(t => t.Amount).ToString("C")</strong></td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- المعاملات المعلقة -->
+            @if (pendingTransactions.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-clock"></i> المعاملات المعلقة</h3>
+                        <span class="badge badge-warning">@pendingTransactions.Count معاملة</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>رقم المعاملة</th>
+                                    <th>التاريخ</th>
+                                    <th>الوصف</th>
+                                    <th>المستفيد</th>
+                                    <th class="text-center">المبلغ</th>
+                                    <th class="text-center">النوع</th>
+                                    <th class="text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in pendingTransactions)
+                                {
+                                    <tr>
+                                        <td><strong>@transaction.TransactionNumber</strong></td>
+                                        <td>@transaction.TransactionDate.ToString("yyyy/MM/dd")</td>
+                                        <td>@transaction.Description</td>
+                                        <td>@transaction.Beneficiary</td>
+                                        <td class="text-center @(transaction.Type == TransactionType.Deposit ? "amount-positive" : "amount-negative")">
+                                            @transaction.Amount.ToString("C")
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge @(transaction.Type == TransactionType.Deposit ? "badge-success" : "badge-error")">
+                                                @(transaction.Type == TransactionType.Deposit ? "إيداع" : "سحب")
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-success" @onclick="()=> ApproveTransaction(transaction.Id)" title="موافقة">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @onclick="()=> DeleteTransaction(transaction.Id)" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool hasError = false;
+    private bool showTransactionModal = false;
+    private bool isSaving = false;
+    private bool isEditMode = false;
+
+    private CashFundDto cashFund = new CashFundDto();
+    private CashFundSummaryDto summary = new CashFundSummaryDto();
+    private List<CashTransactionDto> allTransactions = new List<CashTransactionDto>();
+    private List<CashTransactionDto> filteredTransactions = new List<CashTransactionDto>();
+    private List<CashTransactionDto> pendingTransactions = new List<CashTransactionDto>();
+    private CashTransactionDto newTransaction = new CashTransactionDto();
+    private CashTransactionDto editTransaction = new CashTransactionDto();
+
+    // فلاتر
+    private DateTime? filterFromDate = DateTime.Now.AddDays(-30);
+    private DateTime? filterToDate = DateTime.Now;
+    private string filterTransactionType = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCashFundData();
+    }
+
+    private async Task LoadCashFundData()
+    {
+        try
+        {
+            isLoading = true;
+            hasError = false;
+            StateHasChanged();
+
+            cashFund = await CashFundService.GetCashFundStatusAsync();
+            summary = await CashFundService.GetCashFundSummaryAsync(
+                filterFromDate ?? DateTime.Now.AddDays(-30),
+                filterToDate ?? DateTime.Now);
+
+            allTransactions = await CashFundService.GetCashTransactionsAsync(
+                filterFromDate ?? DateTime.Now.AddDays(-30),
+                filterToDate ?? DateTime.Now);
+
+            filteredTransactions = allTransactions;
+            pendingTransactions = await CashFundService.GetPendingTransactionsAsync();
+
+            // تهيئة معاملة جديدة
+            newTransaction = new CashTransactionDto
+                {
+                    TransactionDate = DateTime.Now,
+                    Type = TransactionType.Deposit
+                };
+
+            ToastService.ShowSuccess("تم تحميل بيانات الصندوق بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            ToastService.ShowError($"حدث خطأ أثناء تحميل البيانات: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task FilterTransactions()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            TransactionType? type = null;
+            if (!string.IsNullOrEmpty(filterTransactionType))
+            {
+                type = filterTransactionType == "Deposit" ? TransactionType.Deposit : TransactionType.Withdrawal;
+            }
+
+            var transactions = await CashFundService.GetCashTransactionsAsync(
+                filterFromDate ?? DateTime.Now.AddDays(-30),
+                filterToDate ?? DateTime.Now);
+
+            if (type.HasValue)
+            {
+                filteredTransactions = transactions.Where(t => t.Type == type.Value).ToList();
+            }
+            else
+            {
+                filteredTransactions = transactions;
+            }
+
+            summary = await CashFundService.GetCashFundSummaryAsync(
+                filterFromDate ?? DateTime.Now.AddDays(-30),
+                filterToDate ?? DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء التصفية: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearFilters()
+    {
+        filterFromDate = DateTime.Now.AddDays(-30);
+        filterToDate = DateTime.Now;
+        filterTransactionType = "";
+        filteredTransactions = allTransactions;
+    }
+
+    private void ShowTransactionModal()
+    {
+        isEditMode = false;
+        newTransaction = new CashTransactionDto
+            {
+                TransactionDate = DateTime.Now,
+                Type = TransactionType.Deposit
+            };
+        showTransactionModal = true;
+    }
+
+    private void ShowEditModal(CashTransactionDto transaction)
+    {
+        isEditMode = true;
+        editTransaction = new CashTransactionDto
+            {
+                Id = transaction.Id,
+                TransactionNumber = transaction.TransactionNumber,
+                Description = transaction.Description,
+                TransactionDate = transaction.TransactionDate,
+                Type = transaction.Type,
+                Amount = transaction.Amount,
+                ReferenceNumber = transaction.ReferenceNumber,
+                Beneficiary = transaction.Beneficiary,
+                Status = transaction.Status
+            };
+        showTransactionModal = true;
+    }
+
+    private void CloseTransactionModal()
+    {
+        showTransactionModal = false;
+        isSaving = false;
+        isEditMode = false;
+    }
+
+    private async Task AddTransaction()
+    {
+        if (isSaving) return;
+
+        try
+        {
+            isSaving = true;
+            StateHasChanged();
+
+            if (isEditMode)
+            {
+                await CashFundService.UpdateCashTransactionAsync(editTransaction.Id, editTransaction);
+                ToastService.ShowSuccess("تم تحديث المعاملة بنجاح", "نجاح");
+            }
+            else
+            {
+                await CashFundService.AddCashTransactionAsync(newTransaction);
+                ToastService.ShowSuccess("تم إضافة المعاملة بنجاح", "نجاح");
+            }
+
+            CloseTransactionModal();
+            await LoadCashFundData();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء الحفظ: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ApproveTransaction(int transactionId)
+    {
+        try
+        {
+            await CashFundService.ApproveTransactionAsync(transactionId);
+            ToastService.ShowSuccess("تمت الموافقة على المعاملة بنجاح", "نجاح");
+            await LoadCashFundData();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء الموافقة: {ex.Message}", "خطأ");
+        }
+    }
+
+    private async Task DeleteTransaction(int transactionId)
+    {
+        try
+        {
+            if (await ConfirmDelete())
+            {
+                await CashFundService.DeleteCashTransactionAsync(transactionId);
+                ToastService.ShowSuccess("تم حذف المعاملة بنجاح", "نجاح");
+                await LoadCashFundData();
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء الحذف: {ex.Message}", "خطأ");
+        }
+    }
+
+    private async Task<bool> ConfirmDelete()
+    {
+        // هنا يمكنك إضافة مودال تأكيد الحذف
+        return true; // مؤقتاً
+    }
+
+    private async Task ExportToExcel()
+    {
+        try
+        {
+            var excelData = await CashFundService.ExportCashTransactionsToExcelAsync(
+                filterFromDate ?? DateTime.Now.AddDays(-30),
+                filterToDate ?? DateTime.Now);
+            // هنا يتم تنفيذ التنزيل
+            ToastService.ShowSuccess("تم تصدير المعاملات إلى Excel بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء التصدير: {ex.Message}", "خطأ");
+        }
+    }
+
+    private async Task ExportToPdf()
+    {
+        try
+        {
+            var pdfData = await CashFundService.ExportCashFundReportToPdfAsync(
+                filterFromDate ?? DateTime.Now.AddDays(-30),
+                filterToDate ?? DateTime.Now);
+            // هنا يتم تنفيذ التنزيل
+            ToastService.ShowSuccess("تم تصدير التقرير إلى PDF بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"حدث خطأ أثناء التصدير: {ex.Message}", "خطأ");
+        }
+    }
+
+    private void PrintTransactions()
+    {
+        // تنفيذ الطباعة
+        ToastService.ShowInfo("جاري تحضير الطباعة...", "طباعة");
+        // يمكنك إضافة كود الطباعة هنا
+    }
+
+    private string GetStatusBadgeClass(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "badge-warning",
+            TransactionStatus.Approved => "badge-success",
+            TransactionStatus.Rejected => "badge-error",
+            TransactionStatus.Cancelled => "badge-info",
+            _ => "badge-info"
+        };
+    }
+
+    private string GetStatusText(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "معلق",
+            TransactionStatus.Approved => "موافق عليه",
+            TransactionStatus.Rejected => "مرفوض",
+            TransactionStatus.Cancelled => "ملغي",
+            _ => "غير محدد"
+        };
+    }
+}

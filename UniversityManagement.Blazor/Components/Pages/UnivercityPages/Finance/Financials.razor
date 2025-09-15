@@ -1,7 +1,7 @@
 ﻿@page "/financial-management"
-@attribute [Authorize]
+@* @attribute [Authorize]
 @inject IStudentPaymentServices StudentPaymentService
-@inject IEmployeeSalaryServices EmployeeSalaryService
+@inject ISalaryService EmployeeSalaryService
 @inject ICourseServices CourseService
 @inject IDepartmentServices DepartmentService
 @inject IFinanceServices FinanceService
@@ -794,4 +794,4 @@
         var value = e.Value?.ToString();
         reportDepartmentId = string.IsNullOrEmpty(value) ? 0 : int.Parse(value);
     }
-}
+} *@

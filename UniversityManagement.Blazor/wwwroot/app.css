@@ -799,6 +799,10 @@ h1 {
     }
 }
 
+.badge badge-info {
+    color: darkblue;
+}
+
 @media (max-width: 480px) {
     .mil-banner {
         height: 200px;

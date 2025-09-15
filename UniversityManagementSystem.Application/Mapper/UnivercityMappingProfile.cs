@@ -86,6 +86,45 @@ namespace UniversityManagementSystem.Application.Mapper
             
             CreateMap<StudentAssessmentDto, StudentAssessment>().ReverseMap().PreserveReferences();
             CreateMap<StudentAssessment, StudentAssessmentDto>().ReverseMap();
+            
+            CreateMap<AccountingEntryDto, AccountingEntry>().ReverseMap().PreserveReferences();
+            CreateMap<AccountingEntry, AccountingEntryDto>().ReverseMap();
+            
+            CreateMap<TrialBalanceAccountDto, Account>().ReverseMap().PreserveReferences();
+            CreateMap<Account, TrialBalanceAccountDto>().ReverseMap();
+
+            CreateMap<CashFundDto, CashFund>().ReverseMap().PreserveReferences();
+            CreateMap<CashFund, CashFundDto>().ReverseMap();
+
+            CreateMap<CashTransactionDto, CashTransaction>().ReverseMap().PreserveReferences();
+            CreateMap<CashTransaction, CashTransactionDto>().ReverseMap();
+
+            CreateMap<AssetCategoryDto, AssetCategory>().ReverseMap().PreserveReferences();
+            CreateMap<AssetCategory, AssetCategoryDto>().ReverseMap();
+
+            CreateMap<AssetMaintenanceDto, AssetMaintenance>().ReverseMap().PreserveReferences();
+            CreateMap<AssetMaintenance, AssetMaintenanceDto>().ReverseMap();
+
+            CreateMap<FixedAssetDto, FixedAsset>().ReverseMap().PreserveReferences();
+            CreateMap<FixedAsset, FixedAssetDto>().ReverseMap();
+            
+            CreateMap<EmployeeSalaryDto, EmployeeSalary>().ReverseMap().PreserveReferences();
+            CreateMap<EmployeeSalary, EmployeeSalaryDto>().ReverseMap();
+
+            CreateMap<SalaryPaymentDto, SalaryPayment>().ReverseMap().PreserveReferences();
+            CreateMap<SalaryPayment, SalaryPaymentDto>().ReverseMap();
+
+            CreateMap<SalaryDeductionDto, SalaryDeduction>().ReverseMap().PreserveReferences();
+            CreateMap<SalaryDeduction, SalaryDeductionDto>().ReverseMap();
+
+            CreateMap<StudentInstallmentDto, StudentInstallment>().ReverseMap().PreserveReferences();
+            CreateMap<StudentInstallment, StudentInstallmentDto>().ReverseMap();
+
+
+            CreateMap<InstallmentPaymentDto, InstallmentPayment>().ReverseMap().PreserveReferences();
+            CreateMap<InstallmentPayment, InstallmentPaymentDto>().ReverseMap();
+
+
         }
     }
 }
