@@ -11,7 +11,7 @@
 @inject IToastService ToastService
 @rendermode InteractiveServer
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 
 <style>
     /* أنماط CSS الموحدة كما في الواجهات السابقة */
@@ -393,7 +393,29 @@
         color: #2e7d32;
     }
 </style>
-
+<!-- Top Panel -->
+<div class="mil-top-panel">
+    <div class="mil-logo">
+        <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
+    </div>
+    <div class="mil-navigation">
+        <nav>
+            <ul>
+                <li><a href="/accountmententryview">إدارة القيود والمعاملات المالية</a></li>
+                <li><a href="/trailaccountmentbalance">ميزان المراجعة</a></li>
+                <li><a href="/financial-statements">الحسابات الختامية</a></li>
+                <li><a href="/cash-fund">الصندوق</a></li>
+                <li><a href="/inventory">المخازن</a></li>
+                <li><a href="/fixed-assets">الموجودات الثابتة</a></li>
+                <li><a href="/salaries">الرواتب</a></li>
+                <li><a href="/stnst">اقساط الطلبة</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="mil-menu-btn">
+        <span></span>
+    </div>
+</div>
 <div class="faculty-dashboard">
     <!-- الشريط الجانبي -->
     <NavMenu2 />
