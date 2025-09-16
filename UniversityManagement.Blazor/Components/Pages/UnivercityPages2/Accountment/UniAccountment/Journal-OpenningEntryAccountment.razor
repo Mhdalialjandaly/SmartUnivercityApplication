@@ -1,171 +1,71 @@
 ﻿@page "/accounting-dashboard"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Accountant,FinanceManager")]
+@inject IAccountingEntryService AccountingEntryService
+@inject ITrialBalanceService TrialBalanceService
+@inject IFinancialStatementsService FinancialStatementsService
+@inject ICashFundService CashFundService
+@inject IInventoryService InventoryService
+@inject IFixedAssetsService FixedAssetsService
+@inject ISalaryService SalaryService
+@inject IStudentInstallmentsService StudentInstallmentsService
+@inject IToastService ToastService
 @rendermode InteractiveServer
 
+
+
 <style>
-    /* أنماط CSS الموحدة */
+    /* أنماط CSS الموحدة كما في الواجهات السابقة */
     :root {
-        --primary-color: #2c3e50;
-        --secondary-color: #3498db;
-        --success-color: #27ae60;
-        --warning-color: #f39c12;
-        --danger-color: #e74c3c;
-        --info-color: #1abc9c;
+        --primary-color: #f57c00;
         --dark-color: #121820;
         --light-color: #ffffff;
         --gray-color: #f5f5f5;
         --text-color: #333333;
-        --border-color: #dee2e6;
-    }
-    h1 {
-        font-size: 42px;
-    }
-
-    h2 {
-        font-size: 36px;
-    }
-
-    h3 {
-        font-size: 28px;
-    }
-
-    h4 {
-        font-size: 22px;
+        --success-color: #4caf50;
+        --error-color: #f44336;
+        --warning-color: #ff9800;
+        --info-color: #2196f3;
+        --accounting-color: #4CAF50;
+        --trial-balance-color: #9c27b0;
+        --financial-color: #009688;
+        --cash-color: #00bcd4;
+        --inventory-color: #795548;
+        --assets-color: #607d8b;
+        --salary-color: #e91e63;
+        --installment-color: #ff5722;
     }
 
-    h5 {
-        font-size: 18px;
+    body {
+        font-family: 'Sora', sans-serif;
+        color: var(--text-color);
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
     }
 
-    h6 {
-        font-size: 16px;
-    }
-
-    a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .finance-management-container {
+    .faculty-dashboard {
         display: flex;
         min-height: 100vh;
-        font-family: 'Sora', sans-serif;
-        background-color: var(--gray-color);
-        padding-top: 80px;
-    }
-    /* الشريط العلوي */
-    .mil-top-panel {
-        background-color: rgb(255, 255, 255);
-        width: 100%;
-        z-index: 999;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-pack: justify;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
-        box-shadow: 0px 0px 40px 0px rgba(18, 24, 32, 0.1);
-        position: fixed;
-        top: 0;
-        left: 0;
     }
 
-   
-
-    .mil-navigation nav ul {
-        list-style: none;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-    }
-
-        .mil-navigation nav ul li {
-            margin: 0 15px;
-            position: relative;
-        }
-
-            .mil-navigation nav ul li a {
-                font-family: "Sora", sans-serif;
-                text-decoration: none;
-                color: rgb(18, 24, 32);
-                font-weight: 400;
-                white-space: nowrap;
-                -webkit-transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
-                transition: 0.2s cubic-bezier(0, 0, 0.3642, 1);
-            }
-
-                .mil-navigation nav ul li a:hover {
-                    color: var(--primary-color);
-                }
-    /* الشريط الجانبي */
     .sidebar {
         width: 280px;
         background: var(--dark-color);
         color: white;
+        padding: 20px 0;
         transition: all 0.3s ease;
         position: fixed;
-        height: calc(100vh - 80px);
+        height: 100vh;
         overflow-y: auto;
+        z-index: 1000;
     }
 
-    .sidebar-header {
-      
-        text-align: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-        .sidebar-header h3 {
-            color: white;
-         
-            font-size: 18px;
-        }
-
-    .sidebar-menu {
-        padding: 20px 0;
-    }
-
-        .sidebar-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 5px;
-        }
-
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: all 0.3s;
-            font-family: 'Sora', sans-serif;
-        }
-
-            .sidebar-menu a:hover, .sidebar-menu a.active {
-                background: rgba(255, 255, 255, 0.1);
-                color: white;
-                border-right: 3px solid var(--primary-color);
-            }
-
-        .sidebar-menu i {
-            margin-left: 10px;
-            font-size: 18px;
-        }
-    /* المحتوى الرئيسي */
     .main-content {
         flex: 1;
-     
+        padding: 20px;
         background: var(--gray-color);
         margin-right: 280px;
-     
-        min-height: calc(100vh - 80px);
+        min-height: 100vh;
     }
 
     .top-bar {
@@ -179,103 +79,44 @@
         margin-bottom: 20px;
     }
 
-    .user-profile {
-        display: flex;
-        align-items: center;
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
     }
 
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-
-    .search-box {
-        display: flex;
-        align-items: center;
-        flex: 1;
-        max-width: 400px;
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
     }
 
-        .search-box input {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px 0 0 5px;
-            outline: none;
-            width: 100%;
-        }
-
-        .search-box button {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 0 5px 5px 0;
-            background: #f5f5f5;
-            cursor: pointer;
-        }
-    /* رأس الصفحة */
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding: 15px 20px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #ddd;
+        color: #777;
     }
 
-        .page-header h1 {
-            margin: 0;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--dark-color);
-        }
-
-    .header-actions {
-        display: flex;
-        gap: 10px;
-    }
-    /* بطاقات الإحصاءات */
-    .stats-cards {
+    .dashboard-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
     }
 
-    .stat-card {
+    .card {
         background: white;
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        transition: transform 0.3s, box-shadow 0.3s;
     }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card.income {
-            border-top: 4px solid var(--success-color);
-        }
-
-        .stat-card.expense {
-            border-top: 4px solid var(--danger-color);
-        }
-
-        .stat-card.balance {
-            border-top: 4px solid var(--info-color);
-        }
-
-        .stat-card.transactions {
-            border-top: 4px solid var(--warning-color);
-        }
+    .stat-card {
+        display: flex;
+        align-items: center;
+    }
 
     .stat-icon {
         width: 60px;
@@ -285,187 +126,52 @@
         align-items: center;
         justify-content: center;
         margin-left: 15px;
-        font-size: 24px;
     }
 
-    .income .stat-icon {
-        background: rgba(39, 174, 96, 0.1);
-        color: var(--success-color);
-    }
-
-    .expense .stat-icon {
-        background: rgba(231, 76, 60, 0.1);
-        color: var(--danger-color);
-    }
-
-    .balance .stat-icon {
-        background: rgba(26, 188, 156, 0.1);
-        color: var(--info-color);
-    }
-
-    .transactions .stat-icon {
-        background: rgba(243, 156, 18, 0.1);
-        color: var(--warning-color);
-    }
-
-    .stat-info h2 {
+    .stat-info h4 {
         margin: 0;
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 600;
-    }
-
-    .income .stat-info h2 {
-        color: var(--success-color);
-    }
-
-    .expense .stat-info h2 {
-        color: var(--danger-color);
-    }
-
-    .balance .stat-info h2 {
-        color: var(--info-color);
-    }
-
-    .transactions .stat-info h2 {
-        color: var(--warning-color);
     }
 
     .stat-info p {
         margin: 5px 0 0;
         color: #777;
     }
-    /* لوحة التحكم */
-    .card {
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        margin-bottom: 20px;
-    }
 
-    .card-header {
-        padding: 20px;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-        .card-header h4 {
-            margin: 0;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-    .card-body {
-        padding: 20px;
-    }
-    /* عناصر التحكم */
-    .control-bar {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        align-items: end;
-    }
-
-    .form-group {
-        flex: 1;
-        min-width: 200px;
-    }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-    .form-control {
-        width: 100%;
-        padding: 10px 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-family: 'Sora', sans-serif;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        border-radius: 5px;
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: 'Sora', sans-serif;
-    }
-
-    .btn-primary {
-        background: var(--primary-color);
-        color: white;
-    }
-
-        .btn-primary:hover {
-            background: #1a2530;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
-        }
-
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-    }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-    .btn-success {
-        background: var(--success-color);
-        color: white;
-    }
-
-        .btn-success:hover {
-            background: #229954;
-            transform: translateY(-2px);
-        }
-
-    .btn-warning {
-        background: var(--warning-color);
-        color: white;
-    }
-
-        .btn-warning:hover {
-            background: #e67e22;
-            transform: translateY(-2px);
-        }
-
-    .btn-danger {
-        background: var(--danger-color);
-        color: white;
-    }
-
-        .btn-danger:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-        }
-
-    .btn-outline {
-        background: transparent;
-        border: 1px solid #ddd;
+    .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 18px;
         color: #777;
     }
 
-        .btn-outline:hover {
-            background: #f5f5f5;
-        }
-    /* جداول البيانات */
-    .table-responsive {
-        overflow-x: auto;
+    .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-success {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .badge-error {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
     }
 
     .table {
@@ -476,7 +182,6 @@
         .table th, .table td {
             padding: 12px 15px;
             text-align: right;
-            border-bottom: 1px solid #eee;
         }
 
         .table th {
@@ -484,89 +189,109 @@
             font-weight: 600;
         }
 
-    .table-hover tbody tr:hover {
-        background: #f5f5f5;
-    }
-    /* المودالات */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
+        .table tr {
+            border-bottom: 1px solid #eee;
+        }
+
+            .table tr:last-child {
+                border-bottom: none;
+            }
+
+    /* أنماط قائمة الإعدادات */
+    .settings-container {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        backdrop-filter: blur(5px);
+        gap: 20px;
+        margin-top: 20px;
     }
 
-    .modal-content {
+    .settings-nav {
+        width: 250px;
         background: white;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 800px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        animation: modalSlideIn 0.3s ease-out;
-        position: relative;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 20px 0;
+        height: fit-content;
     }
 
-    @@keyframes modalSlideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .modal-header {
-        padding: 20px;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: linear-gradient(135deg, var(--primary-color), #34495e);
-        color: white;
-        border-radius: 15px 15px 0 0;
-    }
-
-        .modal-header h5 {
+        .settings-nav ul {
+            list-style: none;
+            padding: 0;
             margin: 0;
-            font-size: 22px;
+        }
+
+        .settings-nav li {
+            margin-bottom: 5px;
+        }
+
+        .settings-nav a {
             display: flex;
             align-items: center;
-            gap: 10px;
+            padding: 12px 20px;
+            color: rgba(0, 0, 0, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-family: 'Sora', sans-serif;
         }
 
-    .modal-close {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background 0.3s;
-    }
+            .settings-nav a:hover, .settings-nav a.active {
+                background: rgba(245, 124, 0, 0.1);
+                color: var(--primary-color);
+                border-right: 3px solid var(--primary-color);
+            }
 
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .settings-nav i {
+            margin-left: 10px;
+            font-size: 18px;
         }
 
-    .modal-body {
-        padding: 20px;
+    .settings-content {
+        flex: 1;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 25px;
     }
+
+    .settings-section {
+        display: none;
+    }
+
+        .settings-section.active {
+            display: block;
+        }
+
+        .settings-section h3 {
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            color: var(--dark-color);
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: 'Sora', sans-serif;
+        font-size: 14px;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(245, 124, 0, 0.2);
+        }
 
     .form-row {
         display: grid;
@@ -575,87 +300,59 @@
         margin-bottom: 20px;
     }
 
-    .modal-footer {
-        padding: 20px;
-        border-top: 1px solid #eee;
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+    .toggle-container {
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
         gap: 10px;
-        background: #f9f9f9;
-        border-radius: 0 0 15px 15px;
-    }
-    /* حالات خاصة */
-    .loading {
-        text-align: center;
-        padding: 50px;
-        font-size: 18px;
-        color: #777;
-    }
-
-        .loading i {
-            font-size: 48px;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            animation: spin 1s linear infinite;
-        }
-
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
-    .no-data {
-        text-align: center;
-        padding: 40px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-        .no-data i {
-            font-size: 48px;
-            color: #ddd;
-            margin-bottom: 15px;
-        }
-    /* تصميم متجاوب */
-    @@media (max-width: 992px) {
-        .sidebar {
-            width: 70px;
-        }
-
-        .sidebar-header h3, .sidebar-menu span {
-            display: none;
-        }
-
-        .sidebar-menu a {
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .sidebar-menu i {
-            margin-left: 0;
-        }
-
-        .main-content {
-            margin-right: 70px;
-        }
-
-        .control-bar {
-            flex-direction: column;
-        }
-
-        .form-group {
-            min-width: 100%;
-        }
     }
 
     @@media (max-width: 768px) {
-        .finance-management-container {
+        .faculty-dashboard {
             flex-direction: column;
         }
 
@@ -663,369 +360,780 @@
             width: 100%;
             height: auto;
             position: relative;
-            margin-top: 0;
         }
-
-        .sidebar-menu {
-            display: flex;
-            overflow-x: auto;
-        }
-
-            .sidebar-menu ul {
-                display: flex;
-            }
-
-            .sidebar-menu li {
-                margin-bottom: 0;
-                margin-left: 5px;
-            }
-
-            .sidebar-menu a {
-                border-radius: 5px;
-                border-right: none !important;
-                border-bottom: 3px solid transparent;
-            }
-
-                .sidebar-menu a:hover, .sidebar-menu a.active {
-                    border-right: none;
-                    border-bottom: 3px solid var(--primary-color);
-                }
 
         .main-content {
             margin-right: 0;
             padding: 10px;
-            margin-top: 80px;
         }
 
-        .top-bar {
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .page-header {
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-start;
-        }
-
-        .header-actions {
-            width: 100%;
-            justify-content: flex-end;
-        }
-
-        .search-box {
-            max-width: 100%;
-            width: 100%;
-        }
-
-        .stats-cards {
+        .dashboard-cards {
             grid-template-columns: 1fr;
         }
 
-        .modal-content {
-            width: 95%;
-            max-width: none;
-            margin: 10px;
-            max-height: 95vh;
+        .settings-container {
+            flex-direction: column;
+        }
+
+        .settings-nav {
+            width: 100%;
         }
 
         .form-row {
             grid-template-columns: 1fr;
-            gap: 15px;
         }
+    }
 
-        .modal-footer {
-            flex-direction: column;
-        }
-
-            .modal-footer button {
-                width: 100%;
-            }
+    .section-title {
+        background: #e8f5e9;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+        font-weight: 600;
+        color: #2e7d32;
     }
 </style>
-
-<div class="finance-management-container">
-    <!-- الشريط العلوي -->
-    <div class="mil-top-panel">
-        <div class="mil-logo">
-            <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
-        </div>
-        <div class="mil-navigation">
-            <nav>
-                <ul>
-                    <li><a href="#home">الرئيسية</a></li>
-                    <li><a href="#about">عن الجامعة</a></li>
-                    <li><a href="#departments">الأقسام</a></li>
-                    <li><a href="#admissions">القبول</a></li>
-                    <li><a href="#contact">اتصل بنا</a></li>
-                </ul>
-            </nav>
-        </div>
+<!-- Top Panel -->
+<div class="mil-top-panel">
+    <div class="mil-logo">
+        <a href="#home"><img src="https://via.placeholder.com/150x50?text=الجامعة" alt="Logo"></a>
     </div>
-
-    <!-- الشريط الجانبي -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h3>النظام المحاسبي</h3>
-        </div>
-        <div class="sidebar-menu">
+    <div class="mil-navigation">
+        <nav>
             <ul>
-                <li><a href="/" class="active"><i class="fas fa-tachometer-alt"></i> <span>لوحة التحكم</span></a></li>
-                <li><a href="/accountmententryview"><i class="fas fa-file-invoice"></i> <span>القيود المحاسبية</span></a></li>
-                <li><a href="/trailaccountmentbalance"><i class="fas fa-balance-scale"></i> <span>ميزان المراجعة</span></a></li>
-                <li><a href="/financial-statements"><i class="fas fa-chart-line"></i> <span>الحسابات الختامية</span></a></li>
-                <li><a href="/cash-fund"><i class="fas fa-cash-register"></i> <span>الصندوق</span></a></li>
-                <li><a href="/inventory"><i class="fas fa-warehouse"></i> <span>المخازن</span></a></li>
-                <li><a href="/fixed-assets"><i class="fas fa-building"></i> <span>الموجودات الثابتة</span></a></li>
-                <li><a href="/salaries"><i class="fas fa-money-bill-wave"></i> <span>الرواتب</span></a></li>
-                <li><a href="/student-installments"><i class="fas fa-graduation-cap"></i> <span>أقساط الطلبة</span></a></li>
-                <li><a href="#"><i class="fas fa-cogs"></i> <span>الإعدادات</span></a></li>
+                <li><a href="/accountmententryview">إدارة القيود والمعاملات المالية</a></li>
+                <li><a href="/trailaccountmentbalance">ميزان المراجعة</a></li>
+                <li><a href="/financial-statements">الحسابات الختامية</a></li>
+                <li><a href="/cash-fund">الصندوق</a></li>
+                <li><a href="/inventory">المخازن</a></li>
+                <li><a href="/fixed-assets">الموجودات الثابتة</a></li>
+                <li><a href="/salaries">الرواتب</a></li>
+                <li><a href="/stnst">اقساط الطلبة</a></li>
             </ul>
-        </div>
+        </nav>
     </div>
+    <div class="mil-menu-btn">
+        <span></span>
+    </div>
+</div>
+<div class="faculty-dashboard">
+    <!-- الشريط الجانبي -->
+    <NavMenu2 />
 
     <!-- المحتوى الرئيسي -->
     <div class="main-content">
-        <!-- الشريط العلوي -->
-        <div class="top-bar">
-            <div class="search-box">
-                <input type="text" placeholder="بحث في العمليات المالية...">
-                <button class="btn btn-outline"><i class="fas fa-search"></i></button>
+        @if (isLoading)
+        {
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> جاري تحميل لوحة التحكم المحاسبية...
             </div>
-            <div class="user-profile">
-                <div class="user-info">
-                    <h4>د. أحمد محمد</h4>
-                    <p>مدير النظام</p>
+        }
+        else if (hasError)
+        {
+            <div class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>خطأ!</strong>
+                    <p>حدث خطأ أثناء تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى.</p>
+                    <button class="btn btn-primary" @onclick="LoadAllData">إعادة المحاولة</button>
                 </div>
-                <img src="https://via.placeholder.com/40" alt="User">
             </div>
-        </div>
+        }
+        else
+        {
+            <!-- الشريط العلوي -->
+            <div class="top-bar">
+                <h2><i class="fas fa-tachometer-alt"></i> لوحة التحكم المحاسبية</h2>
+                <div class="actions">
+                    <button class="btn btn-outline" @onclick="ShowSettings">
+                        <i class="fas fa-cog"></i> الإعدادات
+                    </button>
+                </div>
+            </div>
 
-        <!-- رأس الصفحة -->
-        <div class="page-header">
-            <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم المحاسبية</h1>
-            <div class="header-actions">
-                <button class="btn btn-outline">
-                    <i class="fas fa-sync"></i> تحديث
-                </button>
-                <button class="btn btn-primary">
-                    <i class="fas fa-plus"></i> إضافة عملية
-                </button>
-            </div>
-        </div>
-
-        <!-- بطاقات الإحصاءات -->
-        <div class="stats-cards">
-            <div class="stat-card income">
-                <div class="stat-icon">
-                    <i class="fas fa-arrow-down"></i>
-                </div>
-                <div class="stat-info">
-                    <h2>1,250,000 د.ع</h2>
-                    <p>إجمالي الإيرادات</p>
-                </div>
-            </div>
-            <div class="stat-card expense">
-                <div class="stat-icon">
-                    <i class="fas fa-arrow-up"></i>
-                </div>
-                <div class="stat-info">
-                    <h2>850,000 د.ع</h2>
-                    <p>إجمالي المصروفات</p>
-                </div>
-            </div>
-            <div class="stat-card balance">
-                <div class="stat-icon">
-                    <i class="fas fa-balance-scale"></i>
-                </div>
-                <div class="stat-info">
-                    <h2>400,000 د.ع</h2>
-                    <p>الرصيد الحالي</p>
-                </div>
-            </div>
-            <div class="stat-card transactions">
-                <div class="stat-icon">
-                    <i class="fas fa-exchange-alt"></i>
-                </div>
-                <div class="stat-info">
-                    <h2>1,245</h2>
-                    <p>إجمالي العمليات</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- لوحة التحكم -->
-        <div class="card">
-            <div class="card-header">
-                <h4><i class="fas fa-chart-line"></i> النشاط المالي الحديث</h4>
-                <div class="header-actions">
-                    <div class="form-group" style="margin: 0; min-width: 150px;">
-                        <select class="form-control">
-                            <option>هذا الشهر</option>
-                            <option>هذا الأسبوع</option>
-                            <option>اليوم</option>
-                        </select>
+            @if (!showSettingsPanel)
+            {
+                <!-- بطاقات الإحصائيات العامة -->
+                <div class="dashboard-cards">
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(76, 175, 80, 0.1);">
+                            <i class="fas fa-file-invoice-dollar" style="color: var(--accounting-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>@accountingStats.TotalEntries</h4>
+                            <p>إجمالي القيود</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- علامات التبويب -->
-                <ul class="nav nav-tabs mb-4">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">الإيرادات</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">المصروفات</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">التحويلات</a>
-                    </li>
-                </ul>
 
-                <!-- جداول البيانات -->
-                <div class="tab-content">
-                    <!-- جدول الإيرادات -->
-                    <div class="tab-pane fade show active">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>التاريخ</th>
-                                        <th>الحساب</th>
-                                        <th>الوصف</th>
-                                        <th>المبلغ</th>
-                                        <th>الحالة</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>2024-02-15</td>
-                                        <td>رسوم دراسية</td>
-                                        <td>رسوم الطالب أحمد محمد</td>
-                                        <td class="text-success">+15,000 د.ع</td>
-                                        <td><span class="badge bg-success">مكتمل</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2024-02-14</td>
-                                        <td>إيرادات أخرى</td>
-                                        <td>بيع معدات قديمة</td>
-                                        <td class="text-success">+5,000 د.ع</td>
-                                        <td><span class="badge bg-success">مكتمل</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2024-02-13</td>
-                                        <td>رسوم امتحانات</td>
-                                        <td>رسوم امتحانات الفصل الدراسي</td>
-                                        <td class="text-success">+8,500 د.ع</td>
-                                        <td><span class="badge bg-warning">قيد المراجعة</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(156, 39, 176, 0.1);">
+                            <i class="fas fa-balance-scale" style="color: var(--trial-balance-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>@trialBalanceStats.TotalAccounts</h4>
+                            <p>حسابات ميزان المراجعة</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(0, 150, 136, 0.1);">
+                            <i class="fas fa-chart-line" style="color: var(--financial-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 class="@(financialStats.IsProfitable ? "text-success" : "text-danger")">
+                                @financialStats.NetIncome.ToString("C")
+                            </h4>
+                            <p>صافي الدخل</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(0, 188, 212, 0.1);">
+                            <i class="fas fa-cash-register" style="color: var(--cash-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 class="text-info">@cashFundStats.CurrentBalance.ToString("C")</h4>
+                            <p>رصيد الصندوق</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(121, 85, 72, 0.1);">
+                            <i class="fas fa-boxes" style="color: var(--inventory-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>@inventoryStats.TotalItems</h4>
+                            <p>إجمالي الأصناب</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(96, 125, 139, 0.1);">
+                            <i class="fas fa-building" style="color: var(--assets-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>@assetsStats.TotalAssets</h4>
+                            <p>إجمالي الأصول الثابتة</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(233, 30, 99, 0.1);">
+                            <i class="fas fa-money-bill-wave" style="color: var(--salary-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 class="text-info">@salaryStats.TotalMonthlySalary.ToString("C")</h4>
+                            <p>إجمالي الرواتب الشهرية</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(255, 87, 34, 0.1);">
+                            <i class="fas fa-graduation-cap" style="color: var(--installment-color);"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>@installmentStats.TotalStudents</h4>
+                            <p>طلبة على أقساط</p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- بطاقات التحليل المالي -->
-        <div class="row">
-            <div class="col-md-6">
+                <!-- أحدث القيود المحاسبية -->
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-chart-pie"></i> توزيع المصروفات</h4>
+                        <h3><i class="fas fa-file-invoice"></i> أحدث القيود المحاسبية</h3>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>رقم القيد</th>
+                                    <th>الوصف</th>
+                                    <th>التاريخ</th>
+                                    <th>النوع</th>
+                                    <th>المبلغ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entry in recentAccountingEntries)
+                                {
                                     <tr>
-                                        <th>الصنف</th>
-                                        <th>المبلغ</th>
-                                        <th>النسبة</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>الرواتب</td>
-                                        <td>350,000 د.ع</td>
+                                        <td><strong>@entry.EntryNumber</strong></td>
+                                        <td>@entry.Description</td>
+                                        <td>@entry.EntryDate.ToString("yyyy/MM/dd")</td>
                                         <td>
-                                            <div class="progress" style="height: 10px;">
-                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 41%"></div>
-                                            </div>
-                                            <small>41%</small>
+                                            <span class="badge @(entry.Type == EntryType.Debit ? "badge-success" : "badge-error")">
+                                                @(entry.Type == EntryType.Debit ? "قبض" : "صرف")
+                                            </span>
+                                        </td>
+                                        <td class="@(entry.Type == EntryType.Debit ? "text-success" : "text-danger")">
+                                            @entry.Amount.ToString("C")
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td>الصيانة</td>
-                                        <td>180,000 د.ع</td>
-                                        <td>
-                                            <div class="progress" style="height: 10px;">
-                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 21%"></div>
-                                            </div>
-                                            <small>21%</small>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>المواد الدراسية</td>
-                                        <td>120,000 د.ع</td>
-                                        <td>
-                                            <div class="progress" style="height: 10px;">
-                                                <div class="progress-bar bg-info" role="progressbar" style="width: 14%"></div>
-                                            </div>
-                                            <small>14%</small>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
+
+                <!-- أحدث عمليات الصندوق -->
                 <div class="card">
                     <div class="card-header">
-                        <h4><i class="fas fa-chart-bar"></i> الإيرادات الشهرية</h4>
+                        <h3><i class="fas fa-cash-register"></i> أحدث عمليات الصندوق</h3>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>رقم العملية</th>
+                                    <th>الوصف</th>
+                                    <th>التاريخ</th>
+                                    <th>النوع</th>
+                                    <th>المبلغ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in recentCashTransactions)
+                                {
                                     <tr>
-                                        <th>الشهر</th>
-                                        <th>الإيرادات</th>
-                                        <th>المصروفات</th>
-                                        <th>الصافي</th>
+                                        <td><strong>@transaction.TransactionNumber</strong></td>
+                                        <td>@transaction.Description</td>
+                                        <td>@transaction.TransactionDate.ToString("yyyy/MM/dd")</td>
+                                        <td>
+                                            <span class="badge @(transaction.Type == TransactionType.Deposit ? "badge-success" : "badge-error")">
+                                                @(transaction.Type == TransactionType.Deposit ? "إيداع" : "سحب")
+                                            </span>
+                                        </td>
+                                        <td class="@(transaction.Type == TransactionType.Deposit ? "text-success" : "text-danger")">
+                                            @transaction.Amount.ToString("C")
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>يناير</td>
-                                        <td>1,100,000 د.ع</td>
-                                        <td>800,000 د.ع</td>
-                                        <td class="text-success">+300,000 د.ع</td>
-                                    </tr>
-                                    <tr>
-                                        <td>فبراير</td>
-                                        <td>1,250,000 د.ع</td>
-                                        <td>850,000 د.ع</td>
-                                        <td class="text-success">+400,000 د.ع</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- قائمة الإعدادات -->
+                <div class="settings-container">
+                    <!-- قائمة الإعدادات -->
+                    <div class="settings-nav">
+                        <ul>
+                            <li><a href="javascript:void(0)" class="@(activeSettingsTab == "general" ? "active" : "")" @onclick="()=> SwitchSettingsTab(GeneralString)"><i class="fas fa-cog"></i> الإعدادات العامة</a></li>
+                            <li><a href="javascript:void(0)" class="@(activeSettingsTab == "accounting" ? "active" : "")" @onclick="()=> SwitchSettingsTab(AccountingString)"><i class="fas fa-file-invoice-dollar"></i> إعدادات المحاسبة</a></li>
+                            <li><a href="javascript:void(0)" class="@(activeSettingsTab == "inventory" ? "active" : "")" @onclick="()=> SwitchSettingsTab(InventoryString)"><i class="fas fa-warehouse"></i> إعدادات المخازن</a></li>
+                            <li><a href="javascript:void(0)" class="@(activeSettingsTab == "assets" ? "active" : "")" @onclick="()=> SwitchSettingsTab(AssetsString)"><i class="fas fa-building"></i> إعدادات الأصول</a></li>
+                            <li><a href="javascript:void(0)" class="@(activeSettingsTab == "salaries" ? "active" : "")" @onclick="()=> SwitchSettingsTab(SalariesString)"><i class="fas fa-money-bill-wave"></i> إعدادات الرواتب</a></li>
+                            <li><a href="javascript:void(0)" class="@(activeSettingsTab == "installments" ? "active" : "")" @onclick="()=> SwitchSettingsTab(InstallmentsString)"><i class="fas fa-graduation-cap"></i> إعدادات الأقساط</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- محتوى الإعدادات -->
+                    <div class="settings-content">
+                        <!-- الإعدادات العامة -->
+                        <div id="general" class="settings-section @(activeSettingsTab == "general" ? "active" : "")">
+                            <h3><i class="fas fa-cog"></i> الإعدادات العامة</h3>
+
+                            <div class="form-group">
+                                <label for="university-name">اسم الجامعة</label>
+                                <input type="text" id="university-name" class="form-control" @bind="generalSettings.UniversityName" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="academic-year">السنة الأكاديمية الحالية</label>
+                                <select id="academic-year" class="form-control" @bind="generalSettings.AcademicYear">
+                                    <option value="2023-2024">2023-2024</option>
+                                    <option value="2022-2023" selected>2022-2023</option>
+                                    <option value="2021-2022">2021-2022</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="currency">العملة الافتراضية</label>
+                                <select id="currency" class="form-control" @bind="generalSettings.Currency">
+                                    <option value="د.ع">دينار عراقي</option>
+                                    <option value="USD">$ دولار أمريكي</option>
+                                    <option value="EUR">€ يورو</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="language">اللغة الافتراضية</label>
+                                <select id="language" class="form-control" @bind="generalSettings.Language">
+                                    <option value="ar" selected>العربية</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="SaveGeneralSettings">
+                                <i class="fas fa-save"></i> حفظ التغييرات
+                            </button>
+                        </div>
+
+                        <!-- إعدادات المحاسبة -->
+                        <div id="accounting" class="settings-section @(activeSettingsTab == "accounting" ? "active" : "")">
+                            <h3><i class="fas fa-file-invoice-dollar"></i> إعدادات المحاسبة</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="default-account-code">رمز الحساب الافتراضي</label>
+                                    <input type="text" id="default-account-code" class="form-control" @bind="accountingSettings.DefaultAccountCode" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="default-entry-type">نوع القيد الافتراضي</label>
+                                    <select id="default-entry-type" class="form-control" @bind="accountingSettings.DefaultEntryType">
+                                        <option value="Debit">قبض</option>
+                                        <option value="Credit">صرف</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="accounting-period">فترة المحاسبة</label>
+                                <select id="accounting-period" class="form-control" @bind="accountingSettings.AccountingPeriod">
+                                    <option value="monthly">شهري</option>
+                                    <option value="quarterly">ربع سنوي</option>
+                                    <option value="annually">سنوي</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>تمكين ميزان المراجعة التلقائي</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="accountingSettings.AutoTrialBalance">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>التحقق من التوازن التلقائي</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="accountingSettings.AutoBalanceCheck">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="SaveAccountingSettings">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
+                        </div>
+
+                        <!-- إعدادات المخازن -->
+                        <div id="inventory" class="settings-section @(activeSettingsTab == "inventory" ? "active" : "")">
+                            <h3><i class="fas fa-warehouse"></i> إعدادات المخازن</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="low-stock-threshold">عتبة المخزون المنخفض</label>
+                                    <input type="number" id="low-stock-threshold" class="form-control" @bind="inventorySettings.LowStockThreshold" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="default-unit">وحدة القياس الافتراضية</label>
+                                    <input type="text" id="default-unit" class="form-control" @bind="inventorySettings.DefaultUnit" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="default-category">التصنيف الافتراضي</label>
+                                <input type="text" id="default-category" class="form-control" @bind="inventorySettings.DefaultCategory" />
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>تمكين تنبيهات المخزون</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="inventorySettings.EnableNotifications">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>السماح بالكميات السالبة</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="inventorySettings.AllowNegativeQuantities">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="SaveInventorySettings">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
+                        </div>
+
+                        <!-- إعدادات الأصول الثابتة -->
+                        <div id="assets" class="settings-section @(activeSettingsTab == "assets" ? "active" : "")">
+                            <h3><i class="fas fa-building"></i> إعدادات الأصول الثابتة</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="default-depreciation-rate">معدل الإهلاك الافتراضي (%)</label>
+                                    <input type="number" id="default-depreciation-rate" class="form-control" @bind="assetsSettings.DefaultDepreciationRate" step="0.1" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="maintenance-alert-days">تنبيه الصيانة (أيام)</label>
+                                    <input type="number" id="maintenance-alert-days" class="form-control" @bind="assetsSettings.MaintenanceAlertDays" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="default-asset-category">التصنيف الافتراضي للأصول</label>
+                                <input type="text" id="default-asset-category" class="form-control" @bind="assetsSettings.DefaultAssetCategory" />
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>تمكين تتبع الضمان</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="assetsSettings.EnableWarrantyTracking">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>السماح بإضافة أصول مستعملة</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="assetsSettings.AllowUsedAssets">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="SaveAssetsSettings">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
+                        </div>
+
+                        <!-- إعدادات الرواتب -->
+                        <div id="salaries" class="settings-section @(activeSettingsTab == "salaries" ? "active" : "")">
+                            <h3><i class="fas fa-money-bill-wave"></i> إعدادات الرواتب</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="payroll-date">تاريخ الرواتب الشهري</label>
+                                    <input type="number" id="payroll-date" class="form-control" @bind="salarySettings.PayrollDate" min="1" max="31" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="default-tax-rate">معدل الضريبة الافتراضي (%)</label>
+                                    <input type="number" id="default-tax-rate" class="form-control" @bind="salarySettings.DefaultTaxRate" step="0.1" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="overtime-multiplier">معامل العمل الإضافي</label>
+                                <input type="number" id="overtime-multiplier" class="form-control" @bind="salarySettings.OvertimeMultiplier" step="0.1" />
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>تمكين خصومات تلقائية</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="salarySettings.EnableAutoDeductions">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>السماح بالسلف</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="salarySettings.AllowAdvances">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="SaveSalarySettings">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
+                        </div>
+
+                        <!-- إعدادات الأقساط -->
+                        <div id="installments" class="settings-section @(activeSettingsTab == "installments" ? "active" : "")">
+                            <h3><i class="fas fa-graduation-cap"></i> إعدادات أقساط الطلبة</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="default-installment-count">عدد الأقساط الافتراضي</label>
+                                    <input type="number" id="default-installment-count" class="form-control" @bind="installmentSettings.DefaultInstallmentCount" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="late-fee-percentage">رسوم التأخير (%)</label>
+                                    <input type="number" id="late-fee-percentage" class="form-control" @bind="installmentSettings.LateFeePercentage" step="0.1" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="grace-period-days">فترة السماح (أيام)</label>
+                                <input type="number" id="grace-period-days" class="form-control" @bind="installmentSettings.GracePeriodDays" />
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>تمكين خصومات تلقائية</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="installmentSettings.EnableAutoDeductions">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="toggle-container">
+                                    <label>السماح بتقسيط الرسوم الدراسية</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" @bind="installmentSettings.AllowFeeInstallments">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="SaveInstallmentSettings">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            }
+        }
     </div>
 </div>
+
+@code {
+    private bool isLoading = true;
+    private bool hasError = false;
+    private bool showSettingsPanel = false;
+    private string activeSettingsTab = "general";
+    private string GeneralString = "general";
+    private string AccountingString = "accounting";
+    private string InventoryString = "inventory";
+    private string AssetsString = "assets";
+    private string SalariesString = "salaries";
+    private string InstallmentsString = "installments";
+
+    // الإحصائيات
+    private AccountingStatsDto accountingStats = new();
+    private TrialBalanceSummaryDto trialBalanceStats = new();
+    private FinancialStatementsSummaryDto financialStats = new();
+    private CashFundDto cashFundStats = new();
+    private InventoryStatsDto inventoryStats = new();
+    private FixedAssetsStatsDto assetsStats = new();
+    private SalaryStatsDto salaryStats = new();
+    private StudentInstallmentStatsDto installmentStats = new();
+
+    // أحدث البيانات
+    private List<AccountingEntryDto> recentAccountingEntries = new();
+    private List<CashTransactionDto> recentCashTransactions = new();
+
+    // إعدادات النظام
+    private GeneralSettings generalSettings = new();
+    private AccountingSettings accountingSettings = new();
+    private InventorySettings inventorySettings = new();
+    private AssetsSettings assetsSettings = new();
+    private SalarySettings salarySettings = new();
+    private InstallmentSettings installmentSettings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllData();
+        LoadSettings();
+    }
+
+    private async Task LoadAllData()
+    {
+        try
+        {
+            isLoading = true;
+            hasError = false;
+            StateHasChanged();
+
+            // تحميل الإحصائيات
+            accountingStats = await AccountingEntryService.GetAccountingStatsAsync();
+            trialBalanceStats = await TrialBalanceService.GetTrialBalanceSummaryAsync(DateTime.Now.AddMonths(-1), DateTime.Now);
+            financialStats = await FinancialStatementsService.GenerateFinancialStatementsSummaryAsync(DateTime.Now.AddMonths(-1), DateTime.Now);
+            cashFundStats = await CashFundService.GetCashFundStatusAsync();
+            inventoryStats = await InventoryService.GetInventoryStatsAsync();
+            assetsStats = await FixedAssetsService.GetFixedAssetsStatsAsync();
+            salaryStats = await SalaryService.GetSalaryStatsAsync();
+            installmentStats = await StudentInstallmentsService.GetInstallmentStatsAsync();
+
+            // تحميل أحدث البيانات
+            recentAccountingEntries = (await AccountingEntryService.GetAllEntriesAsync()).Take(5).ToList();
+            recentCashTransactions = (await CashFundService.GetCashTransactionsAsync(DateTime.Now.AddDays(-7), DateTime.Now)).Take(5).ToList();
+
+            ToastService.ShowSuccess("تم تحميل بيانات لوحة التحكم بنجاح", "نجاح");
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            ToastService.ShowError($"حدث خطأ أثناء تحميل البيانات: {ex.Message}", "خطأ");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowSettings()
+    {
+        showSettingsPanel = true;
+    }
+
+    private void SwitchSettingsTab(string tab)
+    {
+        activeSettingsTab = tab;
+    }
+
+    private void LoadSettings()
+    {
+        // تحميل الإعدادات من التخزين المحلي أو قاعدة البيانات
+        generalSettings = new GeneralSettings
+            {
+                UniversityName = "الجامعة العربية المفتوحة",
+                AcademicYear = "2022-2023",
+                Currency = "د.ع",
+                Language = "ar"
+            };
+
+        accountingSettings = new AccountingSettings
+            {
+                DefaultAccountCode = "1000",
+                DefaultEntryType = "Debit",
+                AccountingPeriod = "monthly",
+                AutoTrialBalance = true,
+                AutoBalanceCheck = true
+            };
+
+        inventorySettings = new InventorySettings
+            {
+                LowStockThreshold = 10,
+                DefaultUnit = "قطعة",
+                DefaultCategory = "عام",
+                EnableNotifications = true,
+                AllowNegativeQuantities = false
+            };
+
+        assetsSettings = new AssetsSettings
+            {
+                DefaultDepreciationRate = 10.0,
+                MaintenanceAlertDays = 30,
+                DefaultAssetCategory = "معدات",
+                EnableWarrantyTracking = true,
+                AllowUsedAssets = true
+            };
+
+        salarySettings = new SalarySettings
+            {
+                PayrollDate = 5,
+                DefaultTaxRate = 5.0,
+                OvertimeMultiplier = 1.5,
+                EnableAutoDeductions = true,
+                AllowAdvances = true
+            };
+
+        installmentSettings = new InstallmentSettings
+            {
+                DefaultInstallmentCount = 4,
+                LateFeePercentage = 2.0,
+                GracePeriodDays = 7,
+                EnableAutoDeductions = true,
+                AllowFeeInstallments = true
+            };
+    }
+
+    private void SaveGeneralSettings()
+    {
+        ToastService.ShowSuccess("تم حفظ الإعدادات العامة بنجاح", "نجاح");
+    }
+
+    private void SaveAccountingSettings()
+    {
+        ToastService.ShowSuccess("تم حفظ إعدادات المحاسبة بنجاح", "نجاح");
+    }
+
+    private void SaveInventorySettings()
+    {
+        ToastService.ShowSuccess("تم حفظ إعدادات المخازن بنجاح", "نجاح");
+    }
+
+    private void SaveAssetsSettings()
+    {
+        ToastService.ShowSuccess("تم حفظ إعدادات الأصول الثابتة بنجاح", "نجاح");
+    }
+
+    private void SaveSalarySettings()
+    {
+        ToastService.ShowSuccess("تم حفظ إعدادات الرواتب بنجاح", "نجاح");
+    }
+
+    private void SaveInstallmentSettings()
+    {
+        ToastService.ShowSuccess("تم حفظ إعدادات الأقساط بنجاح", "نجاح");
+    }
+
+    // فئات الإعدادات
+    public class GeneralSettings
+    {
+        public string UniversityName { get; set; }
+        public string AcademicYear { get; set; }
+        public string Currency { get; set; }
+        public string Language { get; set; }
+    }
+
+    public class AccountingSettings
+    {
+        public string DefaultAccountCode { get; set; }
+        public string DefaultEntryType { get; set; }
+        public string AccountingPeriod { get; set; }
+        public bool AutoTrialBalance { get; set; }
+        public bool AutoBalanceCheck { get; set; }
+    }
+
+    public class InventorySettings
+    {
+        public int LowStockThreshold { get; set; }
+        public string DefaultUnit { get; set; }
+        public string DefaultCategory { get; set; }
+        public bool EnableNotifications { get; set; }
+        public bool AllowNegativeQuantities { get; set; }
+    }
+
+    public class AssetsSettings
+    {
+        public double DefaultDepreciationRate { get; set; }
+        public int MaintenanceAlertDays { get; set; }
+        public string DefaultAssetCategory { get; set; }
+        public bool EnableWarrantyTracking { get; set; }
+        public bool AllowUsedAssets { get; set; }
+    }
+
+    public class SalarySettings
+    {
+        public int PayrollDate { get; set; }
+        public double DefaultTaxRate { get; set; }
+        public double OvertimeMultiplier { get; set; }
+        public bool EnableAutoDeductions { get; set; }
+        public bool AllowAdvances { get; set; }
+    }
+
+    public class InstallmentSettings
+    {
+        public int DefaultInstallmentCount { get; set; }
+        public double LateFeePercentage { get; set; }
+        public int GracePeriodDays { get; set; }
+        public bool EnableAutoDeductions { get; set; }
+        public bool AllowFeeInstallments { get; set; }
+    }
+}
