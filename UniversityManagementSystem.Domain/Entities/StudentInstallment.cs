@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UniversityManagementSystem.Domain.Enums;
+﻿using UniversityManagementSystem.Domain.Enums;
 
 namespace UniversityManagementSystem.Domain.Entities
 {

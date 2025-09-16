@@ -1,4 +1,5 @@
-﻿@page "/studentinstallments"
+﻿@page "/stnst"
+
 @attribute [Authorize(Roles = "Admin,FinanceManager,Registrar")]
 @inject IStudentInstallmentsService InstallmentsService
 @inject IToastService ToastService
@@ -530,19 +531,19 @@
         border-bottom: 3px solid transparent;
     }
 
-    .tab.active {
-        border-bottom: 3px solid var(--primary-color);
-        color: var(--primary-color);
-        font-weight: 600;
-    }
+        .tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
 
     .tab-content {
         display: none;
     }
 
-    .tab-content.active {
-        display: block;
-    }
+        .tab-content.active {
+            display: block;
+        }
 
     .installment-breakdown {
         background: #e1f5fe;
@@ -584,7 +585,7 @@
 <div class="faculty-dashboard">
     <!-- الشريط الجانبي -->
     <NavMenu2 />
-    
+
     <!-- المحتوى الرئيسي -->
     <div class="main-content">
         @if (isLoading)
@@ -718,7 +719,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="export-buttons">
                     <button class="btn btn-success" @onclick="()=>ShowInstallmentModal()">
                         <i class="fas fa-plus"></i> إضافة قسط جديد
@@ -1063,7 +1064,7 @@
                         <label for="notes">ملاحظات</label>
                         <textarea id="notes" @bind="currentInstallment.Notes" rows="2"></textarea>
                     </div>
-                    
+
                     <div class="installment-breakdown">
                         <div class="installment-item">
                             <div>المبلغ الإجمالي</div>
@@ -1259,7 +1260,7 @@
                     <i class="fas fa-info-circle"></i>
                     سيتم توليد أقساط جديدة لجميع الطلبة بناءً على خطة الدفع المحددة
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-col">
                         <div class="form-group">
@@ -1368,7 +1369,7 @@
             filteredInstallments = allInstallments;
             overdueInstallments = await InstallmentsService.GetOverdueInstallmentsAsync();
             upcomingInstallments = await InstallmentsService.GetUpcomingInstallmentsAsync();
-            
+
             // تحميل أحدث المدفوعات
             recentPayments = new List<InstallmentPaymentDto>(); // سيتم تحميلها حسب الحاجة
 
@@ -1432,30 +1433,30 @@
         if (isEditMode)
         {
             currentInstallment = new StudentInstallmentDto
-            {
-                Id = installment.Id,
-                StudentId = installment.StudentId,
-                StudentName = installment.StudentName,
-                Program = installment.Program,
-                AcademicYear = installment.AcademicYear,
-                Amount = installment.Amount,
-                OutstandingAmount = installment.OutstandingAmount,
-                DueDate = installment.DueDate,
-                LastPaymentDate = installment.LastPaymentDate,
-                Status = installment.Status,
-                Notes = installment.Notes
-            };
+                {
+                    Id = installment.Id,
+                    StudentId = installment.StudentId,
+                    StudentName = installment.StudentName,
+                    Program = installment.Program,
+                    AcademicYear = installment.AcademicYear,
+                    Amount = installment.Amount,
+                    OutstandingAmount = installment.OutstandingAmount,
+                    DueDate = installment.DueDate,
+                    LastPaymentDate = installment.LastPaymentDate,
+                    Status = installment.Status,
+                    Notes = installment.Notes
+                };
         }
         else
         {
             currentInstallment = new StudentInstallmentDto
-            {
-                Amount = 0,
-                OutstandingAmount = 0,
-                DueDate = DateTime.Now.AddMonths(1),
-                Status = PaymentStatus.Pending,
-                AcademicYear = DateTime.Now.Year.ToString()
-            };
+                {
+                    Amount = 0,
+                    OutstandingAmount = 0,
+                    DueDate = DateTime.Now.AddMonths(1),
+                    Status = PaymentStatus.Pending,
+                    AcademicYear = DateTime.Now.Year.ToString()
+                };
         }
 
         showInstallmentModal = true;
@@ -1506,14 +1507,14 @@
     {
         selectedInstallment = installment;
         newPayment = new InstallmentPaymentDto
-        {
-            StudentInstallmentId = installment.Id,
-            StudentName = installment.StudentName,
-            Amount = installment.OutstandingAmount > 0 ? installment.OutstandingAmount : installment.Amount,
-            PaymentDate = DateTime.Now,
-            PaymentMethod = "نقداً",
-            Status = PaymentStatus.Paid
-        };
+            {
+                StudentInstallmentId = installment.Id,
+                StudentName = installment.StudentName,
+                Amount = installment.OutstandingAmount > 0 ? installment.OutstandingAmount : installment.Amount,
+                PaymentDate = DateTime.Now,
+                PaymentMethod = "نقداً",
+                Status = PaymentStatus.Paid
+            };
         showPaymentModal = true;
     }
 
@@ -1531,10 +1532,10 @@
         {
             await InstallmentsService.AddInstallmentPaymentAsync(newPayment);
             ToastService.ShowSuccess("تمت إضافة الدفعة بنجاح", "نجاح");
-            
+
             // إعادة تحميل سجل الدفعات
             installmentPayments = await InstallmentsService.GetInstallmentPaymentsAsync(selectedInstallment.Id);
-            
+
             // إعادة تحميل البيانات
             await LoadInstallmentData();
         }
@@ -1659,7 +1660,7 @@
     private string GetStatusBadgeClass(PaymentStatus status, bool isOverdue)
     {
         if (isOverdue) return "badge-error";
-        
+
         return status switch
         {
             PaymentStatus.Paid => "badge-success",
@@ -1673,7 +1674,7 @@
     private string GetStatusText(PaymentStatus status, bool isOverdue)
     {
         if (isOverdue) return "متأخر";
-        
+
         return status switch
         {
             PaymentStatus.Paid => "مدفوع",

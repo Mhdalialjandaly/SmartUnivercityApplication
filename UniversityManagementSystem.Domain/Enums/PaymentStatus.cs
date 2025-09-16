@@ -8,6 +8,7 @@ namespace UniversityManagementSystem.Domain.Enums
         Rejected =5,     
         Failed = 3,   
         Cancelled = 4  ,
-        Partial = 5
+        Partial = 5,
+        Overdue= 6
     }
 }
