@@ -661,61 +661,76 @@
                 }
         }
 
+        .system-sections a {
+            text-decoration: none;             
+        }
+
     </style>
 </head>
-<body>
-    <!-- زر القائمة للجوال -->
-    <button class="toggle-menu" id="toggleMenu">
-        <i class="fas fa-bars"></i>
-    </button>
+<AuthorizeView>
+    <Authorized>
+
+        <body>
+            <!-- زر القائمة للجوال -->
+            <button class="toggle-menu" id="toggleMenu">
+                <i class="fas fa-bars"></i>
+            </button>
 
 
-    <!-- الهيدر -->
-    <div class="header">
-        <div class="welcome-message">
-            <i class="fas fa-user-circle"></i> نظام الجامعة الذكية
-        </div>
-        <div class="user-info">
-            <i class="fas fa-bell"></i>
-            <span>الإشعارات</span>
-        </div>
-    </div>
-    <!-- المحتوى الرئيسي -->
-    <div class="dashboard-content">
-        <div class="main-container">
+            <!-- الهيدر -->
+            <div class="header">
+                <div class="welcome-message">
+                    <i class="fas fa-user-circle"></i> نظام الجامعة الذكية
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </div>
+            </div>
+            <!-- المحتوى الرئيسي -->
+            <div class="dashboard-content">
+                <div class="main-container">
 
-          <NavMenu/>
-         
-          @Body
+                    <NavMenu />
 
-        </div>
-    </div>
+                    @Body
 
-    <script>
-        // تفعيل القائمة في الجوال
-        document.getElementById('toggleMenu').addEventListener('click', function () {
-            document.querySelector('.mcd-menu').classList.toggle('active');
-        });
+                </div>
+            </div>
 
-        // إغلاق القائمة عند النقر خارجها (للجوال)
-        document.addEventListener('click', function (event) {
-            const menu = document.querySelector('.mcd-menu');
-            const toggleButton = document.getElementById('toggleMenu'); header
+            <script>
+                // تفعيل القائمة في الجوال
+                document.getElementById('toggleMenu').addEventListener('click', function () {
+                    document.querySelector('.mcd-menu').classList.toggle('active');
+                });
 
-            if (window.innerWidth <= 992) {
-                if (!menu.contains(event.target) && event.target !== toggleButton && !toggleButton.contains(event.target)) {
-                    menu.classList.remove('active');
-                }
-            }
-        });
+                // إغلاق القائمة عند النقر خارجها (للجوال)
+                document.addEventListener('click', function (event) {
+                    const menu = document.querySelector('.mcd-menu');
+                    const toggleButton = document.getElementById('toggleMenu'); header
 
-        // تحديث القائمة عند تغيير حجم النافذة
-        window.addEventListener('resize', function () {
-            const menu = document.querySelector('.mcd-menu');
-            if (window.innerWidth > 992) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
-</body>
+                    if (window.innerWidth <= 992) {
+                        if (!menu.contains(event.target) && event.target !== toggleButton && !toggleButton.contains(event.target)) {
+                            menu.classList.remove('active');
+                        }
+                    }
+                });
+
+                // تحديث القائمة عند تغيير حجم النافذة
+                window.addEventListener('resize', function () {
+                    const menu = document.querySelector('.mcd-menu');
+                    if (window.innerWidth > 992) {
+                        menu.classList.remove('active');
+                    }
+                });
+            </script>
+        </body>
+
+    </Authorized>
+</AuthorizeView>
 </html>
+<AuthorizeView>
+    <NotAuthorized>
+       @Body
+    </NotAuthorized>
+</AuthorizeView>
