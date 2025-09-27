@@ -3429,7 +3429,7 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                         {
                             Id = "51586e47-b125-4534-bba4-9bc6fd3dfbc8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "2982e066-1e78-4bca-bf7f-21df8da9b983",
+                            ConcurrencyStamp = "4d991422-7271-4e44-9cb5-f00f3f43caf4",
                             CreatedAt = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@university.com",
@@ -3442,9 +3442,9 @@ namespace UniversityManagementSystem.Infrastructure.Migrations
                             NationalityId = 1,
                             NormalizedEmail = "ADMIN@UNIVERSITY.COM",
                             NormalizedUserName = "ADMIN@12345.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJtriNe5qsNB6pDkfd225zuDWiQvzkPoUCNDj1FHvWiwQkbk3SJDe92ycKmnfDB2Jw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELhCnsmNPea658KaGEPrKwElcHhpnTdQdKCeXlXoyAxhwe/R3PqR2Bl1TIJL0DPjjQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "d710cc3d-229a-4456-bb60-206702465999",
+                            SecurityStamp = "5ff8d095-0a12-4027-8aeb-bbec038a0365",
                             TwoFactorEnabled = false,
                             UserName = "admin@12345.com"
                         });
