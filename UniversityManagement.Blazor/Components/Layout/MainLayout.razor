@@ -24,9 +24,9 @@
         }
 
         body {
-            background: #BEBCBD;
+            background: #eee;
             color: #333;
-            min-height: 100vh;
+            min-height: 80vh;
             overflow-x: hidden;
             overflow-y: auto;
         }
@@ -81,7 +81,7 @@
                         margin-left: 15px;
                         width: 30px;
                         text-align: center;
-                        color: #A65319;
+                        color: #e67e22;
                     }
 
                     .mcd-menu li a p {
@@ -134,17 +134,17 @@
                 }
 
                 .mcd-menu li:hover > a {
-                    color: #A65319;
+                    color: #e67e22;
                     background: #f8f9fa;
-                    border-right: 4px solid #A65319;
+                    border-right: 4px solid #e67e22;
                 }
 
                 .mcd-menu li a.active {
                     position: relative;
                     background: transparent !important;
-                    border-right: 4px solid #A65319 !important;
-                    border-left: 4px solid #A65319 !important;
-                    color: #A65319 !important;
+                    border-right: 4px solid #e67e22 !important;
+                    border-left: 4px solid #e67e22 !important;
+                    color: #e67e22 !important;
                     box-shadow: none !important;
                 }
 
@@ -154,8 +154,8 @@
                         top: 42%;
                         right: 0;
                         background: transparent !important;
-                        border-right: 4px solid #A65319 !important;
-                        color: #A65319 !important;
+                        border-right: 4px solid #e67e22 !important;
+                        color: #e67e22 !important;
                         border-top: 5px solid transparent;
                         border-bottom: 5px solid transparent;
                     }
@@ -166,7 +166,7 @@
                         top: 42%;
                         left: 0;
                         background: transparent !important;
-                        border-left: 5px solid #A65319 !important;
+                        border-left: 5px solid #e67e22 !important;
                         border-top: 5px solid transparent;
                         border-bottom: 5px solid transparent;
                     }
@@ -179,7 +179,7 @@
                     min-width: 220px;
                     padding: 0;
                     margin: 0;
-                    background: #BEBCBD;
+                    background: #eee;
                     opacity: 0;
                     visibility: hidden;
                     transition: all 300ms linear;
@@ -226,7 +226,7 @@
                         left: -224px;
                         top: 0;
                         border: 0;
-                        border-right: 4px solid #A65319;
+                        border-right: 4px solid #e67e22;
                     }
 
                         .mcd-menu li ul li ul:before {
@@ -234,7 +234,7 @@
                             position: absolute;
                             top: 15px;
                             right: -9px;
-                            border-left: 5px solid #A65319;
+                            border-left: 5px solid #e67e22;
                             border-bottom: 5px solid transparent;
                             border-top: 5px solid transparent;
                         }
@@ -282,7 +282,7 @@
             background-color : darkgray;
             padding: 20px 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 12px #BEBCBD;
+            box-shadow: 0 4px 12px #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -302,13 +302,13 @@
             font-weight: 700;
         }
 
-        .user-info {
+        .user-info:after {
             display: flex;
             align-items: center;
             background: #f8f9fa;
             padding: 10px 20px;
             border-radius: 30px;
-            box-shadow: 0 2px 5px #BEBCBD;
+            box-shadow: 0 2px 5px #eee;
         }
 
         /* بطاقات الإحصائيات */
@@ -316,14 +316,14 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
             gap: 25px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
-            background: #BEBCBD;
-            padding: 25px;
+            background: #eee;
+            padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 12px #BEBCBD;
+            box-shadow: 0 4px 12px #eee;
             text-align: center;
             transition: transform 0.3s, box-shadow 0.3s;
             border-top: 4px solid #333;
@@ -354,10 +354,10 @@
 
         /* أقسام لوحة التحكم */
         .dashboard-section {
-            background: #BEBCBD;
+            background: #eee;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 12px #BEBCBD;
+            box-shadow: 0 4px 12px #eee;
             margin-bottom: 30px;
         }
 
@@ -378,12 +378,12 @@
 
         /* قسم أقسام النظام */
         .system-sections-container {
-            max-height: 500px;
-            overflow-y: auto;
-            padding: 30px;
-            margin-top: 40px;
+            max-height:500px;
+            overflow-y: hidden;
+            padding: 10px;
+            margin-top: 15px;
             border-radius: 10px;
-            background: #BEBCBD;
+            background: #eee;
             z-index:1000;
         }
 
@@ -391,7 +391,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
-            padding: 10px;
+            padding: 20px;
             z-index: 1000;
         }
 
@@ -403,10 +403,10 @@
             justify-content: center;
             padding: 20px;
             border-radius: 8px;
-            background: #BEBCBD;
+            background: #eee;
             cursor: pointer;
             transition: all 0.3s;
-            border: 1px solid #BEBCBD;
+            border: 1px solid #eee;
         }
 
             .system-card:hover {
@@ -431,7 +431,7 @@
         .tooltip {
             position: absolute;
             background-color: #333;
-            color: #BEBCBD;
+            color: #eee;
             text-align: center;
             border-radius: 4px;
             padding: 5px 10px;
@@ -533,7 +533,7 @@
             top: 20px;
             right: 20px;
             background: #333;
-            color: #BEBCBD;
+            color: #eee;
             border: none;
             border-radius: 50%;
             width: 50px;
@@ -550,7 +550,7 @@
         }
 
         .system-sections-container::-webkit-scrollbar-track {
-            background: #BEBCBD;
+            background: #eee;
             border-radius: 10px;
         }
 
@@ -665,6 +665,24 @@
             text-decoration: none;             
         }
 
+        .Logout-btn {
+            background: transparent; /* بدون خلفية */
+            border: none; /* بدون حدود */
+            color: var(--dark-color, #121820); /* لون النص، يمكن تغييره */
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+            /* عند تمرير المؤشر */
+            .Logout-btn:hover {
+                background: rgba(255, 255, 255, 0.2); /* خلفية بيضاء شفافة */
+                color: var(--primary-color, #f57c00); /* يمكن تغيير لون النص عند Hover */
+            }
+
     </style>
 </head>
 <AuthorizeView>
@@ -680,11 +698,10 @@
             <!-- الهيدر -->
             <div class="header">
                 <div class="welcome-message">
-                    <i class="fas fa-user-circle"></i> نظام الجامعة الذكية
+                    <i class="fas fa-bell"></i>
                 </div>
                 <div class="user-info">
-                    <i class="fas fa-bell"></i>
-                    <span>الإشعارات</span>
+                    <button class="Logout-btn">LogOut</button>
                 </div>
             </div>
             <!-- المحتوى الرئيسي -->
