@@ -3,10 +3,9 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>الجامعة الذكية - لوحة التحكم</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 
@@ -16,348 +15,707 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- ملفات CSS الأساسية -->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="assets/css/atlantis.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    <!-- ملف CSS للعرض التوضيحي فقط -->
-    <link rel="stylesheet" href="assets/css/demo.css" />
+        body {
+            background: #BEBCBD;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
 
-    <link rel="stylesheet" href="app.css" />
+        /* القائمة الجانبية */
+        .mcd-menu {
+            list-style: none;
+            padding: 0;
+            margin-top: 80px;
+            margin-right: 20px;
+            border-radius: 2px;
+            -moz-border-radius: 2px;
+            -webkit-border-radius: 2px;
+            width: 280px;
+            height: auto;
+            position: fixed;
+            right: 5px;
+            top: 40px;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.25); /* شفافة */
+            backdrop-filter: blur(12px); /* بلور */
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+            .mcd-menu li {
+                position: relative;
+                margin: 8px 0;
+                background-color:white;
+            }
+
+                .mcd-menu li a {
+                    display: flex;
+                    align-items: center;
+                    text-decoration: none;
+                    padding: 16px 25px;
+                    color: #2c3e50;
+                    text-align: right;
+                    height: auto;
+                    position: relative;
+                    border-bottom: none;
+                    transition: all 0.3s ease;
+                    border-right: 4px solid transparent;
+                    font-size: 18px;
+                }
+
+                    .mcd-menu li a i {
+                        font-size: 24px;
+                        margin-left: 15px;
+                        width: 30px;
+                        text-align: center;
+                        color: #A65319;
+                    }
+
+                    .mcd-menu li a p {
+                        margin: 0;
+                        flex-grow: 1;
+                    }
+
+                    .mcd-menu li a strong {
+                        display: block;
+                        text-transform: uppercase;
+                        font-size: 16px;
+                        font-weight: 600;
+                    }
+
+                    .mcd-menu li a small {
+                        display: block;
+                        font-size: 12px;
+                        opacity: 0.8;
+                    }
+
+                    .mcd-menu li a i,
+                    .mcd-menu li a strong,
+                    .mcd-menu li a small {
+                        position: relative;
+                        transition: all 300ms linear;
+                    }
+
+                .mcd-menu li:hover > a i {
+                    opacity: 1;
+                    -webkit-animation: moveFromTop 300ms ease-in-out;
+                    -moz-animation: moveFromTop 300ms ease-in-out;
+                    -o-animation: moveFromTop 300ms ease-in-out;
+                    animation: moveFromTop 300ms ease-in-out;
+                }
+
+                .mcd-menu li:hover a strong {
+                    opacity: 1;
+                    -webkit-animation: moveFromLeft 300ms ease-in-out;
+                    -moz-animation: moveFromLeft 300ms ease-in-out;
+                    -o-animation: moveFromLeft 300ms ease-in-out;
+                    animation: moveFromLeft 300ms ease-in-out;
+                }
+
+                .mcd-menu li:hover a small {
+                    opacity: 1;
+                    -webkit-animation: moveFromRight 300ms ease-in-out;
+                    -moz-animation: moveFromRight 300ms ease-in-out;
+                    -o-animation: moveFromRight 300ms ease-in-out;
+                    animation: moveFromRight 300ms ease-in-out;
+                }
+
+                .mcd-menu li:hover > a {
+                    color: #A65319;
+                    background: #f8f9fa;
+                    border-right: 4px solid #A65319;
+                }
+
+                .mcd-menu li a.active {
+                    position: relative;
+                    background: transparent !important;
+                    border-right: 4px solid #A65319 !important;
+                    border-left: 4px solid #A65319 !important;
+                    color: #A65319 !important;
+                    box-shadow: none !important;
+                }
+
+                    .mcd-menu li a.active:before {
+                        content: "";
+                        position: absolute;
+                        top: 42%;
+                        right: 0;
+                        background: transparent !important;
+                        border-right: 4px solid #A65319 !important;
+                        color: #A65319 !important;
+                        border-top: 5px solid transparent;
+                        border-bottom: 5px solid transparent;
+                    }
+
+                    .mcd-menu li a.active:after {
+                        content: "";
+                        position: absolute;
+                        top: 42%;
+                        left: 0;
+                        background: transparent !important;
+                        border-left: 5px solid #A65319 !important;
+                        border-top: 5px solid transparent;
+                        border-bottom: 5px solid transparent;
+                    }
+
+                /* القوائم الفرعية */
+                .mcd-menu li ul,
+                .mcd-menu li ul li ul {
+                    position: absolute;
+                    height: auto;
+                    min-width: 220px;
+                    padding: 0;
+                    margin: 0;
+                    background: #BEBCBD;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: all 300ms linear;
+                    left: -224px;
+                    top: 0;
+                    border-right: 4px solid #333;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                    border-radius: 0 0 0 6px;
+                }
+
+                    .mcd-menu li ul:before {
+                        content: "";
+                        position: absolute;
+                        top: 25px;
+                        right: -9px;
+                        border-left: 5px solid #333;
+                        border-bottom: 5px solid transparent;
+                        border-top: 5px solid transparent;
+                    }
+
+                    .mcd-menu li:hover > ul,
+                    .mcd-menu li ul li:hover > ul {
+                        display: block;
+                        opacity: 1;
+                        visibility: visible;
+                        left: -280px;
+                    }
+
+                    .mcd-menu li ul li a {
+                        padding: 12px 20px;
+                        text-align: right;
+                        border: 0;
+                        border-bottom: 1px solid #f1f2f6;
+                        height: auto;
+                        font-size: 16px;
+                    }
+
+                        .mcd-menu li ul li a i {
+                            font-size: 18px;
+                            margin-left: 10px;
+                        }
+
+                    .mcd-menu li ul li ul {
+                        left: -224px;
+                        top: 0;
+                        border: 0;
+                        border-right: 4px solid #A65319;
+                    }
+
+                        .mcd-menu li ul li ul:before {
+                            content: "";
+                            position: absolute;
+                            top: 15px;
+                            right: -9px;
+                            border-left: 5px solid #A65319;
+                            border-bottom: 5px solid transparent;
+                            border-top: 5px solid transparent;
+                        }
+
+                    .mcd-menu li ul li:hover > ul {
+                        top: 0px;
+                        left: -224px;
+                    }
+
+        .stat-card:nth-child(1) i {
+            color: #3498db; /* أزرق */
+        }
+
+        .stat-card:nth-child(2) i {
+            color: #27ae60; /* أخضر */
+        }
+
+        .stat-card:nth-child(3) i {
+            color: #e67e22; /* برتقالي */
+        }
+
+        .stat-card:nth-child(4) i {
+            color: #9b59b6; /* بنفسجي */
+        }
+
+        /* المحتوى الرئيسي */
+        .dashboard-content {
+            margin-right: 330px;
+            margin-top: 90px;
+            padding: 30px;
+            transition: all 0.3s;
+            min-height: 80vh;
+            width: calc(90% - 280px);
+            border:outset 5px #333;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* الهيدر */
+        .header {
+            background-color : darkgray;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px #BEBCBD;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* تعديلات جديدة */
+            position: fixed; /* يخلي الهيدر ثابت */
+            top: 0;
+            right: 0;
+            width: 100%; /* ياخذ العرض كامل */
+            height: 70px;
+            border-radius: 0; /* نشيل الزوايا المدورة */
+            z-index: 900; /* فوق المحتوى */
+        }
+
+        .welcome-message {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px #BEBCBD;
+        }
+
+        /* بطاقات الإحصائيات */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #BEBCBD;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px #BEBCBD;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid #333;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            }
+
+            .stat-card i {
+                font-size: 42px;
+                color: #333;
+                margin-bottom: 15px;
+            }
+
+            .stat-card h3 {
+                margin: 15px 0;
+                color: #2c3e50;
+                font-size: 32px;
+            }
+
+            .stat-card p {
+                color: #7f8c8d;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+        /* أقسام لوحة التحكم */
+        .dashboard-section {
+            background: #BEBCBD;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px #BEBCBD;
+            margin-bottom: 30px;
+        }
+
+            .dashboard-section h2 {
+                color: #2c3e50;
+                border-bottom: 2px solid #f1f2f6;
+                padding-bottom: 15px;
+                margin-top: 0;
+                font-size: 24px;
+                display: flex;
+                align-items: center;
+            }
+
+                .dashboard-section h2 i {
+                    margin-left: 10px;
+                    color: #333;
+                }
+
+        /* قسم أقسام النظام */
+        .system-sections-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 30px;
+            margin-top: 40px;
+            border-radius: 10px;
+            background: #BEBCBD;
+            z-index:1000;
+        }
+
+        .system-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .system-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 8px;
+            background: #BEBCBD;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #BEBCBD;
+        }
+
+            .system-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-color: #333;
+            }
+
+            .system-card i {
+                font-size: 42px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .system-card span {
+                font-weight: 600;
+                color: #2c3e50;
+                text-align: center;
+            }
+
+        /* التبليغات */
+        .tooltip {
+            position: absolute;
+            background-color: #333;
+            color: #BEBCBD;
+            text-align: center;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 14px;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+            .tooltip::after {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 5px;
+                border-style: solid;
+                border-color: #333 transparent transparent transparent;
+            }
+
+        .system-card:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* الأنشطة الحديثة */
+        .recent-activities {
+            list-style: none;
+            padding: 0;
+        }
+
+            .recent-activities li {
+                padding: 15px 0;
+                border-bottom: 1px solid #f1f2f6;
+                display: flex;
+                align-items: center;
+                transition: background 0.2s;
+            }
+
+                .recent-activities li:hover {
+                    background: #f8f9fa;
+                    padding-right: 10px;
+                    border-radius: 5px;
+                }
+
+                .recent-activities li:last-child {
+                    border-bottom: none;
+                }
+
+                .recent-activities li i {
+                    color: #333;
+                    margin-left: 15px;
+                    font-size: 18px;
+                }
+
+        /* الدورات */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .course-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            border-left: 4px solid #333;
+        }
+
+            .course-card:hover {
+                background: #edf2f7;
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            }
+
+            .course-card h4 {
+                margin: 15px 0 8px;
+                color: #2c3e50;
+                font-size: 18px;
+            }
+
+            .course-card p {
+                color: #7f8c8d;
+                font-size: 14px;
+                margin: 0;
+            }
+
+        /* زر القائمة في الجوال */
+        .toggle-menu {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: #BEBCBD;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* شريط التمرير المخصص */
+        .system-sections-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .system-sections-container::-webkit-scrollbar-track {
+            background: #BEBCBD;
+            border-radius: 10px;
+        }
+
+        .system-sections-container::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+            .system-sections-container::-webkit-scrollbar-thumb:hover {
+                background: #333;
+            }
+
+        /* الأنيميشن */
+        @@keyframes moveFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(200%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0%);
+            }
+        }
+
+        @@keyframes moveFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(200%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0%);
+            }
+        }
+
+        @@keyframes moveFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(-200%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0%);
+            }
+        }
+
+        /* تحسينات للجوال */
+        @@media (max-width: 992px) {
+            .mcd-menu {
+                transform: translateX(100%);
+                width: 280px;
+            }
+
+                .mcd-menu.active {
+                    transform: translateX(0);
+                }
+
+            .dashboard-content {
+                margin-right: 280px;
+                padding: 100px 30px 30px; /* 100px بدال 30px علشان يبتعد عن الهيدر */
+                transition: all 0.3s;
+                min-height: 100vh;
+                width: calc(100% - 280px);
+            }
+
+            .toggle-menu {
+                display: block;
+            }
+
+            .stats-cards {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            .system-sections {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .welcome-message {
+                font-size: 24px;
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .system-sections {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+
+            .system-card {
+                height: 120px;
+                padding: 20px 10px;
+            }
+
+                .system-card i {
+                    font-size: 36px;
+                }
+        }
+
+    </style>
 </head>
-<body data-background-color="dark">
-    <div class="wrapper">
-        <AuthorizeView>
-            <Authorized>
-                <!-- رأس الصفحة (Header) -->
-                <div class="main-header">
-                    <!-- شعار الصفحة (Logo Header) -->
-                    <div class="logo-header" data-background-color="dark2">
-                        <a href="/" class="logo">
-                            <img src="assets/img/logo.svg" alt="شعار الجامعة" class="navbar-brand" />
-                        </a>
+<body>
+    <!-- زر القائمة للجوال -->
+    <button class="toggle-menu" id="toggleMenu">
+        <i class="fas fa-bars"></i>
+    </button>
 
-                        <!-- أزرار التحكم في الشريط الجانبي -->
-                        <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-bs-toggle="collapse" data-bs-target="#collapse" aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"><i class="icon-menu"></i></span>
-                        </button>
-                        <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
-                        <div class="nav-toggle">
-                            <button class="btn btn-toggle toggle-sidebar">
-                                <i class="icon-menu"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- نهاية شعار الصفحة -->
-                    <!-- شريط التنقل العلوي (Navbar) -->
-                    <nav class="navbar navbar-header navbar-expand-lg" data-background-color="dark">
-                        <div class="container-fluid">
-                            <!-- حقل البحث -->
-                            <div class="collapse" id="search-nav">
-                                <form class="navbar-left navbar-form nav-search mr-md-3">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <button type="submit" class="btn btn-search pr-1">
-                                                <i class="fa fa-search search-icon"></i>
-                                            </button>
-                                        </div>
-                                        <input type="text" placeholder="ابحث ..." class="form-control" />
-                                    </div>
-                                </form>
-                            </div>
 
-                            <!-- قائمة الإشعارات والملف الشخصي -->
-                            <ul class="navbar-nav topbar-nav ms-auto align-items-center">
-                                <!-- زر البحث -->
-                                <li class="nav-item toggle-nav-search hidden-caret">
-                                    <a class="nav-link" data-bs-toggle="collapse" href="#search-nav" role="button" aria-expanded="false" aria-controls="search-nav">
-                                        <i class="fa fa-search"></i>
-                                    </a>
-                                </li>
-
-                                <!-- رسائل -->
-                                <li class="nav-item dropdown hidden-caret">
-                                    <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fa fa-envelope"></i>
-                                    </a>
-                                    <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
-                                        <li>
-                                            <div class="dropdown-title d-flex justify-content-between align-items-center">
-                                                <span>الرسائل</span>
-                                                <div>
-                                                    <a href="#" class="small">تحديد الكل كمقروء</a>
-                                                    <a href="/chat" class="small d-block">الانتقال لواجهة المحادثة</a>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="message-notif-scroll scrollbar-outer">
-                                                <div class="notif-center">
-                                                    <a href="#" class="dropdown-item">
-                                                        <div class="notif-img">
-                                                            <img src="assets/img/jm_denis.jpg" alt="صورة المستخدم" />
-                                                        </div>
-                                                        <div class="notif-content">
-                                                            <span class="subject">جيمي دينيس</span>
-                                                            <span class="block">كيف حالك؟</span>
-                                                            <span class="time">منذ 5 دقائق</span>
-                                                        </div>
-                                                    </a>
-                                                    <a href="#" class="dropdown-item">
-                                                        <div class="notif-img">
-                                                            <img src="assets/img/chadengle.jpg" alt="صورة المستخدم" />
-                                                        </div>
-                                                        <div class="notif-content">
-                                                            <span class="subject">تشارلز</span>
-                                                            <span class="block">حسناً، شكراً!</span>
-                                                            <span class="time">منذ 12 دقيقة</span>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <a class="see-all dropdown-item" href="javascript:void(0);">عرض جميع الرسائل <i class="fa fa-angle-right"></i></a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <!-- إشعارات -->
-                                <li class="nav-item dropdown hidden-caret">
-                                    <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fa fa-bell"></i>
-                                        <span class="notification">4</span>
-                                    </a>
-                                    <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
-                                        <li>
-                                            <div class="dropdown-title">لديك 4 إشعارات جديدة</div>
-                                        </li>
-                                        <li>
-                                            <div class="notif-scroll scrollbar-outer">
-                                                <div class="notif-center">
-                                                    <a href="#" class="dropdown-item">
-                                                        <div class="notif-icon notif-primary"><i class="fa fa-user-plus"></i></div>
-                                                        <div class="notif-content">
-                                                            <span class="block">مستخدم جديد مسجل</span>
-                                                            <span class="time">منذ 5 دقائق</span>
-                                                        </div>
-                                                    </a>
-                                                    <a href="#" class="dropdown-item">
-                                                        <div class="notif-icon notif-success"><i class="fa fa-comment"></i></div>
-                                                        <div class="notif-content">
-                                                            <span class="block">علّق رحمة على لوحة التحكم</span>
-                                                            <span class="time">منذ 12 دقيقة</span>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <a class="see-all dropdown-item" href="javascript:void(0);">عرض جميع الإشعارات <i class="fa fa-angle-right"></i></a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <!-- اختصارات سريعة -->
-                                <li class="nav-item dropdown hidden-caret">
-                                    <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                                        <i class="fas fa-layer-group"></i>
-                                    </a>
-                                    <div class="dropdown-menu quick-actions quick-actions-info animated fadeIn">
-                                        <div class="quick-actions-header">
-                                            <div class="header-content">
-                                                <h6 class="title">الإجراءات السريعة</h6>
-                                                <p class="subtitle">اختصارات سريعة للوصول الفوري</p>
-                                            </div>
-                                        </div>
-                                        <div class="quick-actions-scroll">
-                                            <div class="quick-actions-items">
-                                                <div class="row g-0">
-                                                    <a class="col-6 col-md-4 p-0" href="/students/add">
-                                                        <div class="quick-action-item">
-                                                            <div class="action-icon bg-primary-light">
-                                                                <i class="fas fa-user-plus"></i>
-                                                            </div>
-                                                            <span class="action-text">إضافة طالب</span>
-                                                        </div>
-                                                    </a>
-                                                    <a class="col-6 col-md-4 p-0" href="/academic/courses">
-                                                        <div class="quick-action-item">
-                                                            <div class="action-icon bg-success-light">
-                                                                <i class="fas fa-book"></i>
-                                                            </div>
-                                                            <span class="action-text">إدارة المواد</span>
-                                                        </div>
-                                                    </a>
-                                                    <a class="col-6 col-md-4 p-0" href="/schedule-management">
-                                                        <div class="quick-action-item">
-                                                            <div class="action-icon bg-info-light">
-                                                                <i class="fas fa-calendar-alt"></i>
-                                                            </div>
-                                                            <span class="action-text">جدول المحاضرات</span>
-                                                        </div>
-                                                    </a>
-                                                    <a class="col-6 col-md-4 p-0" href="/lecturers/list">
-                                                        <div class="quick-action-item">
-                                                            <div class="action-icon bg-warning-light">
-                                                                <i class="fas fa-chalkboard-teacher"></i>
-                                                            </div>
-                                                            <span class="action-text">قائمة الأساتذة</span>
-                                                        </div>
-                                                    </a>
-                                                    <a class="col-6 col-md-4 p-0" href="/analytics/grades">
-                                                        <div class="quick-action-item">
-                                                            <div class="action-icon bg-danger-light">
-                                                                <i class="fas fa-chart-line"></i>
-                                                            </div>
-                                                            <span class="action-text">تحليل الدرجات</span>
-                                                        </div>
-                                                    </a>
-                                                    <a class="col-6 col-md-4 p-0" href="/library/search">
-                                                        <div class="quick-action-item">
-                                                            <div class="action-icon bg-purple-light">
-                                                                <i class="fas fa-search"></i>
-                                                            </div>
-                                                            <span class="action-text">بحث في المكتبة</span>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-
-                                <!-- الملف الشخصي -->
-                                <li class="nav-item dropdown hidden-caret">
-                                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                                        <div class="avatar-sm">
-                                            <img src="profile.jpg" alt="الملف الشخصي" class="avatar-img rounded-circle" />
-                                        </div>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-user animated fadeIn">
-                                        <div class="dropdown-user-scroll scrollbar-outer">
-                                        <li>
-                                            <div class="user-box">
-                                                <div class="avatar-lg">
-                                                    <img src="favicon.png" alt="الصورة الشخصية" class="avatar-img rounded" />
-                                                </div>
-                                                <div class="u-text">
-                                                    <h4>@context.User?.Identity?.Name</h4>
-                                                    <p class="text-muted">@context.User?.Identity?.Name</p>
-                                                    <a href="favicon.png" class="btn btn-xs btn-secondary btn-sm">عرض الملف</a>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="favicon.png">ملفي الشخصي</a>
-                                            <a class="dropdown-item" href="/Account/Register">تسجيل جديد</a>
-                                            <a class="dropdown-item" href="settings.html">إعدادات الحساب</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="logout">تسجيل الخروج</a>
-                                        </li>
-                        </div>
-                        </ul>
-                        </li>
-                        </ul>
-                </div>
-                </nav>
-                <!-- نهاية شريط التنقل -->
-                <!-- القائمة الجانبية -->
-                <NavMenu />
+    <!-- الهيدر -->
+    <div class="header">
+        <div class="welcome-message">
+            <i class="fas fa-user-circle"></i> نظام الجامعة الذكية
+        </div>
+        <div class="user-info">
+            <i class="fas fa-bell"></i>
+            <span>الإشعارات</span>
+        </div>
     </div>
-    <!-- نهاية Navbar -->
-    </Authorized>
-    </AuthorizeView>
+    <!-- المحتوى الرئيسي -->
+    <div class="dashboard-content">
+        <div class="main-container">
 
-    <!-- محتوى الصفحة -->
-    <div class="main-panel">
-        <div class="content">
-                @Body
+          <NavMenu/>
+         
+          @Body
+
         </div>
     </div>
 
-    </div>
-
-    <!-- ملفات JavaScript الأساسية -->
-    <script src="assets/js/core/jquery.3.2.1.min.js"></script>
-    <script src="assets/js/core/popper.min.js"></script>
-    <script src="assets/js/core/bootstrap.min.js"></script>
-
-    <!-- jQuery UI -->
-    <script src="assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-    <script src="assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
-
-    <!-- jQuery Scrollbar -->
-    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
-
-    <!-- المخططات والرسوم البيانية -->
-    <script src="assets/js/plugin/chart.js/chart.min.js"></script>
-    <script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
-    <script src="assets/js/plugin/chart-circle/circles.min.js"></script>
-
-    <!-- الجداول -->
-    <script src="assets/js/plugin/datatables/datatables.min.js"></script>
-
-    <!-- الإشعارات -->
-    <script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
-
-    <!-- Sweet Alert -->
-    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
-
-    <!-- نظام Atlantis -->
-    <script src="assets/js/atlantis.min.js"></script>
-
-    <!-- ملفات تجريبية -->
-    <script src="assets/js/setting-demo.js"></script>
-    <script src="assets/js/demo.js"></script>
-
     <script>
-        // تهيئة Sparkline
-        document.addEventListener('DOMContentLoaded', function () {
-            if ($('#lineChart').length) {
-                $('#lineChart').sparkline([102, 109, 120, 99, 110, 105, 115], {
-                    type: 'line',
-                    height: '70',
-                    width: '100%',
-                    lineWidth: '2',
-                    lineColor: 'rgba(255, 255, 255, .5)',
-                    fillColor: 'rgba(255, 255, 255, .15)'
-                });
-            }
+        // تفعيل القائمة في الجوال
+        document.getElementById('toggleMenu').addEventListener('click', function () {
+            document.querySelector('.mcd-menu').classList.toggle('active');
+        });
 
-            if ($('#lineChart2').length) {
-                $('#lineChart2').sparkline([99, 125, 122, 105, 110, 124, 115], {
-                    type: 'line',
-                    height: '70',
-                    width: '100%',
-                    lineWidth: '2',
-                    lineColor: 'rgba(255, 255, 255, .5)',
-                    fillColor: 'rgba(255, 255, 255, .15)'
-                });
-            }
+        // إغلاق القائمة عند النقر خارجها (للجوال)
+        document.addEventListener('click', function (event) {
+            const menu = document.querySelector('.mcd-menu');
+            const toggleButton = document.getElementById('toggleMenu'); header
 
-            if ($('#lineChart3').length) {
-                $('#lineChart3').sparkline([105, 103, 123, 100, 95, 105, 115], {
-                    type: 'line',
-                    height: '70',
-                    width: '100%',
-                    lineWidth: '2',
-                    lineColor: 'rgba(255, 255, 255, .5)',
-                    fillColor: 'rgba(255, 255, 255, .15)'
-                });
+            if (window.innerWidth <= 992) {
+                if (!menu.contains(event.target) && event.target !== toggleButton && !toggleButton.contains(event.target)) {
+                    menu.classList.remove('active');
+                }
+            }
+        });
+
+        // تحديث القائمة عند تغيير حجم النافذة
+        window.addEventListener('resize', function () {
+            const menu = document.querySelector('.mcd-menu');
+            if (window.innerWidth > 992) {
+                menu.classList.remove('active');
             }
         });
     </script>
 </body>
 </html>
-
-@code {
-    private bool darkMode = false;
-
-    private void ToggleDarkMode()
-    {
-        darkMode = !darkMode;
-        // يمكنك إضافة منطق لتغيير السمة هنا
-    }
-}

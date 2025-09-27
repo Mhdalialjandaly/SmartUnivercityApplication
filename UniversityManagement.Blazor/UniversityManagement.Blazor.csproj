@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\assets2\**" />
+    <Content Remove="wwwroot\assets2\**" />
+    <EmbeddedResource Remove="wwwroot\assets2\**" />
+    <None Remove="wwwroot\assets2\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
     <Content Remove="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <Content Remove="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
@@ -42,10 +49,6 @@
     <None Include="Components\Pages\UnivercityPages2\AcadimicPart\AcadimicCalendarNew.razor" />
     <None Include="Components\Pages\UnivercityPages2\Students\Add-StudentView.razor" />
     <None Include="Components\Pages\UnivercityPages\Admin\AdminDashboard.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\assets2\" />
   </ItemGroup>
 
   <ItemGroup>

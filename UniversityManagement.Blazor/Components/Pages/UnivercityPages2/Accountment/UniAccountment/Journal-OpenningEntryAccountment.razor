@@ -972,7 +972,7 @@
             recentAccountingEntries = (await AccountingEntryService.GetAllEntriesAsync()).Take(5).ToList();
             recentCashTransactions = (await CashFundService.GetCashTransactionsAsync(DateTime.Now.AddDays(-7), DateTime.Now)).Take(5).ToList();
 
-            ToastService.ShowSuccess("تم تحميل بيانات لوحة التحكم بنجاح", "نجاح");
+            
         }
         catch (Exception ex)
         {
